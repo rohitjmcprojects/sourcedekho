@@ -1,22 +1,26 @@
+import Link from "next/link";
 import { sql } from "@/lib/db";
-import CourseEnrollButton from "@/components/CourseEnrollButton";
 
-export default async function CourseDetailPage({
+export default async function LectureDashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{
     exam: string;
     id: string;
   }>;
+  searchParams: Promise<{
+    subject?: string;
+  }>;
 }) {
   const { id } = await params;
+  const { subject } = await searchParams;
 
   // FETCH COURSE
   const courses = await sql`
     SELECT
       courses.*,
-      exams.name AS exam_name,
-      exams.description AS exam_description
+      exams.name AS exam_name
     FROM courses
     JOIN exams
       ON exams.id = courses.exam_id
@@ -45,12 +49,32 @@ export default async function CourseDetailPage({
           "
         >
           <h1 className="text-4xl font-bold text-white">
-            Course not found
+            Dashboard not found
           </h1>
         </div>
       </main>
     );
   }
+
+  // FETCH SUBJECTS
+  const subjects = await sql`
+    SELECT DISTINCT subject_name
+    FROM lectures
+    WHERE course_id = ${course.id}
+    ORDER BY subject_name ASC
+  `;
+
+  const activeSubject =
+    subject || subjects[0]?.subject_name;
+
+  // FETCH LECTURES
+  const lectures = await sql`
+    SELECT *
+    FROM lectures
+    WHERE course_id = ${course.id}
+    AND subject_name = ${activeSubject}
+    ORDER BY id ASC
+  `;
 
   return (
     <main className="pl-[120px] pr-5 py-5">
@@ -132,7 +156,7 @@ export default async function CourseDetailPage({
         {/* CONTENT */}
         <div className="relative z-10">
 
-          {/* HERO */}
+          {/* HEADER */}
           <div
             className="
               p-8
@@ -143,7 +167,7 @@ export default async function CourseDetailPage({
           >
 
             {/* TAGS */}
-            <div className="flex gap-3 mb-6 flex-wrap">
+            <div className="flex gap-3 mb-5 flex-wrap">
 
               {/* EXAM */}
               <div
@@ -195,66 +219,36 @@ export default async function CourseDetailPage({
 
             </div>
 
+            {/* SUBTITLE */}
+            <p
+              className="
+                text-[11px]
+
+                uppercase
+                tracking-[0.25em]
+
+                text-slate-500
+
+                mb-3
+              "
+            >
+              Lecture Dashboard
+            </p>
+
             {/* TITLE */}
             <h1
               className="
                 text-5xl
-                lg:text-6xl
 
                 font-black
 
                 tracking-tight
-                leading-tight
 
                 text-white
-
-                max-w-5xl
               "
             >
               {course.title}
             </h1>
-
-            {/* DESCRIPTION */}
-            <p
-              className="
-                text-[16px]
-                leading-8
-
-                text-slate-400
-
-                mt-6
-
-                max-w-3xl
-              "
-            >
-              {course.description}
-            </p>
-
-            {/* ACTIONS */}
-            <div className="flex items-center gap-5 mt-10 flex-wrap">
-
-              {/* PRICE */}
-              <div
-                className="
-                  text-4xl
-                  lg:text-5xl
-
-                  font-black
-
-                  tracking-tight
-
-                  text-white
-                "
-              >
-                ₹{course.price}
-              </div>
-
-              {/* ENROLL BUTTON */}
-              <CourseEnrollButton
-                course={course}
-              />
-
-            </div>
 
           </div>
 
@@ -265,342 +259,414 @@ export default async function CourseDetailPage({
               className="
                 grid
                 grid-cols-1
-                lg:grid-cols-3
+                lg:grid-cols-4
                 gap-5
               "
             >
 
-              {/* LEFT */}
-              <div className="lg:col-span-2 space-y-5">
+              {/* SUBJECTS */}
+              <div className="space-y-4">
 
-                {/* ABOUT CARD */}
-                <div
-                  className="
-                    group
-                    relative
-                    overflow-hidden
+                {subjects.map((sub: any) => {
+                  const isActive =
+                    sub.subject_name === activeSubject;
 
-                    rounded-[28px]
+                  return (
+                    <Link
+                      key={sub.subject_name}
+                      href={`?subject=${sub.subject_name}`}
+                      className={`
+                        group
+                        relative
+                        overflow-hidden
 
-                    border
-                    border-white/[0.07]
+                        block
 
-                    bg-gradient-to-br
-                    from-[#18253f]/95
-                    via-[#101b32]/95
-                    to-[#0b1220]/95
+                        rounded-[26px]
 
-                    backdrop-blur-2xl
+                        border
 
-                    p-7
+                        p-5
 
-                    shadow-[0_8px_30px_rgba(0,0,0,0.18)]
-                  "
-                >
-                  {/* AMBIENT GLOW */}
-                  <div
-                    className="
-                      absolute
-                      -top-12
-                      -right-12
+                        transition-all
+                        duration-300
 
-                      w-40
-                      h-40
+                        ${
+                          isActive
+                            ? `
+                              border-white/[0.08]
 
-                      rounded-full
+                              bg-gradient-to-br
+                              from-blue-500/20
+                              to-indigo-500/20
 
-                      bg-blue-500/10
+                              backdrop-blur-xl
 
-                      blur-3xl
+                              shadow-[0_0_25px_rgba(59,130,246,0.12)]
+                            `
+                            : `
+                              border-white/[0.06]
 
-                      opacity-70
+                              bg-gradient-to-br
+                              from-[#18253f]/95
+                              via-[#101b32]/95
+                              to-[#0b1220]/95
 
-                      pointer-events-none
-                    "
-                  />
+                              hover:border-white/[0.12]
 
-                  {/* HOVER GLOW */}
-                  <div
-                    className="
-                      absolute
-                      inset-0
-
-                      opacity-0
-                      group-hover:opacity-100
-
-                      transition-all
-                      duration-500
-
-                      bg-gradient-to-br
-                      from-blue-500/10
-                      via-indigo-500/5
-                      to-transparent
-                    "
-                  />
-
-                  {/* GLASS REFLECTION */}
-                  <div
-                    className="
-                      absolute
-                      inset-0
-
-                      bg-gradient-to-b
-                      from-white/[0.06]
-                      via-transparent
-                      to-transparent
-
-                      pointer-events-none
-                    "
-                  />
-
-                  {/* INNER BORDER */}
-                  <div
-                    className="
-                      absolute
-                      inset-[1px]
-
-                      rounded-[27px]
-
-                      border
-                      border-white/[0.03]
-
-                      pointer-events-none
-                    "
-                  />
-
-                  {/* CONTENT */}
-                  <div className="relative z-10">
-
-                    <h2
-                      className="
-                        text-3xl
-                        font-bold
-
-                        text-white
-
-                        mb-5
-                      "
+                              hover:-translate-y-0.5
+                            `
+                        }
+                      `}
                     >
-                      About Course
-                    </h2>
+                      {/* REFLECTION */}
+                      <div
+                        className="
+                          absolute
+                          inset-0
 
-                    <p
-                      className="
-                        text-[15px]
-                        leading-8
+                          bg-gradient-to-b
+                          from-white/[0.05]
+                          via-transparent
+                          to-transparent
 
-                        text-slate-400
-                      "
-                    >
-                      This course is specially designed for
-                      serious aspirants preparing for{" "}
-                      {course.exam_name}. Complete structured
-                      preparation, mentorship, lectures,
-                      notes and tests will be available here.
-                    </p>
+                          pointer-events-none
+                        "
+                      />
 
-                  </div>
-                </div>
+                      <h3
+                        className="
+                          relative
+
+                          text-lg
+                          font-bold
+
+                          text-white
+                        "
+                      >
+                        {sub.subject_name}
+                      </h3>
+
+                    </Link>
+                  );
+                })}
 
               </div>
 
-              {/* RIGHT */}
-              <div className="space-y-5">
+              {/* LECTURES */}
+              <div className="lg:col-span-3">
 
-                {/* INFO CARD */}
-                <div
-                  className="
-                    group
-                    relative
-                    overflow-hidden
+                {/* TOPBAR */}
+                <div className="mb-6">
 
-                    rounded-[28px]
-
-                    border
-                    border-white/[0.07]
-
-                    bg-gradient-to-br
-                    from-[#18253f]/95
-                    via-[#101b32]/95
-                    to-[#0b1220]/95
-
-                    backdrop-blur-2xl
-
-                    p-7
-
-                    shadow-[0_8px_30px_rgba(0,0,0,0.18)]
-                  "
-                >
-                  {/* AMBIENT GLOW */}
-                  <div
+                  <h2
                     className="
-                      absolute
-                      -top-12
-                      -right-12
+                      text-3xl
+                      font-bold
 
-                      w-40
-                      h-40
-
-                      rounded-full
-
-                      bg-indigo-500/10
-
-                      blur-3xl
-
-                      opacity-70
-
-                      pointer-events-none
+                      text-white
                     "
-                  />
+                  >
+                    {activeSubject}
+                  </h2>
 
-                  {/* HOVER GLOW */}
-                  <div
-                    className="
-                      absolute
-                      inset-0
+                </div>
 
-                      opacity-0
-                      group-hover:opacity-100
+                {/* LECTURE LIST */}
+                <div className="space-y-4">
 
-                      transition-all
-                      duration-500
+                  {lectures.map(
+                    (
+                      lecture: any,
+                      index: number
+                    ) => (
+                      <div
+                        key={lecture.id}
+                        className="
+                          group
+                          relative
+                          overflow-hidden
 
-                      bg-gradient-to-br
-                      from-blue-500/10
-                      via-indigo-500/5
-                      to-transparent
-                    "
-                  />
+                          rounded-[28px]
 
-                  {/* GLASS REFLECTION */}
-                  <div
-                    className="
-                      absolute
-                      inset-0
+                          border
+                          border-white/[0.07]
 
-                      bg-gradient-to-b
-                      from-white/[0.06]
-                      via-transparent
-                      to-transparent
+                          bg-gradient-to-br
+                          from-[#18253f]/95
+                          via-[#101b32]/95
+                          to-[#0b1220]/95
 
-                      pointer-events-none
-                    "
-                  />
+                          backdrop-blur-2xl
 
-                  {/* INNER BORDER */}
-                  <div
-                    className="
-                      absolute
-                      inset-[1px]
+                          p-5
 
-                      rounded-[27px]
+                          transition-all
+                          duration-300
 
-                      border
-                      border-white/[0.03]
+                          hover:border-white/[0.12]
 
-                      pointer-events-none
-                    "
-                  />
-
-                  {/* CONTENT */}
-                  <div className="relative z-10">
-
-                    <h3
-                      className="
-                        text-2xl
-                        font-bold
-
-                        text-white
-
-                        mb-6
-                      "
-                    >
-                      Course Info
-                    </h3>
-
-                    <div className="space-y-5">
-
-                      <div>
-                        <p
+                          hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]
+                        "
+                      >
+                        {/* AMBIENT GLOW */}
+                        <div
                           className="
-                            text-xs
+                            absolute
+                            -top-12
+                            -right-12
 
-                            uppercase
-                            tracking-[0.2em]
+                            w-40
+                            h-40
 
-                            text-slate-500
+                            rounded-full
 
-                            mb-2
+                            bg-blue-500/10
+
+                            blur-3xl
+
+                            opacity-70
+
+                            pointer-events-none
+                          "
+                        />
+
+                        {/* REFLECTION */}
+                        <div
+                          className="
+                            absolute
+                            inset-0
+
+                            bg-gradient-to-b
+                            from-white/[0.06]
+                            via-transparent
+                            to-transparent
+
+                            pointer-events-none
+                          "
+                        />
+
+                        {/* INNER BORDER */}
+                        <div
+                          className="
+                            absolute
+                            inset-[1px]
+
+                            rounded-[27px]
+
+                            border
+                            border-white/[0.03]
+
+                            pointer-events-none
+                          "
+                        />
+
+                        {/* CONTENT */}
+                        <div
+                          className="
+                            relative
+                            z-10
+
+                            flex
+                            flex-col
+                            lg:flex-row
+                            lg:items-center
+                            lg:justify-between
+
+                            gap-5
                           "
                         >
-                          Exam
-                        </p>
 
-                        <p
-                          className="
-                            font-semibold
-                            text-white
-                          "
-                        >
-                          {course.exam_name}
-                        </p>
+                          {/* LEFT */}
+                          <div className="flex items-center gap-5">
+
+                            {/* NUMBER */}
+                            <div
+                              className="
+                                w-12
+                                h-12
+
+                                rounded-2xl
+
+                                border
+                                border-white/[0.08]
+
+                                bg-gradient-to-br
+                                from-blue-500/20
+                                to-indigo-500/20
+
+                                backdrop-blur-xl
+
+                                text-white
+
+                                flex
+                                items-center
+                                justify-center
+
+                                font-bold
+                              "
+                            >
+                              {(index + 1)
+                                .toString()
+                                .padStart(2, "0")}
+                            </div>
+
+                            {/* INFO */}
+                            <div>
+
+                              <h3
+                                className="
+                                  text-xl
+                                  font-bold
+
+                                  text-white
+                                "
+                              >
+                                {
+                                  lecture.lecture_title
+                                }
+                              </h3>
+
+                              <p
+                                className="
+                                  text-sm
+
+                                  text-slate-400
+
+                                  mt-2
+                                "
+                              >
+                                {lecture.duration}
+
+                                {lecture.notes_available &&
+                                  " • Notes Included"}
+                              </p>
+
+                            </div>
+
+                          </div>
+
+                          {/* ACTIONS */}
+                          <div className="flex flex-wrap items-center gap-3">
+
+                            {/* VIDEO */}
+                            <button
+                              className="
+                                px-4
+                                py-3
+
+                                rounded-2xl
+
+                                border
+                                border-white/[0.08]
+
+                                bg-gradient-to-br
+                                from-blue-500/20
+                                to-indigo-500/20
+
+                                backdrop-blur-xl
+
+                                text-white
+                                text-sm
+                                font-semibold
+
+                                hover:scale-[1.02]
+
+                                transition-all
+                              "
+                            >
+                              Video
+                            </button>
+
+                            {/* NOTES */}
+                            <button
+                              className="
+                                px-4
+                                py-3
+
+                                rounded-2xl
+
+                                border
+                                border-white/[0.08]
+
+                                bg-white/[0.04]
+
+                                backdrop-blur-xl
+
+                                text-slate-200
+                                text-sm
+                                font-semibold
+
+                                hover:bg-white/[0.08]
+
+                                transition-all
+                              "
+                            >
+                              Notes
+                            </button>
+
+                            {/* MCQs */}
+                            <button
+                              className="
+                                px-4
+                                py-3
+
+                                rounded-2xl
+
+                                border
+                                border-white/[0.08]
+
+                                bg-white/[0.04]
+
+                                backdrop-blur-xl
+
+                                text-slate-200
+                                text-sm
+                                font-semibold
+
+                                hover:bg-white/[0.08]
+
+                                transition-all
+                              "
+                            >
+                              MCQs
+                            </button>
+
+                            {/* PYQs */}
+                            <button
+                              className="
+                                px-4
+                                py-3
+
+                                rounded-2xl
+
+                                border
+                                border-white/[0.08]
+
+                                bg-white/[0.04]
+
+                                backdrop-blur-xl
+
+                                text-slate-200
+                                text-sm
+                                font-semibold
+
+                                hover:bg-white/[0.08]
+
+                                transition-all
+                              "
+                            >
+                              PYQs
+                            </button>
+
+                          </div>
+
+                        </div>
+
                       </div>
+                    )
+                  )}
 
-                      <div>
-                        <p
-                          className="
-                            text-xs
-
-                            uppercase
-                            tracking-[0.2em]
-
-                            text-slate-500
-
-                            mb-2
-                          "
-                        >
-                          Stage
-                        </p>
-
-                        <p
-                          className="
-                            font-semibold
-                            text-white
-                          "
-                        >
-                          {course.stage}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p
-                          className="
-                            text-xs
-
-                            uppercase
-                            tracking-[0.2em]
-
-                            text-slate-500
-
-                            mb-2
-                          "
-                        >
-                          Price
-                        </p>
-
-                        <p
-                          className="
-                            font-semibold
-                            text-white
-                          "
-                        >
-                          ₹{course.price}
-                        </p>
-                      </div>
-
-                    </div>
-
-                  </div>
                 </div>
 
               </div>
