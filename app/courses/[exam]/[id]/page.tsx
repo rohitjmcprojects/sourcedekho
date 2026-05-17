@@ -1,5 +1,4 @@
 import { sql } from "@/lib/db";
-
 import CourseEnrollButton from "@/components/CourseEnrollButton";
 
 export default async function CourseDetailPage({
@@ -88,16 +87,18 @@ export default async function CourseDetailPage({
             {course.description}
           </p>
 
-          {/* ACTION */}
-          <div className="flex items-center gap-6 mt-10">
+          {/* ACTIONS */}
+          <div className="flex items-center gap-4 mt-10 flex-wrap">
 
-            <div className="text-5xl font-black">
+            {/* PRICE */}
+            <div className="text-5xl font-black mr-2">
               ₹{course.price}
             </div>
 
+            {/* BUTTONS */}
             <CourseEnrollButton
-                  courseTitle={course.title}
-                />
+              course={course}
+            />
 
           </div>
 
@@ -111,7 +112,6 @@ export default async function CourseDetailPage({
             {/* LEFT */}
             <div className="lg:col-span-2 space-y-6">
 
-              {/* ABOUT */}
               <div className="border rounded-[32px] p-8">
 
                 <h2 className="text-3xl font-bold mb-5">
@@ -124,35 +124,6 @@ export default async function CourseDetailPage({
                   Complete structured preparation, mentorship,
                   lectures, notes and tests will be available here.
                 </p>
-
-              </div>
-
-              {/* FEATURES */}
-              <div className="border rounded-[32px] p-8">
-
-                <h2 className="text-3xl font-bold mb-6">
-                  Course Features
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                  <div className="border rounded-2xl p-5">
-                    Live Lectures
-                  </div>
-
-                  <div className="border rounded-2xl p-5">
-                    PDF Notes
-                  </div>
-
-                  <div className="border rounded-2xl p-5">
-                    Mock Tests
-                  </div>
-
-                  <div className="border rounded-2xl p-5">
-                    Mentorship
-                  </div>
-
-                </div>
 
               </div>
 
