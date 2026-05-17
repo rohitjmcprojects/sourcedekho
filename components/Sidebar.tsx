@@ -15,7 +15,8 @@ import {
 
 import {
   UserButton,
-   useUser,
+  useUser,
+  SignInButton,
 } from "@clerk/nextjs";
 
 const menuItems = [
@@ -124,22 +125,48 @@ export default function Sidebar() {
       {/* AUTH + FOOTER */}
       <div className="p-4 border-t space-y-4">
         {/* AUTH */}
-            
-            <div className="flex items-center gap-3 justify-center">
-            <UserButton />
+            {/* AUTH */}
+<div className="flex items-center justify-center">
+  {user ? (
+    <div className="flex items-center gap-3">
+      <UserButton />
 
-            {!collapsed && user && (
-                <div className="flex flex-col overflow-hidden">
-                <p className="text-sm font-semibold truncate">
-                    {user.fullName || "User"}
-                </p>
+      {!collapsed && (
+        <div className="flex flex-col overflow-hidden">
+          <p className="text-sm font-semibold truncate">
+            {user.fullName || "User"}
+          </p>
 
-                <p className="text-xs text-gray-500 truncate max-w-[140px]">
-                    {user.primaryEmailAddress?.emailAddress}
-                </p>
-                </div>
-            )}
-            </div>
+          <p className="text-xs text-gray-500 truncate max-w-[140px]">
+            {user.primaryEmailAddress?.emailAddress}
+          </p>
+        </div>
+      )}
+    </div>
+  ) : (
+    <SignInButton mode="modal">
+      <button
+        className={`
+          rounded-2xl
+          bg-black
+          text-white
+          transition
+          hover:opacity-90
+          ${
+            collapsed
+              ? "w-12 h-12 text-sm"
+              : "w-full px-4 py-3 font-medium"
+          }
+        `}
+      >
+        {collapsed ? "→" : "Sign In"}
+      </button>
+    </SignInButton>
+  )}
+</div>
+
+
+
         {/* FOOTER */}
         {!collapsed ? (
           <div className="rounded-2xl bg-gray-100 p-4">
