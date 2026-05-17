@@ -13,6 +13,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import {
+  UserButton,
+   useUser,
+} from "@clerk/nextjs";
+
 const menuItems = [
   {
     title: "Dashboard",
@@ -42,7 +47,8 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+  const { user } = useUser();
 
   return (
     <div
@@ -115,15 +121,33 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* FOOTER */}
-      <div className="p-4 border-t">
+      {/* AUTH + FOOTER */}
+      <div className="p-4 border-t space-y-4">
+        {/* AUTH */}
+            
+            <div className="flex items-center gap-3 justify-center">
+            <UserButton />
+
+            {!collapsed && user && (
+                <div className="flex flex-col overflow-hidden">
+                <p className="text-sm font-semibold truncate">
+                    {user.fullName || "User"}
+                </p>
+
+                <p className="text-xs text-gray-500 truncate max-w-[140px]">
+                    {user.primaryEmailAddress?.emailAddress}
+                </p>
+                </div>
+            )}
+            </div>
+        {/* FOOTER */}
         {!collapsed ? (
-          <div className="rounded-2xl bg-black text-white p-4">
+          <div className="rounded-2xl bg-gray-100 p-4">
             <p className="text-sm font-semibold">
               SourceDekho
             </p>
 
-            <p className="text-xs text-gray-300 mt-1">
+            <p className="text-xs text-gray-500 mt-1">
               Modern learning dashboard
             </p>
           </div>
