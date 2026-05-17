@@ -527,139 +527,241 @@ export default async function LectureDashboardPage({
                                 }
                               </h3>
 
-                              <p
-                                className="
-                                  text-sm
-
-                                  text-slate-400
-
-                                  mt-2
-                                "
-                              >
-                                {lecture.duration}
-
-                                {lecture.notes_available &&
-                                  " • Notes Included"}
-                              </p>
-
+                              
                             </div>
 
                           </div>
 
                           {/* ACTIONS */}
-                          <div className="flex flex-wrap items-center gap-3">
+<div className="flex flex-wrap items-center gap-3">
 
-                            {/* VIDEO */}
-                            <button
-                              className="
-                                px-4
-                                py-3
+  {/* VIDEO */}
+  <button
+    className="
+      group
 
-                                rounded-2xl
+      flex
+      items-center
+      gap-2.5
 
-                                border
-                                border-white/[0.08]
+      px-4
+      py-3
 
-                                bg-gradient-to-br
-                                from-blue-500/20
-                                to-indigo-500/20
+      rounded-2xl
 
-                                backdrop-blur-xl
+      border
+      border-white/[0.08]
 
-                                text-white
-                                text-sm
-                                font-semibold
+      bg-gradient-to-br
+      from-blue-500/20
+      to-indigo-500/20
 
-                                hover:scale-[1.02]
+      backdrop-blur-xl
 
-                                transition-all
-                              "
-                            >
-                              Video
-                            </button>
+      text-white
+      text-sm
+      font-semibold
 
-                            {/* NOTES */}
-                            <button
-                              className="
-                                px-4
-                                py-3
+      hover:scale-[1.03]
 
-                                rounded-2xl
+      hover:shadow-[0_0_20px_rgba(59,130,246,0.20)]
 
-                                border
-                                border-white/[0.08]
+      transition-all
+      duration-300
+    "
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className="
+        opacity-90
+        group-hover:scale-110
+        transition
+      "
+    >
+      <path d="M8 5v14l11-7z" />
+    </svg>
 
-                                bg-white/[0.04]
+    Video
+  </button>
 
-                                backdrop-blur-xl
+  {/* NOTES */}
+  <button
+    className="
+      group
 
-                                text-slate-200
-                                text-sm
-                                font-semibold
+      flex
+      items-center
+      gap-2.5
 
-                                hover:bg-white/[0.08]
+      px-4
+      py-3
 
-                                transition-all
-                              "
-                            >
-                              Notes
-                            </button>
+      rounded-2xl
 
-                            {/* MCQs */}
-                            <button
-                              className="
-                                px-4
-                                py-3
+      border
+      border-white/[0.08]
 
-                                rounded-2xl
+      bg-white/[0.04]
 
-                                border
-                                border-white/[0.08]
+      backdrop-blur-xl
 
-                                bg-white/[0.04]
+      text-slate-200
+      text-sm
+      font-semibold
 
-                                backdrop-blur-xl
+      hover:bg-white/[0.08]
 
-                                text-slate-200
-                                text-sm
-                                font-semibold
+      hover:border-white/[0.12]
 
-                                hover:bg-white/[0.08]
+      transition-all
+      duration-300
+    "
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="
+        opacity-80
+        group-hover:scale-110
+        transition
+      "
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="M16 13H8" />
+      <path d="M16 17H8" />
+      <path d="M10 9H8" />
+    </svg>
 
-                                transition-all
-                              "
-                            >
-                              MCQs
-                            </button>
+    Notes
+  </button>
 
-                            {/* PYQs */}
-                            <button
-                              className="
-                                px-4
-                                py-3
+  {/* MCQs */}
+  <button
+    className="
+      group
 
-                                rounded-2xl
+      flex
+      items-center
+      gap-2.5
 
-                                border
-                                border-white/[0.08]
+      px-4
+      py-3
 
-                                bg-white/[0.04]
+      rounded-2xl
 
-                                backdrop-blur-xl
+      border
+      border-white/[0.08]
 
-                                text-slate-200
-                                text-sm
-                                font-semibold
+      bg-white/[0.04]
 
-                                hover:bg-white/[0.08]
+      backdrop-blur-xl
 
-                                transition-all
-                              "
-                            >
-                              PYQs
-                            </button>
+      text-slate-200
+      text-sm
+      font-semibold
 
-                          </div>
+      hover:bg-white/[0.08]
+
+      hover:border-white/[0.12]
+
+      transition-all
+      duration-300
+    "
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="
+        opacity-80
+        group-hover:scale-110
+        transition
+      "
+    >
+      <path d="M9 11l3 3L22 4" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </svg>
+
+    MCQs
+  </button>
+
+  {/* PYQs */}
+  <button
+    className="
+      group
+
+      flex
+      items-center
+      gap-2.5
+
+      px-4
+      py-3
+
+      rounded-2xl
+
+      border
+      border-white/[0.08]
+
+      bg-white/[0.04]
+
+      backdrop-blur-xl
+
+      text-slate-200
+      text-sm
+      font-semibold
+
+      hover:bg-white/[0.08]
+
+      hover:border-white/[0.12]
+
+      transition-all
+      duration-300
+    "
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="
+        opacity-80
+        group-hover:scale-110
+        transition
+      "
+    >
+      <path d="M3 3v18h18" />
+      <path d="M18 17V9" />
+      <path d="M13 17V5" />
+      <path d="M8 17v-3" />
+    </svg>
+
+    PYQs
+  </button>
+
+</div>
 
                         </div>
 

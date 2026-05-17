@@ -21,29 +21,9 @@ import {
 
 const menuItems = [
   {
-    title: "Dashboard",
+    title: "Home",
     href: "/",
     icon: LayoutDashboard,
-  },
-  {
-    title: "Communities",
-    href: "/communities",
-    icon: Users,
-  },
-  {
-    title: "Courses",
-    href: "/courses",
-    icon: BookOpen,
-  },
-  {
-    title: "My Learning",
-    href: "/learning",
-    icon: GraduationCap,
-  },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
   },
 ];
 
