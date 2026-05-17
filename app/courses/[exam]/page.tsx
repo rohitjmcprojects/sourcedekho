@@ -20,8 +20,23 @@ export default async function ExamCoursesPage({
   if (!examData) {
     return (
       <main className="pl-[120px] pr-5 py-5">
-        <div className="min-h-[calc(100vh-40px)] rounded-[32px] border bg-white shadow-sm p-10">
-          <h1 className="text-4xl font-bold">
+        <div
+          className="
+            min-h-[calc(100vh-40px)]
+
+            rounded-[32px]
+
+            border
+            border-white/[0.08]
+
+            bg-[#0b1020]/40
+
+            backdrop-blur-2xl
+
+            p-10
+          "
+        >
+          <h1 className="text-4xl font-bold text-white">
             Exam not found
           </h1>
         </div>
@@ -39,136 +54,410 @@ export default async function ExamCoursesPage({
 
   return (
     <main className="pl-[120px] pr-5 py-5">
-      <div className="min-h-[calc(100vh-40px)] rounded-[32px] border bg-white shadow-sm p-8">
+      <div
+        className="
+          relative
+          overflow-hidden
 
-        {/* HEADER */}
-        <div className="mb-10">
+          min-h-[calc(100vh-40px)]
 
-          <div className="flex items-center gap-4 mb-4">
+          rounded-[32px]
 
-            <div
-              className="
-                w-16
-                h-16
-                rounded-3xl
-                bg-black
-                text-white
-                flex
-                items-center
-                justify-center
-                text-2xl
-                font-bold
-              "
-            >
-              {examData.name[0]}
-            </div>
+          border
+          border-white/[0.08]
 
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">
-                EXAM
-              </p>
+          bg-[#0b1020]/40
 
-              <h1 className="text-5xl font-black tracking-tight">
-                {examData.name}
-              </h1>
-            </div>
+          backdrop-blur-2xl
 
-          </div>
+          shadow-[0_8px_40px_rgba(0,0,0,0.25)]
 
-          <p className="text-lg text-gray-500 max-w-3xl">
-            {examData.description}
-          </p>
+          p-8
+        "
+      >
+        {/* BACKGROUND LIGHTS */}
+        <div
+          className="
+            absolute
+            -top-32
+            -left-32
 
-        </div>
+            w-[500px]
+            h-[500px]
 
-        {/* COURSES */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            bg-blue-400/20
 
-          {courses.map((course: any) => (
-            <Link
-              key={course.id}
-              href={`/courses/${examData.name.toLowerCase()}/${course.id}`}
-              className="
-                relative
-                border
-                rounded-[28px]
-                p-6
-                bg-white
-                hover:shadow-lg
-                hover:-translate-y-1
-                transition
-                min-h-[260px]
-                block
-              "
-            >
+            blur-3xl
 
-              {/* TOP */}
-              <div className="flex justify-between items-start mb-6">
+            rounded-full
 
-                <div className="space-y-2">
+            pointer-events-none
+          "
+        />
 
-                  <div
-                    className="
-                      inline-flex
-                      px-4
-                      py-2
-                      rounded-2xl
-                      bg-black
-                      text-white
-                      text-sm
-                      font-semibold
-                    "
-                  >
-                    {course.stage}
-                  </div>
+        <div
+          className="
+            absolute
+            bottom-0
+            right-0
 
-                  <div className="text-sm text-gray-500">
-                    {examData.name}
-                  </div>
+            w-[400px]
+            h-[400px]
 
-                </div>
+            bg-indigo-400/20
 
-                <div className="text-3xl font-black">
-                  ₹{course.price}
-                </div>
+            blur-3xl
 
-              </div>
+            rounded-full
 
-              {/* TITLE */}
-              <h2 className="text-2xl font-bold mb-4 leading-tight">
-                {course.title}
-              </h2>
+            pointer-events-none
+          "
+        />
 
-              {/* DESCRIPTION */}
-              <p className="text-gray-500 text-sm leading-relaxed">
-                {course.description}
-              </p>
+        {/* GLASS LIGHT */}
+        <div
+          className="
+            absolute
+            inset-0
 
-              {/* CTA */}
+            bg-gradient-to-b
+            from-white/[0.04]
+            to-transparent
+
+            pointer-events-none
+          "
+        />
+
+        {/* CONTENT */}
+        <div className="relative z-10">
+
+          {/* HEADER */}
+          <div className="mb-10">
+
+            <div className="flex items-center gap-5 mb-5">
+
+              {/* ICON */}
               <div
                 className="
-                  absolute
-                  bottom-6
-                  right-6
-                  w-12
-                  h-12
-                  rounded-full
-                  bg-black
-                  text-white
+                  relative
+
+                  w-14
+                  h-14
+
+                  rounded-[22px]
+
+                  border
+                  border-white/[0.08]
+
+                  bg-gradient-to-br
+                  from-blue-500/20
+                  to-indigo-500/20
+
+                  backdrop-blur-xl
+
                   flex
                   items-center
                   justify-center
+
+                  text-white
                   text-xl
+                  font-bold
                 "
               >
-                →
+                {examData.name[0]}
               </div>
 
-            </Link>
-          ))}
+              {/* TITLE */}
+              <div>
+                <p
+                  className="
+                    text-[11px]
+                    font-semibold
 
+                    tracking-[0.25em]
+
+                    uppercase
+
+                    text-slate-500
+
+                    mb-1
+                  "
+                >
+                  Exam
+                </p>
+
+                <h1
+                  className="
+                    text-5xl
+                    font-black
+                    tracking-tight
+
+                    text-white
+                  "
+                >
+                  {examData.name}
+                </h1>
+              </div>
+            </div>
+
+            {/* DESCRIPTION */}
+            <p
+              className="
+                text-slate-400
+                text-[15px]
+                leading-7
+                max-w-3xl
+              "
+            >
+              {examData.description}
+            </p>
+          </div>
+
+          {/* COURSES GRID */}
+          <div
+            className="
+              grid
+              grid-cols-1
+              md:grid-cols-2
+              xl:grid-cols-3
+              gap-4
+            "
+          >
+            {courses.map((course: any) => (
+              <Link
+                key={course.id}
+                href={`/courses/${examData.name.toLowerCase()}/${course.id}`}
+                className="
+                  group
+                  relative
+                  overflow-hidden
+
+                  rounded-[26px]
+
+                  border
+                  border-white/[0.07]
+
+                  bg-gradient-to-br
+                  from-[#18253f]/95
+                  via-[#101b32]/95
+                  to-[#0b1220]/95
+
+                  backdrop-blur-2xl
+
+                  p-5
+
+                  min-h-[220px]
+
+                  transition-all
+                  duration-500
+
+                  hover:-translate-y-1
+                  hover:border-white/[0.12]
+
+                  hover:shadow-[0_0_35px_rgba(59,130,246,0.14)]
+                "
+              >
+                {/* AMBIENT GLOW */}
+                <div
+                  className="
+                    absolute
+                    -top-10
+                    -right-10
+
+                    w-40
+                    h-40
+
+                    rounded-full
+
+                    bg-blue-500/10
+
+                    blur-3xl
+
+                    opacity-70
+
+                    pointer-events-none
+                  "
+                />
+
+                {/* HOVER GLOW */}
+                <div
+                  className="
+                    absolute
+                    inset-0
+
+                    opacity-0
+                    group-hover:opacity-100
+
+                    transition-all
+                    duration-500
+
+                    bg-gradient-to-br
+                    from-blue-500/10
+                    via-indigo-500/5
+                    to-transparent
+                  "
+                />
+
+                {/* GLASS REFLECTION */}
+                <div
+                  className="
+                    absolute
+                    inset-0
+
+                    bg-gradient-to-b
+                    from-white/[0.06]
+                    via-transparent
+                    to-transparent
+
+                    pointer-events-none
+                  "
+                />
+
+                {/* INNER BORDER */}
+                <div
+                  className="
+                    absolute
+                    inset-[1px]
+
+                    rounded-[25px]
+
+                    border
+                    border-white/[0.03]
+
+                    pointer-events-none
+                  "
+                />
+
+                {/* CONTENT */}
+                <div className="relative z-10 flex flex-col h-full">
+
+                  {/* TOP */}
+                  <div className="flex justify-between items-start mb-5">
+
+                    <div className="space-y-2">
+
+                      {/* STAGE */}
+                      <div
+                        className="
+                          inline-flex
+
+                          px-3
+                          py-1.5
+
+                          rounded-2xl
+
+                          border
+                          border-white/[0.08]
+
+                          bg-white/[0.05]
+
+                          backdrop-blur-xl
+
+                          text-white
+                          text-xs
+                          font-semibold
+                        "
+                      >
+                        {course.stage}
+                      </div>
+
+                      {/* EXAM */}
+                      <div
+                        className="
+                          text-xs
+                          text-slate-500
+                        "
+                      >
+                        {examData.name}
+                      </div>
+                    </div>
+
+                    {/* PRICE */}
+                    <div
+                      className="
+                        text-2xl
+                        font-black
+
+                        tracking-tight
+
+                        text-white
+                      "
+                    >
+                      ₹{course.price}
+                    </div>
+                  </div>
+
+                  {/* TITLE */}
+                  <h2
+                    className="
+                      text-[22px]
+                      font-bold
+                      leading-tight
+
+                      text-white
+
+                      mb-4
+                    "
+                  >
+                    {course.title}
+                  </h2>
+
+                  {/* DESCRIPTION */}
+                  <p
+                    className="
+                      text-[13px]
+                      leading-6
+
+                      text-slate-400
+                    "
+                  >
+                    {course.description}
+                  </p>
+
+                  {/* SPACER */}
+                  <div className="flex-1" />
+
+                  {/* CTA */}
+                  <div className="mt-6 flex justify-end">
+                    <div
+                      className="
+                        flex
+                        items-center
+                        justify-center
+
+                        w-10
+                        h-10
+
+                        rounded-2xl
+
+                        border
+                        border-white/[0.08]
+
+                        bg-gradient-to-br
+                        from-blue-500/25
+                        to-indigo-500/20
+
+                        backdrop-blur-xl
+
+                        text-white
+                        text-lg
+
+                        transition-all
+                        duration-300
+
+                        group-hover:scale-110
+
+                        group-hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]
+                      "
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-
       </div>
     </main>
   );

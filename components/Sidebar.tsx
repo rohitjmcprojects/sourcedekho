@@ -48,7 +48,8 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
+
   const { user } = useUser();
 
   return (
@@ -58,28 +59,84 @@ export default function Sidebar() {
         top-5
         left-5
         h-[calc(100vh-40px)]
-        bg-white/90
-        backdrop-blur-xl
-        border
-        shadow-xl
-        rounded-3xl
         z-50
-        transition-all
-        duration-300
         flex
         flex-col
+        overflow-hidden
+
+        transition-all
+        duration-500
+
         ${collapsed ? "w-24" : "w-72"}
+
+        rounded-[32px]
+
+        border
+        border-white/[0.08]
+
+        bg-[#0f172a]/80
+
+        backdrop-blur-2xl
+
+        shadow-[0_8px_50px_rgba(0,0,0,0.55)]
+
+        before:absolute
+        before:inset-0
+        before:bg-gradient-to-b
+        before:from-white/[0.06]
+        before:to-transparent
+        before:pointer-events-none
       `}
     >
+      {/* AMBIENT GLOW */}
+      <div
+        className="
+          absolute
+          -top-24
+          -left-24
+          w-60
+          h-60
+          bg-blue-500/10
+          blur-3xl
+          rounded-full
+          pointer-events-none
+        "
+      />
+
       {/* HEADER */}
-      <div className="flex items-center justify-between p-5 border-b">
+      <div
+        className="
+          relative
+          flex
+          items-center
+          justify-between
+          px-5
+          py-5
+
+          border-b
+          border-white/[0.08]
+        "
+      >
         {!collapsed && (
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1
+              className="
+                text-[30px]
+                font-bold
+                tracking-tight
+                text-white
+              "
+            >
               SourceDekho
             </h1>
 
-            <p className="text-xs text-gray-500 mt-1">
+            <p
+              className="
+                text-xs
+                text-slate-400
+                mt-1
+              "
+            >
               Competitive Exam Platform
             </p>
           </div>
@@ -87,7 +144,28 @@ export default function Sidebar() {
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-10 h-10 rounded-full border flex items-center justify-center hover:bg-gray-100 transition"
+          className="
+            flex
+            items-center
+            justify-center
+
+            w-11
+            h-11
+
+            rounded-2xl
+
+            border
+            border-white/[0.08]
+
+            bg-white/[0.04]
+
+            hover:bg-white/[0.08]
+
+            transition-all
+            duration-300
+
+            text-white
+          "
         >
           {collapsed ? (
             <ChevronRight size={18} />
@@ -98,22 +176,135 @@ export default function Sidebar() {
       </div>
 
       {/* MENU */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {menuItems.map((item) => {
+      <nav
+        className="
+          relative
+          flex-1
+
+          px-4
+          py-5
+
+          space-y-3
+
+          overflow-y-auto
+        "
+      >
+        {!collapsed && (
+          <p
+            className="
+              px-4
+              mb-2
+
+              text-[11px]
+              font-semibold
+
+              tracking-[0.25em]
+
+              text-slate-500
+
+              uppercase
+            "
+          >
+            Main
+          </p>
+        )}
+
+        {menuItems.map((item, index) => {
           const Icon = item.icon;
 
           return (
             <Link
               key={item.title}
               href={item.href}
-              className="flex items-center gap-4 px-4 py-4 rounded-2xl hover:bg-gray-100 transition"
+              className={`
+                group
+                relative
+
+                flex
+                items-center
+                gap-4
+
+                px-4
+                py-4
+
+                rounded-2xl
+
+                transition-all
+                duration-300
+
+                ${
+                  index === 0
+                    ? `
+                      bg-gradient-to-r
+                      from-blue-500/20
+                      to-indigo-500/20
+
+                      border
+                      border-white/[0.08]
+
+                      backdrop-blur-xl
+
+                      shadow-[0_0_30px_rgba(59,130,246,0.12)]
+                    `
+                    : `
+                      text-slate-300
+
+                      hover:bg-white/[0.04]
+
+                      hover:border
+                      hover:border-white/[0.06]
+                    `
+                }
+              `}
             >
-              <div className="min-w-[24px] flex justify-center">
-                <Icon size={22} />
+              {/* HOVER LIGHT */}
+              <div
+                className="
+                  absolute
+                  inset-0
+
+                  rounded-2xl
+
+                  opacity-0
+                  group-hover:opacity-100
+
+                  transition
+                  duration-300
+
+                  bg-gradient-to-r
+                  from-white/[0.03]
+                  to-transparent
+                "
+              />
+
+              <div
+                className="
+                  relative
+                  min-w-[24px]
+
+                  flex
+                  justify-center
+
+                  text-white
+                "
+              >
+                <Icon
+                  size={21}
+                  strokeWidth={2.2}
+                />
               </div>
 
               {!collapsed && (
-                <span className="font-medium text-[15px]">
+                <span
+                  className="
+                    relative
+
+                    text-[15px]
+                    font-medium
+
+                    text-slate-200
+                  "
+                >
                   {item.title}
                 </span>
               )}
@@ -122,65 +313,177 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* AUTH + FOOTER */}
-      <div className="p-4 border-t space-y-4">
-        {/* AUTH */}
-            {/* AUTH */}
-<div className="flex items-center justify-center">
-  {user ? (
-    <div className="flex items-center gap-3">
-      <UserButton />
+      {/* FOOTER */}
+      <div
+        className="
+          relative
 
-      {!collapsed && (
-        <div className="flex flex-col overflow-hidden">
-          <p className="text-sm font-semibold truncate">
-            {user.fullName || "User"}
-          </p>
+          p-4
 
-          <p className="text-xs text-gray-500 truncate max-w-[140px]">
-            {user.primaryEmailAddress?.emailAddress}
-          </p>
-        </div>
-      )}
-    </div>
-  ) : (
-    <SignInButton mode="modal">
-      <button
-        className={`
-          rounded-2xl
-          bg-black
-          text-white
-          transition
-          hover:opacity-90
-          ${
-            collapsed
-              ? "w-12 h-12 text-sm"
-              : "w-full px-4 py-3 font-medium"
-          }
-        `}
+          border-t
+          border-white/[0.08]
+
+          space-y-4
+        "
       >
-        {collapsed ? "→" : "Sign In"}
-      </button>
-    </SignInButton>
-  )}
-</div>
+        {/* USER */}
+        <div className="flex items-center justify-center">
+          {user ? (
+            <div
+              className={`
+                flex
+                items-center
 
+                ${
+                  collapsed
+                    ? "justify-center"
+                    : "gap-3 w-full"
+                }
+              `}
+            >
+              <UserButton />
 
+              {!collapsed && (
+                <div className="flex flex-col overflow-hidden">
+                  <p
+                    className="
+                      text-sm
+                      font-semibold
+                      text-white
+                      truncate
+                    "
+                  >
+                    {user.fullName || "User"}
+                  </p>
 
-        {/* FOOTER */}
+                  <p
+                    className="
+                      text-xs
+                      text-slate-400
+
+                      truncate
+                      max-w-[150px]
+                    "
+                  >
+                    {
+                      user.primaryEmailAddress
+                        ?.emailAddress
+                    }
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <SignInButton mode="modal">
+              <button
+                className={`
+                  rounded-2xl
+
+                  border
+                  border-white/[0.08]
+
+                  bg-white/[0.05]
+
+                  text-white
+
+                  hover:bg-white/[0.08]
+
+                  transition-all
+                  duration-300
+
+                  ${
+                    collapsed
+                      ? "w-12 h-12 text-sm"
+                      : "w-full px-4 py-3 font-medium"
+                  }
+                `}
+              >
+                {collapsed ? "→" : "Sign In"}
+              </button>
+            </SignInButton>
+          )}
+        </div>
+
+        {/* FOOTER CARD */}
         {!collapsed ? (
-          <div className="rounded-2xl bg-gray-100 p-4">
-            <p className="text-sm font-semibold">
+          <div
+            className="
+              relative
+              overflow-hidden
+
+              rounded-3xl
+
+              border
+              border-white/[0.06]
+
+              bg-white/[0.04]
+
+              backdrop-blur-xl
+
+              p-4
+            "
+          >
+            {/* INNER GLOW */}
+            <div
+              className="
+                absolute
+                inset-0
+
+                bg-gradient-to-br
+                from-blue-500/10
+                via-indigo-500/5
+                to-transparent
+
+                pointer-events-none
+              "
+            />
+
+            <p
+              className="
+                relative
+
+                text-sm
+                font-semibold
+
+                text-white
+              "
+            >
               SourceDekho
             </p>
 
-            <p className="text-xs text-gray-500 mt-1">
+            <p
+              className="
+                relative
+
+                text-xs
+
+                text-slate-400
+
+                mt-1
+              "
+            >
               Modern learning dashboard
             </p>
           </div>
         ) : (
           <div className="flex justify-center">
-            <div className="w-10 h-10 rounded-full bg-black" />
+            <div
+              className="
+                w-10
+                h-10
+
+                rounded-2xl
+
+                border
+                border-white/[0.08]
+
+                bg-gradient-to-br
+                from-blue-500/20
+                to-indigo-500/20
+
+                backdrop-blur-xl
+              "
+            />
           </div>
         )}
       </div>
