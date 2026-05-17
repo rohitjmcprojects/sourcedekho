@@ -218,19 +218,75 @@ export default async function LectureDashboardPage({
 
                     </div>
 
-                    {/* ACTION */}
-                    <button
-                      className="
-                        w-12
-                        h-12
-                        rounded-full
-                        bg-black
-                        text-white
-                        text-xl
-                      "
-                    >
-                      →
-                    </button>
+                    {/* ACTIONS */}
+                    <div className="flex items-center gap-3">
+
+                      {/* VIDEO */}
+                      <button
+                        className="
+                          px-4
+                          py-3
+                          rounded-2xl
+                          bg-black
+                          text-white
+                          text-sm
+                          font-semibold
+                          hover:opacity-90
+                          transition
+                        "
+                      >
+                        Video
+                      </button>
+
+                      {/* NOTES */}
+                      <button
+                        className="
+                          px-4
+                          py-3
+                          rounded-2xl
+                          border
+                          text-sm
+                          font-semibold
+                          hover:bg-gray-100
+                          transition
+                        "
+                      >
+                        Notes
+                      </button>
+
+                      {/* MCQs */}
+                      <button
+                        className="
+                          px-4
+                          py-3
+                          rounded-2xl
+                          border
+                          text-sm
+                          font-semibold
+                          hover:bg-gray-100
+                          transition
+                        "
+                      >
+                        MCQs
+                      </button>
+
+                      {/* PYQs */}
+                      <button
+                        className="
+                          px-4
+                          py-3
+                          rounded-2xl
+                          border
+                          text-sm
+                          font-semibold
+                          hover:bg-gray-100
+                          transition
+                        "
+                      >
+                        PYQs
+                      </button>
+
+                    </div>
 
                   </div>
                 ))}
