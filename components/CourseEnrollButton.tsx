@@ -46,6 +46,23 @@ export default function CourseEnrollButton({
   // =========================
   return (
     <>
+        {/* LECTURE DASHBOARD */}
+  <button
+    className="
+      px-8
+      py-4
+      rounded-2xl
+      border
+      font-semibold
+      text-lg
+      hover:bg-gray-100
+      transition
+    "
+  >
+    Lecture Dashboard
+  </button>
+
+
       {/* BUTTON */}
       <button
         onClick={() => setOpen(true)}
