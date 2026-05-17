@@ -1,18 +1,22 @@
 "use client";
+
+import { useState } from "react";
 import Link from "next/link";
+
 import {
   LayoutDashboard,
   Users,
   BookOpen,
   GraduationCap,
   Settings,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const menuItems = [
   {
     title: "Dashboard",
     href: "/",
-
     icon: LayoutDashboard,
   },
   {
@@ -38,21 +42,56 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
-  return (
-    <aside className="w-64 min-h-screen border-r bg-white p-5 flex flex-col">
-      {/* LOGO */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold tracking-tight">
-          SourceDekho
-        </h1>
+  const [collapsed, setCollapsed] = useState(false);
 
-        <p className="text-sm text-gray-500 mt-1">
-          Competitive Exam Platform
-        </p>
+  return (
+    <div
+      className={`
+        fixed
+        top-5
+        left-5
+        h-[calc(100vh-40px)]
+        bg-white/90
+        backdrop-blur-xl
+        border
+        shadow-xl
+        rounded-3xl
+        z-50
+        transition-all
+        duration-300
+        flex
+        flex-col
+        ${collapsed ? "w-24" : "w-72"}
+      `}
+    >
+      {/* HEADER */}
+      <div className="flex items-center justify-between p-5 border-b">
+        {!collapsed && (
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              SourceDekho
+            </h1>
+
+            <p className="text-xs text-gray-500 mt-1">
+              Competitive Exam Platform
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-10 h-10 rounded-full border flex items-center justify-center hover:bg-gray-100 transition"
+        >
+          {collapsed ? (
+            <ChevronRight size={18} />
+          ) : (
+            <ChevronLeft size={18} />
+          )}
+        </button>
       </div>
 
       {/* MENU */}
-      <nav className="space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
 
@@ -60,17 +99,40 @@ export default function Sidebar() {
             <Link
               key={item.title}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition"
+              className="flex items-center gap-4 px-4 py-4 rounded-2xl hover:bg-gray-100 transition"
             >
-              <Icon size={20} />
+              <div className="min-w-[24px] flex justify-center">
+                <Icon size={22} />
+              </div>
 
-              <span className="font-medium">
-                {item.title}
-              </span>
+              {!collapsed && (
+                <span className="font-medium text-[15px]">
+                  {item.title}
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
-    </aside>
+
+      {/* FOOTER */}
+      <div className="p-4 border-t">
+        {!collapsed ? (
+          <div className="rounded-2xl bg-black text-white p-4">
+            <p className="text-sm font-semibold">
+              SourceDekho
+            </p>
+
+            <p className="text-xs text-gray-300 mt-1">
+              Modern learning dashboard
+            </p>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <div className="w-10 h-10 rounded-full bg-black" />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

@@ -2,18 +2,18 @@ import Sidebar from "@/components/Sidebar";
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f5f7fb]">
       {/* SIDEBAR */}
       <Sidebar />
 
-      {/* MAIN AREA */}
-      <main className="flex-1 p-10">
-        <div className="border rounded-3xl bg-white min-h-[85vh] p-10 shadow-sm">
-          <h1 className="text-5xl font-bold mb-4">
+      {/* MAIN CONTENT */}
+      <main className="ml-[310px] p-5">
+        <div className="min-h-[calc(100vh-40px)] bg-white rounded-[32px] border shadow-sm p-10">
+          <h1 className="text-5xl font-bold tracking-tight mb-4">
             SourceDekho
           </h1>
 
-          <p className="text-gray-600 text-lg">
+          <p className="text-lg text-gray-500">
             Blank landing workspace.
           </p>
         </div>
