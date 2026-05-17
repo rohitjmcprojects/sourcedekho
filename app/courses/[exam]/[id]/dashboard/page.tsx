@@ -1,14 +1,20 @@
+import Link from "next/link";
 import { sql } from "@/lib/db";
 
 export default async function LectureDashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{
     exam: string;
     id: string;
   }>;
+  searchParams: Promise<{
+    subject?: string;
+  }>;
 }) {
   const { id } = await params;
+  const { subject } = await searchParams;
 
   // FETCH COURSE
   const courses = await sql`
@@ -34,6 +40,26 @@ export default async function LectureDashboardPage({
       </main>
     );
   }
+
+  // FETCH SUBJECTS
+  const subjects = await sql`
+    SELECT DISTINCT subject_name
+    FROM lectures
+    WHERE course_id = ${course.id}
+    ORDER BY subject_name ASC
+  `;
+
+  const activeSubject =
+    subject || subjects[0]?.subject_name;
+
+  // FETCH LECTURES
+  const lectures = await sql`
+    SELECT *
+    FROM lectures
+    WHERE course_id = ${course.id}
+    AND subject_name = ${activeSubject}
+    ORDER BY id ASC
+  `;
 
   return (
     <main className="pl-[120px] pr-5 py-5">
@@ -82,11 +108,6 @@ export default async function LectureDashboardPage({
             {course.title}
           </h1>
 
-          <p className="text-lg text-gray-500 mt-4 max-w-3xl">
-            Structured learning dashboard with subjects,
-            lectures, progress tracking and resources.
-          </p>
-
         </div>
 
         {/* BODY */}
@@ -97,57 +118,35 @@ export default async function LectureDashboardPage({
             {/* SUBJECTS */}
             <div className="space-y-4">
 
-              {/* ACTIVE */}
-              <div className="border rounded-[28px] p-5 bg-black text-white">
+              {subjects.map((sub: any) => {
+                const isActive =
+                  sub.subject_name === activeSubject;
 
-                <h3 className="text-xl font-bold">
-                  Polity
-                </h3>
+                return (
+                  <Link
+                    key={sub.subject_name}
+                    href={`?subject=${sub.subject_name}`}
+                    className={`
+                      block
+                      border
+                      rounded-[28px]
+                      p-5
+                      transition
+                      ${
+                        isActive
+                          ? "bg-black text-white"
+                          : "hover:bg-gray-50"
+                      }
+                    `}
+                  >
 
-                <p className="text-sm text-gray-300 mt-2">
-                  42 Lectures
-                </p>
+                    <h3 className="text-xl font-bold">
+                      {sub.subject_name}
+                    </h3>
 
-              </div>
-
-              {/* ITEM */}
-              <div className="border rounded-[28px] p-5 hover:bg-gray-50 transition">
-
-                <h3 className="text-xl font-bold">
-                  History
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-2">
-                  36 Lectures
-                </p>
-
-              </div>
-
-              {/* ITEM */}
-              <div className="border rounded-[28px] p-5 hover:bg-gray-50 transition">
-
-                <h3 className="text-xl font-bold">
-                  Geography
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-2">
-                  28 Lectures
-                </p>
-
-              </div>
-
-              {/* ITEM */}
-              <div className="border rounded-[28px] p-5 hover:bg-gray-50 transition">
-
-                <h3 className="text-xl font-bold">
-                  Economy
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-2">
-                  31 Lectures
-                </p>
-
-              </div>
+                  </Link>
+                );
+              })}
 
             </div>
 
@@ -155,219 +154,86 @@ export default async function LectureDashboardPage({
             <div className="lg:col-span-3">
 
               {/* TOPBAR */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="mb-6">
 
-                <div>
-
-                  <h2 className="text-3xl font-bold">
-                    Polity
-                  </h2>
-
-                  <p className="text-gray-500 mt-2">
-                    Constitutional framework and governance.
-                  </p>
-
-                </div>
-
-                <button
-                  className="
-                    px-6
-                    py-3
-                    rounded-2xl
-                    bg-black
-                    text-white
-                    font-semibold
-                  "
-                >
-                  Continue Learning
-                </button>
+                <h2 className="text-3xl font-bold">
+                  {activeSubject}
+                </h2>
 
               </div>
 
-              {/* LECTURES LIST */}
+              {/* LECTURES */}
               <div className="space-y-4">
 
-                {/* LECTURE */}
-                <div
-                  className="
-                    border
-                    rounded-[28px]
-                    p-6
-                    flex
-                    items-center
-                    justify-between
-                    hover:shadow-md
-                    transition
-                  "
-                >
+                {lectures.map((lecture: any, index: number) => (
+                  <div
+                    key={lecture.id}
+                    className="
+                      border
+                      rounded-[28px]
+                      p-6
+                      flex
+                      items-center
+                      justify-between
+                      hover:shadow-md
+                      transition
+                    "
+                  >
 
-                  <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-5">
 
-                    {/* NUMBER */}
-                    <div
+                      {/* NUMBER */}
+                      <div
+                        className="
+                          w-14
+                          h-14
+                          rounded-2xl
+                          bg-black
+                          text-white
+                          flex
+                          items-center
+                          justify-center
+                          font-bold
+                        "
+                      >
+                        {(index + 1)
+                          .toString()
+                          .padStart(2, "0")}
+                      </div>
+
+                      {/* INFO */}
+                      <div>
+
+                        <h3 className="text-xl font-bold">
+                          {lecture.lecture_title}
+                        </h3>
+
+                        <p className="text-gray-500 mt-2">
+                          {lecture.duration}
+                          {lecture.notes_available &&
+                            " • Notes Included"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {/* ACTION */}
+                    <button
                       className="
-                        w-14
-                        h-14
-                        rounded-2xl
+                        w-12
+                        h-12
+                        rounded-full
                         bg-black
                         text-white
-                        flex
-                        items-center
-                        justify-center
-                        font-bold
+                        text-xl
                       "
                     >
-                      01
-                    </div>
-
-                    {/* INFO */}
-                    <div>
-
-                      <h3 className="text-xl font-bold">
-                        Historical Background
-                      </h3>
-
-                      <p className="text-gray-500 mt-2">
-                        1 hr 24 min • PDF Notes Included
-                      </p>
-
-                    </div>
+                      →
+                    </button>
 
                   </div>
-
-                  {/* ACTION */}
-                  <button
-                    className="
-                      w-12
-                      h-12
-                      rounded-full
-                      bg-black
-                      text-white
-                      text-xl
-                    "
-                  >
-                    →
-                  </button>
-
-                </div>
-
-                {/* LECTURE */}
-                <div
-                  className="
-                    border
-                    rounded-[28px]
-                    p-6
-                    flex
-                    items-center
-                    justify-between
-                    hover:shadow-md
-                    transition
-                  "
-                >
-
-                  <div className="flex items-center gap-5">
-
-                    <div
-                      className="
-                        w-14
-                        h-14
-                        rounded-2xl
-                        bg-gray-100
-                        flex
-                        items-center
-                        justify-center
-                        font-bold
-                      "
-                    >
-                      02
-                    </div>
-
-                    <div>
-
-                      <h3 className="text-xl font-bold">
-                        Making of Constitution
-                      </h3>
-
-                      <p className="text-gray-500 mt-2">
-                        2 hr 10 min • Notes Included
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <button
-                    className="
-                      w-12
-                      h-12
-                      rounded-full
-                      border
-                      text-xl
-                    "
-                  >
-                    →
-                  </button>
-
-                </div>
-
-                {/* LECTURE */}
-                <div
-                  className="
-                    border
-                    rounded-[28px]
-                    p-6
-                    flex
-                    items-center
-                    justify-between
-                    hover:shadow-md
-                    transition
-                  "
-                >
-
-                  <div className="flex items-center gap-5">
-
-                    <div
-                      className="
-                        w-14
-                        h-14
-                        rounded-2xl
-                        bg-gray-100
-                        flex
-                        items-center
-                        justify-center
-                        font-bold
-                      "
-                    >
-                      03
-                    </div>
-
-                    <div>
-
-                      <h3 className="text-xl font-bold">
-                        Preamble
-                      </h3>
-
-                      <p className="text-gray-500 mt-2">
-                        58 min • Slides Included
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <button
-                    className="
-                      w-12
-                      h-12
-                      rounded-full
-                      border
-                      text-xl
-                    "
-                  >
-                    →
-                  </button>
-
-                </div>
+                ))}
 
               </div>
 
