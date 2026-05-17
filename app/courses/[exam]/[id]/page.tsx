@@ -1,5 +1,7 @@
 import { sql } from "@/lib/db";
 
+import CourseEnrollButton from "@/components/CourseEnrollButton";
+
 export default async function CourseDetailPage({
   params,
 }: {
@@ -93,21 +95,9 @@ export default async function CourseDetailPage({
               ₹{course.price}
             </div>
 
-            <button
-              className="
-                px-8
-                py-4
-                rounded-2xl
-                bg-black
-                text-white
-                font-semibold
-                text-lg
-                hover:opacity-90
-                transition
-              "
-            >
-              Enroll Now
-            </button>
+            <CourseEnrollButton
+                  courseTitle={course.title}
+                />
 
           </div>
 
