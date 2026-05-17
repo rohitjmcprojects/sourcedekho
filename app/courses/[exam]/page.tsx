@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { sql } from "@/lib/db";
 
 export default async function ExamCoursesPage({
@@ -42,25 +43,51 @@ export default async function ExamCoursesPage({
 
         {/* HEADER */}
         <div className="mb-10">
-          <p className="text-sm font-medium text-gray-500 mb-2">
-            COURSES
-          </p>
 
-          <h1 className="text-5xl font-black tracking-tight">
-            {examData.name}
-          </h1>
+          <div className="flex items-center gap-4 mb-4">
 
-          <p className="text-lg text-gray-500 mt-3">
+            <div
+              className="
+                w-16
+                h-16
+                rounded-3xl
+                bg-black
+                text-white
+                flex
+                items-center
+                justify-center
+                text-2xl
+                font-bold
+              "
+            >
+              {examData.name[0]}
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">
+                EXAM
+              </p>
+
+              <h1 className="text-5xl font-black tracking-tight">
+                {examData.name}
+              </h1>
+            </div>
+
+          </div>
+
+          <p className="text-lg text-gray-500 max-w-3xl">
             {examData.description}
           </p>
+
         </div>
 
-        {/* COURSES GRID */}
+        {/* COURSES */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
           {courses.map((course: any) => (
-            <div
+            <Link
               key={course.id}
+              href={`/courses/${examData.name.toLowerCase()}/${course.id}`}
               className="
                 relative
                 border
@@ -71,16 +98,18 @@ export default async function ExamCoursesPage({
                 hover:-translate-y-1
                 transition
                 min-h-[260px]
+                block
               "
             >
+
               {/* TOP */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex justify-between items-start mb-6">
 
-                <div className="flex gap-2">
+                <div className="space-y-2">
 
-                  {/* EXAM */}
                   <div
                     className="
+                      inline-flex
                       px-4
                       py-2
                       rounded-2xl
@@ -90,29 +119,19 @@ export default async function ExamCoursesPage({
                       font-semibold
                     "
                   >
-                    {examData.name}
-                  </div>
-
-                  {/* STAGE */}
-                  <div
-                    className="
-                      px-4
-                      py-2
-                      rounded-2xl
-                      bg-gray-100
-                      text-sm
-                      font-semibold
-                    "
-                  >
                     {course.stage}
                   </div>
 
+                  <div className="text-sm text-gray-500">
+                    {examData.name}
+                  </div>
+
                 </div>
 
-                {/* PRICE */}
-                <div className="text-2xl font-black">
+                <div className="text-3xl font-black">
                   ₹{course.price}
                 </div>
+
               </div>
 
               {/* TITLE */}
@@ -121,12 +140,12 @@ export default async function ExamCoursesPage({
               </h2>
 
               {/* DESCRIPTION */}
-              <p className="text-gray-500 leading-relaxed text-sm">
+              <p className="text-gray-500 text-sm leading-relaxed">
                 {course.description}
               </p>
 
-              {/* ARROW */}
-              <button
+              {/* CTA */}
+              <div
                 className="
                   absolute
                   bottom-6
@@ -136,17 +155,16 @@ export default async function ExamCoursesPage({
                   rounded-full
                   bg-black
                   text-white
-                  text-xl
                   flex
                   items-center
                   justify-center
-                  hover:scale-105
-                  transition
+                  text-xl
                 "
               >
                 →
-              </button>
-            </div>
+              </div>
+
+            </Link>
           ))}
 
         </div>
