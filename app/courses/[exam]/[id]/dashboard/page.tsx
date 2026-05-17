@@ -34,23 +34,47 @@ export default async function LectureDashboardPage({
       <main className="pl-[120px] pr-5 py-5">
         <div
           className="
+            relative
+            overflow-hidden
+
             min-h-[calc(100vh-40px)]
 
-            rounded-[32px]
+            rounded-[36px]
 
             border
-            border-white/[0.08]
+            border-white/[0.06]
 
-            bg-[#0b1020]/40
+            backdrop-blur-3xl
 
-            backdrop-blur-2xl
+            shadow-[0_20px_80px_rgba(0,0,0,0.45)]
 
             p-10
           "
         >
-          <h1 className="text-4xl font-bold text-white">
-            Dashboard not found
-          </h1>
+          {/* BG IMAGE */}
+          <div
+            className="
+              absolute
+              inset-0
+            "
+            style={{
+              backgroundImage: `
+                linear-gradient(
+                  rgba(8,17,32,0.72),
+                  rgba(8,17,32,0.82)
+                ),
+                url('/bgimg.png')
+              `,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+
+          <div className="relative z-10">
+            <h1 className="text-4xl font-bold text-white">
+              Dashboard not found
+            </h1>
+          </div>
         </div>
       </main>
     );
@@ -87,87 +111,75 @@ export default async function LectureDashboardPage({
 
           min-h-[calc(100vh-40px)]
 
-          rounded-[32px]
+          rounded-[36px]
 
           border
-          border-white/[0.08]
+          border-white/[0.06]
 
-          bg-[#0b1020]/40
+          backdrop-blur-3xl
 
-          backdrop-blur-2xl
+          shadow-[0_20px_80px_rgba(0,0,0,0.45)]
 
-          shadow-[0_8px_40px_rgba(0,0,0,0.25)]
+          p-8
         "
       >
-        {/* BACKGROUND LIGHTS */}
+
+        {/* BACKGROUND IMAGE */}
         <div
           className="
             absolute
-            -top-32
-            -left-32
-
-            w-[500px]
-            h-[500px]
-
-            bg-blue-400/20
-
-            blur-3xl
-
-            rounded-full
-
-            pointer-events-none
+            inset-0
+            z-0
           "
+          style={{
+            backgroundImage: `
+              linear-gradient(
+                rgba(8,17,32,0.72),
+                rgba(8,17,32,0.82)
+              ),
+              url('/bgimg.png')
+            `,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         />
 
-        <div
-          className="
-            absolute
-            bottom-0
-            right-0
-
-            w-[400px]
-            h-[400px]
-
-            bg-indigo-400/20
-
-            blur-3xl
-
-            rounded-full
-
-            pointer-events-none
-          "
-        />
-
-        {/* GLASS LIGHT */}
+        {/* DEPTH BLUR */}
         <div
           className="
             absolute
             inset-0
 
-            bg-gradient-to-b
-            from-white/[0.04]
-            via-transparent
-            to-transparent
+            backdrop-blur-[1px]
+          "
+        />
+
+        {/* NOISE */}
+        <div
+          className="
+            absolute
+            inset-0
+
+            opacity-[0.03]
+
+            mix-blend-soft-light
 
             pointer-events-none
           "
+          style={{
+            backgroundImage:
+              "url('https://grainy-gradients.vercel.app/noise.svg')",
+          }}
         />
 
         {/* CONTENT */}
         <div className="relative z-10">
 
           {/* HEADER */}
-          <div
-            className="
-              p-8
+          <div className="mb-12">
 
-              border-b
-              border-white/[0.08]
-            "
-          >
-
-            {/* TAGS */}
-            <div className="flex gap-3 mb-5 flex-wrap">
+            {/* BADGES */}
+            <div className="flex gap-3 mb-6 flex-wrap">
 
               {/* EXAM */}
               <div
@@ -238,13 +250,16 @@ export default async function LectureDashboardPage({
             {/* TITLE */}
             <h1
               className="
-                text-5xl
+                text-6xl
 
                 font-black
 
                 tracking-tight
+                leading-[0.95]
 
                 text-white
+
+                max-w-5xl
               "
             >
               {course.title}
@@ -253,72 +268,198 @@ export default async function LectureDashboardPage({
           </div>
 
           {/* BODY */}
-          <div className="p-8">
+          <div
+            className="
+              grid
+              grid-cols-1
+              lg:grid-cols-4
+              gap-6
+            "
+          >
 
-            <div
-              className="
-                grid
-                grid-cols-1
-                lg:grid-cols-4
-                gap-5
-              "
-            >
+            {/* SUBJECTS */}
+            <div className="space-y-4">
 
-              {/* SUBJECTS */}
+              {subjects.map((sub: any) => {
+                const isActive =
+                  sub.subject_name === activeSubject;
+
+                return (
+                  <Link
+                    key={sub.subject_name}
+                    href={`?subject=${sub.subject_name}`}
+                    className={`
+                      group
+                      relative
+                      overflow-hidden
+
+                      block
+
+                      rounded-[28px]
+
+                      border
+
+                      p-5
+
+                      transition-all
+                      duration-300
+
+                      shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+
+                      ${
+                        isActive
+                          ? `
+                            border-white/[0.08]
+
+                            bg-gradient-to-br
+                            from-blue-500/20
+                            to-indigo-500/20
+
+                            backdrop-blur-xl
+
+                            shadow-[0_0_25px_rgba(59,130,246,0.12)]
+                          `
+                          : `
+                            border-white/[0.07]
+
+                            bg-[#0f172a]/60
+
+                            backdrop-blur-2xl
+
+                            hover:border-white/[0.12]
+
+                            hover:-translate-y-0.5
+                          `
+                      }
+                    `}
+                  >
+
+                    {/* REFLECTION */}
+                    <div
+                      className="
+                        absolute
+                        inset-0
+
+                        bg-gradient-to-b
+                        from-white/[0.05]
+                        via-transparent
+                        to-transparent
+
+                        pointer-events-none
+                      "
+                    />
+
+                    {/* INNER BORDER */}
+                    <div
+                      className="
+                        absolute
+                        inset-[1px]
+
+                        rounded-[27px]
+
+                        border
+                        border-white/[0.03]
+
+                        pointer-events-none
+                      "
+                    />
+
+                    <h3
+                      className="
+                        relative
+
+                        text-lg
+                        font-bold
+
+                        text-white
+                      "
+                    >
+                      {sub.subject_name}
+                    </h3>
+
+                  </Link>
+                );
+              })}
+
+            </div>
+
+            {/* LECTURES */}
+            <div className="lg:col-span-3">
+
+              {/* TOPBAR */}
+              <div className="mb-6">
+
+                <h2
+                  className="
+                    text-3xl
+
+                    font-black
+
+                    tracking-tight
+
+                    text-white
+                  "
+                >
+                  {activeSubject}
+                </h2>
+
+              </div>
+
+              {/* LECTURES */}
               <div className="space-y-4">
-
-                {subjects.map((sub: any) => {
-                  const isActive =
-                    sub.subject_name === activeSubject;
-
-                  return (
-                    <Link
-                      key={sub.subject_name}
-                      href={`?subject=${sub.subject_name}`}
-                      className={`
+                                {lectures.map(
+                  (
+                    lecture: any,
+                    index: number
+                  ) => (
+                    <div
+                      key={lecture.id}
+                      className="
                         group
                         relative
                         overflow-hidden
 
-                        block
-
-                        rounded-[26px]
+                        rounded-[30px]
 
                         border
+                        border-white/[0.07]
 
-                        p-5
+                        bg-[#0f172a]/60
+
+                        backdrop-blur-2xl
+
+                        p-6
 
                         transition-all
                         duration-300
 
-                        ${
-                          isActive
-                            ? `
-                              border-white/[0.08]
+                        hover:border-white/[0.12]
 
-                              bg-gradient-to-br
-                              from-blue-500/20
-                              to-indigo-500/20
+                        hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]
 
-                              backdrop-blur-xl
-
-                              shadow-[0_0_25px_rgba(59,130,246,0.12)]
-                            `
-                            : `
-                              border-white/[0.06]
-
-                              bg-gradient-to-br
-                              from-[#18253f]/95
-                              via-[#101b32]/95
-                              to-[#0b1220]/95
-
-                              hover:border-white/[0.12]
-
-                              hover:-translate-y-0.5
-                            `
-                        }
-                      `}
+                        shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+                      "
                     >
+
+                      {/* HOVER GLOW */}
+                      <div
+                        className="
+                          absolute
+                          inset-0
+
+                          opacity-0
+                          group-hover:opacity-100
+
+                          transition-all
+                          duration-500
+
+                          bg-gradient-to-br
+                          from-blue-500/10
+                          via-indigo-500/5
+                          to-transparent
+                        "
+                      />
+
                       {/* REFLECTION */}
                       <div
                         className="
@@ -334,442 +475,267 @@ export default async function LectureDashboardPage({
                         "
                       />
 
-                      <h3
-                        className="
-                          relative
-
-                          text-lg
-                          font-bold
-
-                          text-white
-                        "
-                      >
-                        {sub.subject_name}
-                      </h3>
-
-                    </Link>
-                  );
-                })}
-
-              </div>
-
-              {/* LECTURES */}
-              <div className="lg:col-span-3">
-
-                {/* TOPBAR */}
-                <div className="mb-6">
-
-                  <h2
-                    className="
-                      text-3xl
-                      font-bold
-
-                      text-white
-                    "
-                  >
-                    {activeSubject}
-                  </h2>
-
-                </div>
-
-                {/* LECTURE LIST */}
-                <div className="space-y-4">
-
-                  {lectures.map(
-                    (
-                      lecture: any,
-                      index: number
-                    ) => (
+                      {/* INNER BORDER */}
                       <div
-                        key={lecture.id}
                         className="
-                          group
-                          relative
-                          overflow-hidden
+                          absolute
+                          inset-[1px]
 
-                          rounded-[28px]
+                          rounded-[29px]
 
                           border
-                          border-white/[0.07]
+                          border-white/[0.03]
 
-                          bg-gradient-to-br
-                          from-[#18253f]/95
-                          via-[#101b32]/95
-                          to-[#0b1220]/95
+                          pointer-events-none
+                        "
+                      />
 
-                          backdrop-blur-2xl
+                      {/* CONTENT */}
+                      <div
+                        className="
+                          relative
+                          z-10
 
-                          p-5
+                          flex
+                          flex-col
+                          lg:flex-row
 
-                          transition-all
-                          duration-300
+                          lg:items-center
+                          lg:justify-between
 
-                          hover:border-white/[0.12]
-
-                          hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]
+                          gap-5
                         "
                       >
-                        {/* AMBIENT GLOW */}
-                        <div
-                          className="
-                            absolute
-                            -top-12
-                            -right-12
 
-                            w-40
-                            h-40
+                        {/* LEFT */}
+                        <div className="flex items-center gap-5">
 
-                            rounded-full
+                          {/* NUMBER */}
+                          <div
+                            className="
+                              w-14
+                              h-14
 
-                            bg-blue-500/10
+                              rounded-2xl
 
-                            blur-3xl
+                              border
+                              border-white/[0.08]
 
-                            opacity-70
+                              bg-gradient-to-br
+                              from-blue-500/20
+                              to-indigo-500/20
 
-                            pointer-events-none
-                          "
-                        />
+                              backdrop-blur-xl
 
-                        {/* REFLECTION */}
-                        <div
-                          className="
-                            absolute
-                            inset-0
+                              text-white
 
-                            bg-gradient-to-b
-                            from-white/[0.06]
-                            via-transparent
-                            to-transparent
+                              flex
+                              items-center
+                              justify-center
 
-                            pointer-events-none
-                          "
-                        />
+                              font-bold
+                            "
+                          >
+                            {(index + 1)
+                              .toString()
+                              .padStart(2, "0")}
+                          </div>
 
-                        {/* INNER BORDER */}
-                        <div
-                          className="
-                            absolute
-                            inset-[1px]
+                          {/* INFO */}
+                          <div>
 
-                            rounded-[27px]
-
-                            border
-                            border-white/[0.03]
-
-                            pointer-events-none
-                          "
-                        />
-
-                        {/* CONTENT */}
-                        <div
-                          className="
-                            relative
-                            z-10
-
-                            flex
-                            flex-col
-                            lg:flex-row
-                            lg:items-center
-                            lg:justify-between
-
-                            gap-5
-                          "
-                        >
-
-                          {/* LEFT */}
-                          <div className="flex items-center gap-5">
-
-                            {/* NUMBER */}
-                            <div
+                            <h3
                               className="
-                                w-12
-                                h-12
-
-                                rounded-2xl
-
-                                border
-                                border-white/[0.08]
-
-                                bg-gradient-to-br
-                                from-blue-500/20
-                                to-indigo-500/20
-
-                                backdrop-blur-xl
+                                text-xl
+                                font-bold
 
                                 text-white
-
-                                flex
-                                items-center
-                                justify-center
-
-                                font-bold
                               "
                             >
-                              {(index + 1)
-                                .toString()
-                                .padStart(2, "0")}
-                            </div>
+                              {
+                                lecture.lecture_title
+                              }
+                            </h3>
 
-                            {/* INFO */}
-                            <div>
+                            <p
+                              className="
+                                text-sm
 
-                              <h3
-                                className="
-                                  text-xl
-                                  font-bold
+                                text-slate-400
 
-                                  text-white
-                                "
-                              >
-                                {
-                                  lecture.lecture_title
-                                }
-                              </h3>
+                                mt-2
+                              "
+                            >
+                              {lecture.duration}
 
-                              
-                            </div>
+                              {lecture.notes_available &&
+                                " • Notes Included"}
+                            </p>
 
                           </div>
 
-                          {/* ACTIONS */}
-<div className="flex flex-wrap items-center gap-3">
+                        </div>
 
-  {/* VIDEO */}
-  <button
-    className="
-      group
+                        {/* ACTIONS */}
+                        <div className="flex flex-wrap items-center gap-3">
 
-      flex
-      items-center
-      gap-2.5
+                          {/* VIDEO */}
+                          <button
+                            className="
+                              group
 
-      px-4
-      py-3
+                              flex
+                              items-center
+                              gap-2.5
 
-      rounded-2xl
+                              px-4
+                              py-3
 
-      border
-      border-white/[0.08]
+                              rounded-2xl
 
-      bg-gradient-to-br
-      from-blue-500/20
-      to-indigo-500/20
+                              border
+                              border-white/[0.08]
 
-      backdrop-blur-xl
+                              bg-gradient-to-br
+                              from-blue-500/20
+                              to-indigo-500/20
 
-      text-white
-      text-sm
-      font-semibold
+                              backdrop-blur-xl
 
-      hover:scale-[1.03]
+                              text-white
+                              text-sm
+                              font-semibold
 
-      hover:shadow-[0_0_20px_rgba(59,130,246,0.20)]
+                              hover:scale-[1.03]
 
-      transition-all
-      duration-300
-    "
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="
-        opacity-90
-        group-hover:scale-110
-        transition
-      "
-    >
-      <path d="M8 5v14l11-7z" />
-    </svg>
+                              hover:shadow-[0_0_20px_rgba(59,130,246,0.20)]
 
-    Video
-  </button>
+                              transition-all
+                              duration-300
+                            "
+                          >
+                            ▶
+                            Video
+                          </button>
 
-  {/* NOTES */}
-  <button
-    className="
-      group
+                          {/* NOTES */}
+                          <button
+                            className="
+                              group
 
-      flex
-      items-center
-      gap-2.5
+                              flex
+                              items-center
+                              gap-2.5
 
-      px-4
-      py-3
+                              px-4
+                              py-3
 
-      rounded-2xl
+                              rounded-2xl
 
-      border
-      border-white/[0.08]
+                              border
+                              border-white/[0.08]
 
-      bg-white/[0.04]
+                              bg-white/[0.04]
 
-      backdrop-blur-xl
+                              backdrop-blur-xl
 
-      text-slate-200
-      text-sm
-      font-semibold
+                              text-slate-200
+                              text-sm
+                              font-semibold
 
-      hover:bg-white/[0.08]
+                              hover:bg-white/[0.08]
 
-      hover:border-white/[0.12]
+                              hover:border-white/[0.12]
 
-      transition-all
-      duration-300
-    "
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="
-        opacity-80
-        group-hover:scale-110
-        transition
-      "
-    >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <path d="M14 2v6h6" />
-      <path d="M16 13H8" />
-      <path d="M16 17H8" />
-      <path d="M10 9H8" />
-    </svg>
+                              transition-all
+                              duration-300
+                            "
+                          >
+                            📄
+                            Notes
+                          </button>
 
-    Notes
-  </button>
+                          {/* MCQs */}
+                          <button
+                            className="
+                              group
 
-  {/* MCQs */}
-  <button
-    className="
-      group
+                              flex
+                              items-center
+                              gap-2.5
 
-      flex
-      items-center
-      gap-2.5
+                              px-4
+                              py-3
 
-      px-4
-      py-3
+                              rounded-2xl
 
-      rounded-2xl
+                              border
+                              border-white/[0.08]
 
-      border
-      border-white/[0.08]
+                              bg-white/[0.04]
 
-      bg-white/[0.04]
+                              backdrop-blur-xl
 
-      backdrop-blur-xl
+                              text-slate-200
+                              text-sm
+                              font-semibold
 
-      text-slate-200
-      text-sm
-      font-semibold
+                              hover:bg-white/[0.08]
 
-      hover:bg-white/[0.08]
+                              hover:border-white/[0.12]
 
-      hover:border-white/[0.12]
+                              transition-all
+                              duration-300
+                            "
+                          >
+                            ✔
+                            MCQs
+                          </button>
 
-      transition-all
-      duration-300
-    "
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="
-        opacity-80
-        group-hover:scale-110
-        transition
-      "
-    >
-      <path d="M9 11l3 3L22 4" />
-      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-    </svg>
+                          {/* PYQs */}
+                          <button
+                            className="
+                              group
 
-    MCQs
-  </button>
+                              flex
+                              items-center
+                              gap-2.5
 
-  {/* PYQs */}
-  <button
-    className="
-      group
+                              px-4
+                              py-3
 
-      flex
-      items-center
-      gap-2.5
+                              rounded-2xl
 
-      px-4
-      py-3
+                              border
+                              border-white/[0.08]
 
-      rounded-2xl
+                              bg-white/[0.04]
 
-      border
-      border-white/[0.08]
+                              backdrop-blur-xl
 
-      bg-white/[0.04]
+                              text-slate-200
+                              text-sm
+                              font-semibold
 
-      backdrop-blur-xl
+                              hover:bg-white/[0.08]
 
-      text-slate-200
-      text-sm
-      font-semibold
+                              hover:border-white/[0.12]
 
-      hover:bg-white/[0.08]
-
-      hover:border-white/[0.12]
-
-      transition-all
-      duration-300
-    "
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="
-        opacity-80
-        group-hover:scale-110
-        transition
-      "
-    >
-      <path d="M3 3v18h18" />
-      <path d="M18 17V9" />
-      <path d="M13 17V5" />
-      <path d="M8 17v-3" />
-    </svg>
-
-    PYQs
-  </button>
-
-</div>
+                              transition-all
+                              duration-300
+                            "
+                          >
+                            📊
+                            PYQs
+                          </button>
 
                         </div>
 
                       </div>
-                    )
-                  )}
 
-                </div>
+                    </div>
+                  )
+                )}
 
               </div>
 

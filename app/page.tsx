@@ -10,6 +10,8 @@ export default async function HomePage() {
 
   return (
     <main className="pl-[120px] pr-5 py-5">
+
+      {/* MAIN CONTAINER */}
       <div
         className="
           relative
@@ -17,71 +19,52 @@ export default async function HomePage() {
 
           min-h-[calc(100vh-40px)]
 
-          rounded-[32px]
+          rounded-[36px]
 
           border
-          border-white/[0.08]
+          border-white/[0.06]
 
-          bg-[#0b1020]/40
+          backdrop-blur-3xl
 
-          backdrop-blur-2xl
+          shadow-[0_20px_80px_rgba(0,0,0,0.45)]
 
-          shadow-[0_8px_40px_rgba(0,0,0,0.25)]
+          before:absolute
+          before:inset-0
+          before:bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_30%)]
+
+          before:pointer-events-none
 
           p-8
         "
       >
-        {/* GLOBAL AMBIENT LIGHT */}
+
+        {/* BACKGROUND IMAGE */}
         <div
           className="
             absolute
-            -top-32
-            -left-32
-
-            w-[500px]
-            h-[500px]
-
-            bg-blue-400/20
-
-            blur-3xl
-
-            rounded-full
-
-            pointer-events-none
+            inset-0
+            z-0
           "
+          style={{
+            backgroundImage: `
+              linear-gradient(
+                rgba(8,17,32,0.72),
+                rgba(8,17,32,0.82)
+              ),
+              url('/bgimg.png')
+            `,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         />
 
-        <div
-          className="
-            absolute
-            bottom-0
-            right-0
-
-            w-[400px]
-            h-[400px]
-
-            bg-indigo-400/20
-
-            blur-3xl
-
-            rounded-full
-
-            pointer-events-none
-          "
-        />
-
-        {/* GLASS LIGHT */}
+        {/* DEPTH BLUR */}
         <div
           className="
             absolute
             inset-0
 
-            bg-gradient-to-b
-            from-white/[0.04]
-            via-transparent
-            to-transparent
-
-            pointer-events-none
+            backdrop-blur-[1px]
           "
         />
 
@@ -89,27 +72,75 @@ export default async function HomePage() {
         <div className="relative z-10">
 
           {/* HEADER */}
-          <div className="mb-10">
+          <div className="mb-12">
+
+            {/* BADGE */}
+            <div
+              className="
+                inline-flex
+
+                px-5
+                py-2.5
+
+                rounded-2xl
+
+                border
+                border-white/[0.08]
+
+                bg-gradient-to-br
+                from-blue-500/20
+                to-indigo-500/20
+
+                backdrop-blur-xl
+
+                text-white
+                text-sm
+                font-semibold
+
+                mb-7
+              "
+            >
+              SourceDekho Premium UI
+            </div>
+
+            {/* TITLE */}
             <h1
               className="
-                text-5xl
+                text-6xl
+
                 font-black
+
                 tracking-tight
+                leading-[0.95]
+
                 text-white
+
+                max-w-4xl
               "
             >
-              Courses
+              Premium Learning
+              Platform
             </h1>
 
+            {/* DESCRIPTION */}
             <p
               className="
-                mt-2
-                text-sm
-                text-slate-400
+                mt-6
+
+                max-w-2xl
+
+                text-[16px]
+                leading-8
+
+                text-slate-300
               "
             >
-              Choose Your Exam
+              Modern immersive preparation
+              experience designed for UPSC,
+              PCS and state civil services
+              aspirants.
             </p>
+
           </div>
 
           {/* GRID */}
@@ -121,9 +152,10 @@ export default async function HomePage() {
               lg:grid-cols-3
               xl:grid-cols-4
               2xl:grid-cols-5
-              gap-4
+              gap-5
             "
           >
+
             {exams.map((exam: any) => (
               <Link
                 key={exam.id}
@@ -133,21 +165,18 @@ export default async function HomePage() {
                   relative
                   overflow-hidden
 
-                  rounded-[26px]
+                  rounded-[30px]
 
                   border
                   border-white/[0.07]
 
-                  bg-gradient-to-br
-                  from-[#18253f]/95
-                  via-[#101b32]/95
-                  to-[#0b1220]/95
+                  bg-[#0f172a]/60
 
                   backdrop-blur-2xl
 
-                  p-5
+                  p-6
 
-                  min-h-[190px]
+                  min-h-[240px]
 
                   transition-all
                   duration-500
@@ -156,29 +185,10 @@ export default async function HomePage() {
                   hover:border-white/[0.12]
 
                   hover:shadow-[0_0_40px_rgba(59,130,246,0.16)]
+
+                  shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
                 "
               >
-                {/* TOP AMBIENT GLOW */}
-                <div
-                  className="
-                    absolute
-                    -top-16
-                    -right-16
-
-                    w-44
-                    h-44
-
-                    rounded-full
-
-                    bg-blue-500/10
-
-                    blur-3xl
-
-                    opacity-70
-
-                    pointer-events-none
-                  "
-                />
 
                 {/* HOVER GLOW */}
                 <div
@@ -206,7 +216,7 @@ export default async function HomePage() {
                     inset-0
 
                     bg-gradient-to-b
-                    from-white/[0.07]
+                    from-white/[0.05]
                     via-transparent
                     to-transparent
 
@@ -214,7 +224,7 @@ export default async function HomePage() {
                   "
                 />
 
-                {/* INNER BORDER LIGHT */}
+                {/* INNER BORDER */}
                 <div
                   className="
                     absolute
@@ -232,44 +242,110 @@ export default async function HomePage() {
                 {/* CONTENT */}
                 <div className="relative z-10 flex flex-col h-full">
 
-                  {/* TITLE */}
-                  <div className="mb-5">
+                  {/* TOP */}
+                  <div>
+
+                    {/* TAG */}
+                    <div
+                      className="
+                        inline-flex
+
+                        px-3
+                        py-1.5
+
+                        rounded-2xl
+
+                        border
+                        border-white/[0.08]
+
+                        bg-white/[0.05]
+
+                        backdrop-blur-xl
+
+                        text-white
+                        text-[11px]
+                        font-semibold
+
+                        mb-5
+                      "
+                    >
+                      Civil Services
+                    </div>
+
+                    {/* TITLE */}
                     <h2
                       className="
-                        text-[22px]
-                        font-bold
+                        text-[28px]
+
+                        font-black
+
                         tracking-tight
+                        leading-tight
+
                         text-white
                       "
                     >
                       {exam.name}
                     </h2>
-                  </div>
 
-                  {/* DESCRIPTION */}
-                  <p
-                    className="
-                      text-[13px]
-                      leading-6
-                      text-slate-400
-                    "
-                  >
-                    {exam.description}
-                  </p>
+                    {/* DESCRIPTION */}
+                    <p
+                      className="
+                        mt-4
+
+                        text-[14px]
+                        leading-7
+
+                        text-slate-300
+                      "
+                    >
+                      {exam.description}
+                    </p>
+
+                  </div>
 
                   {/* SPACER */}
                   <div className="flex-1" />
 
-                  {/* BUTTON */}
-                  <div className="mt-6 flex justify-end">
+                  {/* FOOTER */}
+                  <div className="flex items-center justify-between mt-8">
+
+                    {/* STATS */}
+                    <div>
+
+                      <p
+                        className="
+                          text-xs
+                          text-slate-400
+                        "
+                      >
+                        Premium Courses
+                      </p>
+
+                      <h3
+                        className="
+                          text-2xl
+                          font-black
+
+                          text-white
+
+                          mt-1
+                        "
+                      >
+                        120+
+                      </h3>
+
+                    </div>
+
+                    {/* CTA */}
                     <div
                       className="
                         flex
                         items-center
                         justify-center
 
-                        w-10
-                        h-10
+                        w-12
+                        h-12
 
                         rounded-2xl
 
@@ -277,7 +353,7 @@ export default async function HomePage() {
                         border-white/[0.08]
 
                         bg-gradient-to-br
-                        from-blue-500/25
+                        from-blue-500/20
                         to-indigo-500/20
 
                         backdrop-blur-xl
@@ -290,18 +366,25 @@ export default async function HomePage() {
 
                         group-hover:scale-110
 
-                        group-hover:shadow-[0_0_25px_rgba(59,130,246,0.30)]
+                        group-hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]
                       "
                     >
                       →
                     </div>
+
                   </div>
+
                 </div>
+
               </Link>
             ))}
+
           </div>
+
         </div>
+
       </div>
+
     </main>
   );
 }

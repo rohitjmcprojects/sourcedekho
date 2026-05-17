@@ -28,26 +28,54 @@ export default async function CourseDetailPage({
   if (!course) {
     return (
       <main className="pl-[120px] pr-5 py-5">
+
         <div
           className="
+            relative
+            overflow-hidden
+
             min-h-[calc(100vh-40px)]
 
-            rounded-[32px]
+            rounded-[36px]
 
             border
-            border-white/[0.08]
+            border-white/[0.06]
 
-            bg-[#0b1020]/40
+            backdrop-blur-3xl
 
-            backdrop-blur-2xl
+            shadow-[0_20px_80px_rgba(0,0,0,0.45)]
 
             p-10
           "
         >
-          <h1 className="text-4xl font-bold text-white">
-            Course not found
-          </h1>
+
+          {/* BG IMAGE */}
+          <div
+            className="
+              absolute
+              inset-0
+            "
+            style={{
+              backgroundImage: `
+                linear-gradient(
+                  rgba(8,17,32,0.72),
+                  rgba(8,17,32,0.82)
+                ),
+                url('/bgimg.png')
+              `,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+
+          <div className="relative z-10">
+            <h1 className="text-4xl font-bold text-white">
+              Course not found
+            </h1>
+          </div>
+
         </div>
+
       </main>
     );
   }
@@ -63,69 +91,63 @@ export default async function CourseDetailPage({
 
           min-h-[calc(100vh-40px)]
 
-          rounded-[32px]
+          rounded-[36px]
 
           border
-          border-white/[0.08]
+          border-white/[0.06]
 
-          bg-[#0b1020]/40
+          backdrop-blur-3xl
 
-          backdrop-blur-2xl
-
-          shadow-[0_8px_40px_rgba(0,0,0,0.25)]
+          shadow-[0_20px_80px_rgba(0,0,0,0.45)]
         "
       >
-        {/* BACKGROUND LIGHTS */}
+
+        {/* BACKGROUND IMAGE */}
         <div
           className="
             absolute
-            -top-32
-            -left-32
-
-            w-[500px]
-            h-[500px]
-
-            bg-blue-400/20
-
-            blur-3xl
-
-            rounded-full
-
-            pointer-events-none
+            inset-0
+            z-0
           "
+          style={{
+            backgroundImage: `
+              linear-gradient(
+                rgba(8,17,32,0.72),
+                rgba(8,17,32,0.82)
+              ),
+              url('/bgimg.png')
+            `,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         />
 
-        <div
-          className="
-            absolute
-            bottom-0
-            right-0
-
-            w-[400px]
-            h-[400px]
-
-            bg-indigo-400/20
-
-            blur-3xl
-
-            rounded-full
-
-            pointer-events-none
-          "
-        />
-
-        {/* GLASS LIGHT */}
+        {/* DEPTH BLUR */}
         <div
           className="
             absolute
             inset-0
 
-            bg-gradient-to-b
-            from-white/[0.04]
-            to-transparent
+            backdrop-blur-[1px]
+          "
+        />
+
+        {/* NOISE */}
+        <div
+          className="
+            absolute
+            inset-0
+
+            opacity-[0.03]
+
+            mix-blend-soft-light
 
             pointer-events-none
           "
+          style={{
+            backgroundImage:
+              "url('https://grainy-gradients.vercel.app/noise.svg')",
+          }}
         />
 
         {/* CONTENT */}
@@ -134,7 +156,7 @@ export default async function CourseDetailPage({
           {/* HERO */}
           <div
             className="
-              p-8
+              p-10
 
               border-b
               border-white/[0.08]
@@ -142,7 +164,7 @@ export default async function CourseDetailPage({
           >
 
             {/* TAGS */}
-            <div className="flex gap-3 mb-6 flex-wrap">
+            <div className="flex gap-3 mb-7 flex-wrap">
 
               {/* EXAM */}
               <div
@@ -197,13 +219,12 @@ export default async function CourseDetailPage({
             {/* TITLE */}
             <h1
               className="
-                text-5xl
-                lg:text-6xl
+                text-6xl
 
                 font-black
 
                 tracking-tight
-                leading-tight
+                leading-[0.95]
 
                 text-white
 
@@ -216,14 +237,14 @@ export default async function CourseDetailPage({
             {/* DESCRIPTION */}
             <p
               className="
-                text-[16px]
-                leading-8
-
-                text-slate-400
-
                 mt-6
 
                 max-w-3xl
+
+                text-[16px]
+                leading-8
+
+                text-slate-300
               "
             >
               {course.description}
@@ -235,8 +256,7 @@ export default async function CourseDetailPage({
               {/* PRICE */}
               <div
                 className="
-                  text-4xl
-                  lg:text-5xl
+                  text-5xl
 
                   font-black
 
@@ -248,7 +268,7 @@ export default async function CourseDetailPage({
                 ₹{course.price}
               </div>
 
-              {/* ENROLL BUTTON */}
+              {/* ENROLL */}
               <CourseEnrollButton
                 course={course}
               />
@@ -270,39 +290,72 @@ export default async function CourseDetailPage({
             >
 
               {/* LEFT */}
-              <div className="lg:col-span-2 space-y-5">
+              <div className="lg:col-span-2">
 
                 {/* ABOUT CARD */}
                 <div
                   className="
+                    group
                     relative
                     overflow-hidden
 
-                    rounded-[28px]
+                    rounded-[30px]
 
                     border
                     border-white/[0.07]
 
-                    bg-gradient-to-br
-                    from-[#18253f]/95
-                    via-[#101b32]/95
-                    to-[#0b1220]/95
+                    bg-[#0f172a]/60
 
                     backdrop-blur-2xl
 
-                    p-7
+                    p-8
+
+                    shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
                   "
                 >
-                  {/* LIGHT */}
+
+                  {/* HOVER GLOW */}
+                  <div
+                    className="
+                      absolute
+                      inset-0
+
+                      opacity-0
+                      group-hover:opacity-100
+
+                      transition-all
+                      duration-500
+
+                      bg-gradient-to-br
+                      from-blue-500/10
+                      via-indigo-500/5
+                      to-transparent
+                    "
+                  />
+
+                  {/* REFLECTION */}
                   <div
                     className="
                       absolute
                       inset-0
 
                       bg-gradient-to-b
-                      from-white/[0.06]
+                      from-white/[0.05]
                       via-transparent
                       to-transparent
+                    "
+                  />
+
+                  {/* INNER BORDER */}
+                  <div
+                    className="
+                      absolute
+                      inset-[1px]
+
+                      rounded-[29px]
+
+                      border
+                      border-white/[0.03]
 
                       pointer-events-none
                     "
@@ -314,11 +367,14 @@ export default async function CourseDetailPage({
                     <h2
                       className="
                         text-3xl
-                        font-bold
+
+                        font-black
+
+                        tracking-tight
 
                         text-white
 
-                        mb-5
+                        mb-6
                       "
                     >
                       About Course
@@ -329,55 +385,90 @@ export default async function CourseDetailPage({
                         text-[15px]
                         leading-8
 
-                        text-slate-400
+                        text-slate-300
                       "
                     >
                       This course is specially designed for
                       serious aspirants preparing for{" "}
-                      {course.exam_name}. Complete structured
-                      preparation, mentorship, lectures,
-                      notes and tests will be available here.
+                      {course.exam_name}. Complete
+                      structured preparation, mentorship,
+                      lectures, notes and tests will be
+                      available here.
                     </p>
 
                   </div>
+
                 </div>
 
               </div>
 
               {/* RIGHT */}
-              <div className="space-y-5">
+              <div>
 
                 {/* INFO CARD */}
                 <div
                   className="
+                    group
                     relative
                     overflow-hidden
 
-                    rounded-[28px]
+                    rounded-[30px]
 
                     border
                     border-white/[0.07]
 
-                    bg-gradient-to-br
-                    from-[#18253f]/95
-                    via-[#101b32]/95
-                    to-[#0b1220]/95
+                    bg-[#0f172a]/60
 
                     backdrop-blur-2xl
 
-                    p-7
+                    p-8
+
+                    shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
                   "
                 >
-                  {/* LIGHT */}
+
+                  {/* HOVER GLOW */}
+                  <div
+                    className="
+                      absolute
+                      inset-0
+
+                      opacity-0
+                      group-hover:opacity-100
+
+                      transition-all
+                      duration-500
+
+                      bg-gradient-to-br
+                      from-blue-500/10
+                      via-indigo-500/5
+                      to-transparent
+                    "
+                  />
+
+                  {/* REFLECTION */}
                   <div
                     className="
                       absolute
                       inset-0
 
                       bg-gradient-to-b
-                      from-white/[0.06]
+                      from-white/[0.05]
                       via-transparent
                       to-transparent
+                    "
+                  />
+
+                  {/* INNER BORDER */}
+                  <div
+                    className="
+                      absolute
+                      inset-[1px]
+
+                      rounded-[29px]
+
+                      border
+                      border-white/[0.03]
 
                       pointer-events-none
                     "
@@ -389,17 +480,20 @@ export default async function CourseDetailPage({
                     <h3
                       className="
                         text-2xl
-                        font-bold
+
+                        font-black
+
+                        tracking-tight
 
                         text-white
 
-                        mb-6
+                        mb-7
                       "
                     >
                       Course Info
                     </h3>
 
-                    <div className="space-y-5">
+                    <div className="space-y-6">
 
                       {/* EXAM */}
                       <div>
@@ -408,7 +502,7 @@ export default async function CourseDetailPage({
                             text-xs
 
                             uppercase
-                            tracking-[0.2em]
+                            tracking-[0.25em]
 
                             text-slate-500
 
@@ -420,8 +514,8 @@ export default async function CourseDetailPage({
 
                         <p
                           className="
-                            font-semibold
                             text-white
+                            font-semibold
                           "
                         >
                           {course.exam_name}
@@ -435,7 +529,7 @@ export default async function CourseDetailPage({
                             text-xs
 
                             uppercase
-                            tracking-[0.2em]
+                            tracking-[0.25em]
 
                             text-slate-500
 
@@ -447,8 +541,8 @@ export default async function CourseDetailPage({
 
                         <p
                           className="
-                            font-semibold
                             text-white
+                            font-semibold
                           "
                         >
                           {course.stage}
@@ -462,7 +556,7 @@ export default async function CourseDetailPage({
                             text-xs
 
                             uppercase
-                            tracking-[0.2em]
+                            tracking-[0.25em]
 
                             text-slate-500
 
@@ -474,8 +568,8 @@ export default async function CourseDetailPage({
 
                         <p
                           className="
-                            font-semibold
                             text-white
+                            font-semibold
                           "
                         >
                           ₹{course.price}
@@ -485,6 +579,7 @@ export default async function CourseDetailPage({
                     </div>
 
                   </div>
+
                 </div>
 
               </div>
