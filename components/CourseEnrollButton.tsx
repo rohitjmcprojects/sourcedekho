@@ -31,7 +31,8 @@ export default function CourseEnrollButton({
             border
             font-semibold
             text-lg
-            hover:bg-gray-100
+            bg-gray-100
+            hover:bg-indigo-500/30
             transition
           "
         >

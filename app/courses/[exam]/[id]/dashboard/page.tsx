@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { sql } from "@/lib/db";
+import { Info } from "lucide-react";
+import LectureVideoModal from "@/components/LectureVideoModal";
+
 
 export default async function LectureDashboardPage({
   params,
@@ -177,7 +180,7 @@ export default async function LectureDashboardPage({
         <div className="relative z-10">
 
           {/* HEADER */}
-          <div className="mb-12">
+          <div className="mb-1">
 
             {/* TOP ROW */}
                 <div
@@ -266,23 +269,36 @@ export default async function LectureDashboardPage({
             <div>
 
             {/* TITLE */}
-            <h1
-              className="
-                text-5xl
+                    <a
+                      href={`/courses/${course.exam_name.toLowerCase()}/${course.id}/dashboard`}
+                      className="
+                        flex
+                        items-center
+                        gap-5
 
-                font-black
+                        px-8
+                        py-4
 
-                tracking-tight
-                leading-[0.95]
+                        rounded-4xl
 
-                text-white
+                        border
+                        border-white/10
 
-                max-w-5xl
-              "
-            >
-              {course.title}
-            </h1>
+                        bg-indigo-500/20
 
+                        text-white
+                        font-semibold
+                        text-lg
+
+                        hover:bg-indigo-500/30
+
+                        transition-all
+                      "
+                    >
+                      {course.title}                      
+                      <Info className="w-5 h-5" />
+
+                    </a>
           </div>
           </div>
           </div>
@@ -293,7 +309,7 @@ export default async function LectureDashboardPage({
               grid
               grid-cols-1
               lg:grid-cols-4
-              gap-6
+              gap-2
             "
           >
 
@@ -315,7 +331,7 @@ export default async function LectureDashboardPage({
 
                     shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
 
-                    h-[400px]
+                    h-[380px]
 
                     flex
                     flex-col
@@ -502,6 +518,8 @@ export default async function LectureDashboardPage({
                         hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]
 
                         shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+
+                        
                       "
                     >
 
@@ -608,10 +626,12 @@ export default async function LectureDashboardPage({
 
                             <h3
                               className="
-                                text-xl
-                                font-bold
+                               text-sm
+                                    md:text-base
 
-                                text-white
+                                    font-semibold
+
+                                    text-white
                               "
                             >
                               {
@@ -642,43 +662,9 @@ export default async function LectureDashboardPage({
                         <div className="flex flex-wrap items-center gap-3">
 
                           {/* VIDEO */}
-                          <button
-                            className="
-                              group
-
-                              flex
-                              items-center
-                              gap-2.5
-
-                              px-4
-                              py-3
-
-                              rounded-2xl
-
-                              border
-                              border-white/[0.08]
-
-                              bg-gradient-to-br
-                              from-blue-500/20
-                              to-indigo-500/20
-
-                              backdrop-blur-xl
-
-                              text-white
-                              text-sm
-                              font-semibold
-
-                              hover:scale-[1.03]
-
-                              hover:shadow-[0_0_20px_rgba(59,130,246,0.20)]
-
-                              transition-all
-                              duration-300
-                            "
-                          >
-                            ▶
-                            Video
-                          </button>
+                          <LectureVideoModal
+                              title={lecture.lecture_title}
+                            />
 
                           {/* NOTES */}
                           <button
