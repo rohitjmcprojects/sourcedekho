@@ -32,12 +32,13 @@ export default async function LectureDashboardPage({
   if (!course) {
     return (
       <main className="pl-[120px] pr-5 py-5">
+        
         <div
           className="
             relative
             overflow-hidden
 
-            min-h-[calc(100vh-40px)]
+            
 
             rounded-[36px]
 
@@ -101,16 +102,16 @@ export default async function LectureDashboardPage({
   `;
 
   return (
-    <main className="pl-[120px] pr-5 py-5">
+    <main className="pl-[120px] pr-5 py-5" >
 
+      
       {/* MAIN WRAPPER */}
       <div
         className="
           relative
           overflow-hidden
 
-          min-h-[calc(100vh-40px)]
-
+          
           rounded-[36px]
 
           border
@@ -178,6 +179,35 @@ export default async function LectureDashboardPage({
           {/* HEADER */}
           <div className="mb-12">
 
+            {/* TOP ROW */}
+                <div
+                  className="
+                    flex
+                    items-start
+                    justify-between
+                    gap-6
+                  "
+                >
+
+     {/* LEFT */}
+      <div>
+
+            {/* SUBTITLE */}
+            <p
+              className="
+                text-[11px]
+
+                uppercase
+                tracking-[0.25em]
+
+                text-slate-500
+
+                mb-3
+              "
+            >
+              Lecture Dashboard
+            </p>
+
             {/* BADGES */}
             <div className="flex gap-3 mb-6 flex-wrap">
 
@@ -230,27 +260,15 @@ export default async function LectureDashboardPage({
               </div>
 
             </div>
+            </div>
 
-            {/* SUBTITLE */}
-            <p
-              className="
-                text-[11px]
-
-                uppercase
-                tracking-[0.25em]
-
-                text-slate-500
-
-                mb-3
-              "
-            >
-              Lecture Dashboard
-            </p>
+            {/* Right */}
+            <div>
 
             {/* TITLE */}
             <h1
               className="
-                text-6xl
+                text-5xl
 
                 font-black
 
@@ -266,6 +284,8 @@ export default async function LectureDashboardPage({
             </h1>
 
           </div>
+          </div>
+          </div>
 
           {/* BODY */}
           <div
@@ -277,136 +297,180 @@ export default async function LectureDashboardPage({
             "
           >
 
-            {/* SUBJECTS */}
-            <div className="space-y-4">
+            {/* SUBJECTS CARD */}
+                <div
+                  className="
+                    flex-1
+                    overflow-y-auto
 
-              {subjects.map((sub: any) => {
-                const isActive =
-                  sub.subject_name === activeSubject;
+                   
+                    rounded-[32px]
+                     
+                    border
+                    border-white/[0.07]
 
-                return (
-                  <Link
-                    key={sub.subject_name}
-                    href={`?subject=${sub.subject_name}`}
-                    className={`
-                      group
-                      relative
-                      overflow-hidden
+                    bg-[#0f172a]/60
 
-                      block
+                    backdrop-blur-2xl
 
-                      rounded-[28px]
+                    shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
 
-                      border
+                    h-[400px]
 
-                      p-5
+                    flex
+                    flex-col
+                  "
+                >
 
-                      transition-all
-                      duration-300
+                  {/* CARD HEADER */}
+                  <div
+                    className="
+                      p-4
 
-                      shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+                      border-b
+                      border-white/[0.06]
 
-                      ${
-                        isActive
-                          ? `
-                            border-white/[0.08]
-
-                            bg-gradient-to-br
-                            from-blue-500/20
-                            to-indigo-500/20
-
-                            backdrop-blur-xl
-
-                            shadow-[0_0_25px_rgba(59,130,246,0.12)]
-                          `
-                          : `
-                            border-white/[0.07]
-
-                            bg-[#0f172a]/60
-
-                            backdrop-blur-2xl
-
-                            hover:border-white/[0.12]
-
-                            hover:-translate-y-0.5
-                          `
-                      }
-                    `}
+                      bg-gradient-to-r
+                      from-blue-500/10
+                      to-indigo-500/10
+                    "
                   >
-
-                    {/* REFLECTION */}
-                    <div
+                    <h2
                       className="
-                        absolute
-                        inset-0
-
-                        bg-gradient-to-b
-                        from-white/[0.05]
-                        via-transparent
-                        to-transparent
-
-                        pointer-events-none
-                      "
-                    />
-
-                    {/* INNER BORDER */}
-                    <div
-                      className="
-                        absolute
-                        inset-[1px]
-
-                        rounded-[27px]
-
-                        border
-                        border-white/[0.03]
-
-                        pointer-events-none
-                      "
-                    />
-
-                    <h3
-                      className="
-                        relative
-
-                        text-lg
-                        font-bold
-
+                        text-1xl
+                        font-black
                         text-white
+                        tracking-tight
                       "
                     >
-                      {sub.subject_name}
-                    </h3>
+                      SUBJECTS
+                    </h2>
 
-                  </Link>
-                );
-              })}
+                  </div>
 
-            </div>
+                  {/* SCROLLABLE SUBJECTS */}
+                  <div
+                    className="
+                      flex-1
+                      overflow-y-auto
+
+                      p-4
+                      space-y-1
+                      
+
+                      scrollbar-thin
+                      scrollbar-thumb-white/10
+                      scrollbar-track-transparent
+                    "
+                  >
+                    {subjects.map((sub: any) => {
+                      const isActive =
+                        sub.subject_name === activeSubject;
+
+                      return (
+                        <Link
+                          key={sub.subject_name}
+                          href={`?subject=${sub.subject_name}`}
+                          className={`
+                            group
+                            relative
+                            overflow-hidden
+
+                            block
+
+                            rounded-[24px]
+
+                            border
+
+                            p-2
+
+                            transition-all
+                            duration-300
+
+                            shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+
+                            ${
+                              isActive
+                                ? `
+                                  border-white/[0.08]
+
+                                  bg-gradient-to-br
+                                  from-blue-500/20
+                                  to-indigo-500/20
+
+                                  backdrop-blur-xl
+
+                                  shadow-[0_0_25px_rgba(59,130,246,0.12)]
+                                `
+                                : `
+                                  border-white/[0.07]
+
+                                  bg-[#111827]/60
+
+                                  backdrop-blur-2xl
+
+                                  hover:border-white/[0.12]
+
+                                  hover:-translate-y-0.5
+                                `
+                            }
+                          `}
+                        >
+
+                          {/* REFLECTION */}
+                          <div
+                            className="
+                              absolute
+                              inset-0
+
+                              bg-gradient-to-b
+                              from-white/[0.05]
+                              via-transparent
+                              to-transparent
+
+                              pointer-events-none
+                            "
+                          />
+
+                          {/* INNER BORDER */}
+                          <div
+                            className="
+                              absolute
+                              inset-[1px]
+
+                              rounded-[23px]
+
+                              border
+                              border-white/[0.03]
+
+                              pointer-events-none
+                            "
+                          />
+
+                          <h3
+                            className="
+                              relative
+
+                              text-lg
+                              font-bold
+
+                              text-white
+                            "
+                          >
+                            {sub.subject_name}
+                          </h3>
+
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
 
             {/* LECTURES */}
             <div className="lg:col-span-3">
 
-              {/* TOPBAR */}
-              <div className="mb-6">
-
-                <h2
-                  className="
-                    text-3xl
-
-                    font-black
-
-                    tracking-tight
-
-                    text-white
-                  "
-                >
-                  {activeSubject}
-                </h2>
-
-              </div>
-
               {/* LECTURES */}
-              <div className="space-y-4">
+              <div className="space-y-1">
                                 {lectures.map(
                   (
                     lecture: any,
@@ -428,7 +492,7 @@ export default async function LectureDashboardPage({
 
                         backdrop-blur-2xl
 
-                        p-6
+                        p-0
 
                         transition-all
                         duration-300
@@ -536,9 +600,7 @@ export default async function LectureDashboardPage({
                               font-bold
                             "
                           >
-                            {(index + 1)
-                              .toString()
-                              .padStart(2, "0")}
+
                           </div>
 
                           {/* INFO */}
