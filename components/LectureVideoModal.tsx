@@ -1,48 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import {
   X,
   PlayCircle,
   CheckCircle2,
+  Clock3,
 } from "lucide-react";
 
 import { createPortal } from "react-dom";
 
+import { useUser } from "@clerk/nextjs";
+
+interface VideoItem {
+  sub_title: string;
+  video_url?: string;
+  duration?: string;
+}
+
 interface LectureVideoModalProps {
   title: string;
-  subTitles?: string[];
+  videos?: VideoItem[];
 }
 
 export default function LectureVideoModal({
   title,
-  subTitles = [],
+  videos = [],
 }: LectureVideoModalProps) {
+  const { user } = useUser();
+
   const [open, setOpen] = useState(false);
 
   const [selectedVideo, setSelectedVideo] =
-    useState<string | null>(null);
+    useState<VideoItem | null>(null);
 
   const [completedVideos, setCompletedVideos] =
     useState<string[]>([]);
 
+  // LOAD SAVED PROGRESS
+  useEffect(() => {
+    const fetchProgress =
+      async () => {
+        if (!user?.id) return;
+
+        try {
+          const res = await fetch(
+            `/api/get-progress?userId=${user.id}`
+          );
+
+          const data =
+            await res.json();
+
+          setCompletedVideos(
+            data.completedVideos || []
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+    fetchProgress();
+  }, [user]);
+
   // TOGGLE COMPLETE
-  const toggleCompleted = (
-    video: string
+  const toggleCompleted = async (
+    videoTitle: string
   ) => {
-    setCompletedVideos((prev) =>
-      prev.includes(video)
-        ? prev.filter((v) => v !== video)
-        : [...prev, video]
-    );
+    const alreadyCompleted =
+      completedVideos.includes(
+        videoTitle
+      );
+
+    const updated =
+      alreadyCompleted
+        ? completedVideos.filter(
+            (v) => v !== videoTitle
+          )
+        : [
+            ...completedVideos,
+            videoTitle,
+          ];
+
+    setCompletedVideos(updated);
+
+    try {
+      await fetch(
+        "/api/save-progress",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            userId: user?.id,
+
+            lectureTitle: title,
+
+            subTitle: videoTitle,
+
+            completed:
+              !alreadyCompleted,
+          }),
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // PROGRESS
   const progress =
-    subTitles.length > 0
+    videos.length > 0
       ? Math.round(
           (completedVideos.length /
-            subTitles.length) *
+            videos.length) *
             100
         )
       : 0;
@@ -223,17 +298,17 @@ export default function LectureVideoModal({
                     </div>
 
                     <div className="space-y-3">
-                      {subTitles.length > 0 ? (
-                        subTitles.map(
+                      {videos.length > 0 ? (
+                        videos.map(
                           (
-                            subTitle,
+                            video,
                             index
                           ) => (
                             <div
                               key={index}
                               onClick={() =>
                                 setSelectedVideo(
-                                  subTitle
+                                  video
                                 )
                               }
                               className={`
@@ -249,8 +324,8 @@ export default function LectureVideoModal({
                                 transition-all
 
                                 ${
-                                  selectedVideo ===
-                                  subTitle
+                                  selectedVideo?.sub_title ===
+                                  video.sub_title
                                     ? `
                                       border-blue-500/40
                                       bg-blue-500/15
@@ -267,16 +342,27 @@ export default function LectureVideoModal({
                               <div className="pr-4 flex-1">
                                 <div className="flex items-center gap-2">
                                   {completedVideos.includes(
-                                    subTitle
+                                    video.sub_title
                                   ) && (
                                     <CheckCircle2 className="w-4 h-4 text-green-400" />
                                   )}
 
                                   <span className="text-white font-medium">
-                                    {subTitle}
+                                    {
+                                      video.sub_title
+                                    }
                                   </span>
                                 </div>
-                                
+
+                                {/* DURATION */}
+                                <div className="flex items-center gap-2 mt-2 text-white/40 text-xs">
+                                  <Clock3 className="w-3 h-3" />
+
+                                  <span>
+                                    {video.duration ||
+                                      "10m"}
+                                  </span>
+                                </div>
                               </div>
 
                               {/* PLAY ICON */}
@@ -314,7 +400,7 @@ export default function LectureVideoModal({
                       flex-col
                     "
                   >
-                    {/* TOP ACTIONS */}
+                    {/* TOP BAR */}
                     <div
                       className="
                         flex
@@ -333,16 +419,17 @@ export default function LectureVideoModal({
                         </div>
 
                         <div className="text-white font-semibold mt-1">
-                          {selectedVideo ||
+                          {selectedVideo?.sub_title ||
                             "No lecture selected"}
                         </div>
                       </div>
 
+                      {/* COMPLETE BUTTON */}
                       {selectedVideo && (
                         <button
                           onClick={() =>
                             toggleCompleted(
-                              selectedVideo
+                              selectedVideo.sub_title
                             )
                           }
                           className={`
@@ -358,7 +445,7 @@ export default function LectureVideoModal({
 
                             ${
                               completedVideos.includes(
-                                selectedVideo
+                                selectedVideo.sub_title
                               )
                                 ? `
                                   bg-green-500/20
@@ -379,7 +466,7 @@ export default function LectureVideoModal({
                           <CheckCircle2 className="w-4 h-4" />
 
                           {completedVideos.includes(
-                            selectedVideo
+                            selectedVideo.sub_title
                           )
                             ? "Completed"
                             : "Mark as Completed"}
@@ -392,12 +479,38 @@ export default function LectureVideoModal({
                       {selectedVideo ? (
                         <div className="w-full">
                           <div className="aspect-video w-full">
-                            <iframe
-                              className="w-full h-full"
-                              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                              title={selectedVideo}
-                              allowFullScreen
-                            />
+                            {selectedVideo.video_url ? (
+                              <iframe
+                                className="w-full h-full"
+                                src={
+                                  selectedVideo.video_url
+                                    ?.replace(
+                                      "watch?v=",
+                                      "embed/"
+                                    ) ||
+                                  undefined
+                                }
+                                title={
+                                  selectedVideo.sub_title
+                                }
+                                allowFullScreen
+                              />
+                            ) : (
+                              <div
+                                className="
+                                  w-full
+                                  h-full
+                                  flex
+                                  items-center
+                                  justify-center
+                                  bg-black
+                                  text-white/50
+                                  text-lg
+                                "
+                              >
+                                Video URL not added yet
+                              </div>
+                            )}
                           </div>
                         </div>
                       ) : (

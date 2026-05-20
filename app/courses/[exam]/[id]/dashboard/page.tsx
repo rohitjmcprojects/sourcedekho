@@ -676,16 +676,20 @@ const allLectures = await sql`
                         <div className="flex flex-wrap items-center gap-3">
 
                           {/* VIDEO */}
-                            <LectureVideoModal
+<LectureVideoModal
   title={lecture.lecture_title}
-  subTitles={
+  videos={
     allLectures
       .filter(
         (l: any) =>
           l.lecture_title ===
           lecture.lecture_title
       )
-      .map((l: any) => l.sub_title)
+      .map((l: any) => ({
+        sub_title: l.sub_title,
+        video_url: l.video_url,
+        duration: l.duration,
+      }))
   }
 />
                           {/* NOTES */}
