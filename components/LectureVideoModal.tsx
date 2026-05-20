@@ -38,30 +38,144 @@ export default function LectureVideoModal({
   const [completedVideos, setCompletedVideos] =
     useState<string[]>([]);
 
-  // LOAD SAVED PROGRESS
+  // CURRENT INDEX
+  const currentIndex =
+    videos.findIndex(
+      (v) =>
+        v.sub_title ===
+        selectedVideo?.sub_title
+    );
+
+  // LOAD SAVED PROGRESS + LAST WATCHED
   useEffect(() => {
-    const fetchProgress =
+    const fetchData =
       async () => {
         if (!user?.id) return;
 
         try {
-          const res = await fetch(
-            `/api/get-progress?userId=${user.id}`
-          );
+          // COMPLETED VIDEOS
+          const progressRes =
+            await fetch(
+              `/api/get-progress?userId=${user.id}`
+            );
 
-          const data =
-            await res.json();
+          const progressData =
+            await progressRes.json();
 
           setCompletedVideos(
-            data.completedVideos || []
+            progressData.completedVideos ||
+              []
           );
+
+          // LAST WATCHED
+          const lastRes =
+            await fetch(
+              `/api/get-last-watched?userId=${user.id}`
+            );
+
+          const lastData =
+            await lastRes.json();
+
+          if (!lastData) return;
+
+          const matchedVideo =
+            videos.find(
+              (v) =>
+                v.sub_title ===
+                lastData.sub_title
+            );
+
+          if (matchedVideo) {
+            setSelectedVideo(
+              matchedVideo
+            );
+          }
         } catch (error) {
           console.log(error);
         }
       };
 
-    fetchProgress();
-  }, [user]);
+    fetchData();
+  }, [user?.id, title]);
+
+  // SAVE LAST WATCHED
+  const handleVideoSelect =
+    async (video: VideoItem) => {
+      setSelectedVideo(video);
+
+      try {
+        await fetch(
+          "/api/set-last-watched",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              userId: user?.id,
+
+              lectureTitle: title,
+
+              subTitle:
+                video.sub_title,
+            }),
+          }
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  // AUTO NEXT
+  const playNextLecture =
+    async () => {
+      if (
+        currentIndex === -1
+      )
+        return;
+
+      // AUTO COMPLETE CURRENT
+      if (
+        selectedVideo &&
+        !completedVideos.includes(
+          selectedVideo.sub_title
+        )
+      ) {
+        await toggleCompleted(
+          selectedVideo.sub_title
+        );
+      }
+
+      const nextVideo =
+        videos[currentIndex + 1];
+
+      if (!nextVideo) return;
+
+      await handleVideoSelect(
+        nextVideo
+      );
+    };
+
+  // PREVIOUS
+  const playPreviousLecture =
+    async () => {
+      if (
+        currentIndex <= 0
+      )
+        return;
+
+      const prevVideo =
+        videos[currentIndex - 1];
+
+      if (!prevVideo) return;
+
+      await handleVideoSelect(
+        prevVideo
+      );
+    };
 
   // TOGGLE COMPLETE
   const toggleCompleted = async (
@@ -161,7 +275,8 @@ export default function LectureVideoModal({
               justify-center
               bg-black/80
               backdrop-blur-md
-              p-4
+              px-4
+              py-2
             "
           >
             {/* BACKDROP */}
@@ -176,28 +291,29 @@ export default function LectureVideoModal({
             {/* MAIN */}
             <div
               className="
-                relative
-                z-10
-                w-[95vw]
-                max-w-7xl
-                rounded-[32px]
-                overflow-hidden
-                border
-                border-white/[0.08]
-                bg-[#0b1220]
-                shadow-[0_20px_80px_rgba(0,0,0,0.7)]
-              "
+              relative
+              z-10
+              w-full
+              max-w-[1400px]
+              h-[92vh]
+              rounded-[32px]
+              overflow-hidden
+              border
+              border-white/[0.08]
+              bg-[#0b1220]
+              shadow-[0_20px_80px_rgba(0,0,0,0.7)]
+            "
             >
               {/* HEADER */}
               <div
                 className="
                   px-6
-                  py-5
+                  py-3
                   border-b
                   border-white/[0.08]
                 "
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
                   {/* LEFT */}
                   <div className="flex-1">
                     <div className="text-white/50 text-sm">
@@ -253,7 +369,7 @@ export default function LectureVideoModal({
                       setSelectedVideo(null);
                     }}
                     className="
-                      ml-6
+                      ml-auto shrink-0
                       w-10
                       h-10
                       rounded-2xl
@@ -272,14 +388,14 @@ export default function LectureVideoModal({
               </div>
 
               {/* BODY */}
-              <div className="p-6">
+              <div className="p-4">
                 <div
                   className="
                     grid
                     grid-cols-1
                     lg:grid-cols-[380px_1fr]
-                    gap-6
-                    h-[70vh]
+                    gap-4
+                    min-h-[85vh] max-h-[92vh]
                   "
                 >
                   {/* LEFT PANEL */}
@@ -290,7 +406,7 @@ export default function LectureVideoModal({
                       border-white/[0.08]
                       bg-white/[0.03]
                       p-4
-                      overflow-y-auto
+                      overflow-y-auto max-h-[calc(100vh-250px)]
                     "
                   >
                     <div className="text-white font-semibold mb-4">
@@ -307,7 +423,7 @@ export default function LectureVideoModal({
                             <div
                               key={index}
                               onClick={() =>
-                                setSelectedVideo(
+                                handleVideoSelect(
                                   video
                                 )
                               }
@@ -352,17 +468,15 @@ export default function LectureVideoModal({
                                       video.sub_title
                                     }
                                   </span>
-                                </div>
-
-                                {/* DURATION */}
-                                <div className="flex items-center gap-2 mt-2 text-white/40 text-xs">
+                                  <span className="flex items-center gap-2 mt-2 text-white/40 text-xs">
+                                  <div className="flex items-center gap-2 mt-2 text-white/40 text-xs">
                                   <Clock3 className="w-3 h-3" />
-
-                                  <span>
-                                    {video.duration ||
-                                      "10m"}
-                                  </span>
+                                    {
+                                      (video.duration)
+                                    }
+                                  </div></span>
                                 </div>
+
                               </div>
 
                               {/* PLAY ICON */}
@@ -396,8 +510,7 @@ export default function LectureVideoModal({
                       border
                       border-white/[0.08]
                       bg-black
-                      flex
-                      flex-col
+                      flex flex-col overflow-hidden
                     "
                   >
                     {/* TOP BAR */}
@@ -475,10 +588,10 @@ export default function LectureVideoModal({
                     </div>
 
                     {/* VIDEO AREA */}
-                    <div className="flex-1 flex items-center justify-center">
+                    <div className="flex-1 overflow-y-auto">
                       {selectedVideo ? (
                         <div className="w-full">
-                          <div className="aspect-video w-full">
+                          <div className="aspect-video w-full max-h-[46vh]">
                             {selectedVideo.video_url ? (
                               <iframe
                                 className="w-full h-full"
@@ -511,6 +624,74 @@ export default function LectureVideoModal({
                                 Video URL not added yet
                               </div>
                             )}
+                          </div>
+
+                          {/* PLAYER CONTROLS */}
+                          <div
+                            className="
+                              flex
+                              items-center
+                              justify-between
+                              px-5
+                              py-4
+                              border-t
+                              border-white/[0.08]
+                              bg-[#0b1220]
+                            "
+                          >
+                            {/* PREVIOUS */}
+                            <button
+                              onClick={
+                                playPreviousLecture
+                              }
+                              disabled={
+                                currentIndex <=
+                                0
+                              }
+                              className="
+                                px-4
+                                py-2
+                                rounded-2xl
+                                bg-white/[0.06]
+                                text-white
+                                disabled:opacity-30
+                              "
+                            >
+                              ← Previous
+                            </button>
+
+                            {/* COUNT */}
+                            <div className="text-white/60 text-sm">
+                              Lecture{" "}
+                              {currentIndex +
+                                1}{" "}
+                              /{" "}
+                              {
+                                videos.length
+                              }
+                            </div>
+
+                            {/* NEXT */}
+                            <button
+                              onClick={
+                                playNextLecture
+                              }
+                              disabled={
+                                currentIndex >=
+                                videos.length -
+                                  1
+                              }
+                              className="
+                                px-4
+                                py-2
+                                rounded-2xl
+                                bg-blue-500/20
+                                text-white
+                                disabled:opacity-30
+                              "
+                            >
+                              Next →
+                            </button>
                           </div>
                         </div>
                       ) : (

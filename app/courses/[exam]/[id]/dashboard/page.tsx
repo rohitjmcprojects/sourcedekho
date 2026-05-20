@@ -662,10 +662,7 @@ const allLectures = await sql`
                                 mt-2
                               "
                             >
-                              {lecture.duration}
-
-                              {lecture.notes_available &&
-                                " • Notes Included"}
+                              
                             </p>
 
                           </div>
