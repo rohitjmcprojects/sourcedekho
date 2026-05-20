@@ -97,49 +97,12 @@ export default async function HomePage() {
                 text-sm
                 font-semibold
 
-                mb-7
+                mb-1
               "
             >
-              SourceDekho Premium UI
+              SourceDekho
             </div>
-
-            {/* TITLE */}
-            <h1
-              className="
-                text-6xl
-
-                font-black
-
-                tracking-tight
-                leading-[0.95]
-
-                text-white
-
-                max-w-4xl
-              "
-            >
-              Premium Learning
-              Platform
-            </h1>
-
-            {/* DESCRIPTION */}
-            <p
-              className="
-                mt-6
-
-                max-w-2xl
-
-                text-[16px]
-                leading-8
-
-                text-slate-300
-              "
-            >
-              Modern immersive preparation
-              experience designed for UPSC,
-              PCS and state civil services
-              aspirants.
-            </p>
+           
 
           </div>
 
@@ -266,7 +229,7 @@ export default async function HomePage() {
                         text-[11px]
                         font-semibold
 
-                        mb-5
+                        mb-2
                       "
                     >
                       Civil Services
@@ -288,19 +251,6 @@ export default async function HomePage() {
                       {exam.name}
                     </h2>
 
-                    {/* DESCRIPTION */}
-                    <p
-                      className="
-                        mt-4
-
-                        text-[14px]
-                        leading-7
-
-                        text-slate-300
-                      "
-                    >
-                      {exam.description}
-                    </p>
 
                   </div>
 
@@ -308,35 +258,9 @@ export default async function HomePage() {
                   <div className="flex-1" />
 
                   {/* FOOTER */}
-                  <div className="flex items-center justify-between mt-8">
+                  <div className="flex items-center justify-between mt-0">
 
-                    {/* STATS */}
-                    <div>
-
-                      <p
-                        className="
-                          text-xs
-                          text-slate-400
-                        "
-                      >
-                        Premium Courses
-                      </p>
-
-                      <h3
-                        className="
-                          text-2xl
-                          font-black
-
-                          text-white
-
-                          mt-1
-                        "
-                      >
-                        120+
-                      </h3>
-
-                    </div>
-
+                    
                     {/* CTA */}
                     <div
                       className="

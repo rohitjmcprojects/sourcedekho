@@ -30,6 +30,7 @@ export default async function LectureDashboardPage({
     WHERE courses.id = ${id}
   `;
 
+  
   const course = courses[0];
 
   if (!course) {
@@ -96,13 +97,26 @@ export default async function LectureDashboardPage({
     subject || subjects[0]?.subject_name;
 
   // FETCH LECTURES
-  const lectures = await sql`
-    SELECT *
+  const uniqueLectures = await sql`
+  SELECT *
+  FROM (
+    SELECT DISTINCT ON (lecture_title)
+      *
     FROM lectures
     WHERE course_id = ${course.id}
+      AND subject_name = ${activeSubject}
+    ORDER BY lecture_title, id ASC
+  ) unique_lectures
+  ORDER BY id ASC
+`;
+
+const allLectures = await sql`
+  SELECT *
+  FROM lectures
+  WHERE course_id = ${course.id}
     AND subject_name = ${activeSubject}
-    ORDER BY id ASC
-  `;
+  ORDER BY id ASC
+`;
 
   return (
     <main className="pl-[120px] pr-5 py-5" >
@@ -487,7 +501,7 @@ export default async function LectureDashboardPage({
 
               {/* LECTURES */}
               <div className="space-y-1">
-                                {lectures.map(
+                                {uniqueLectures.map(
                   (
                     lecture: any,
                     index: number
@@ -662,10 +676,18 @@ export default async function LectureDashboardPage({
                         <div className="flex flex-wrap items-center gap-3">
 
                           {/* VIDEO */}
-                          <LectureVideoModal
-                              title={lecture.lecture_title}
-                            />
-
+                            <LectureVideoModal
+  title={lecture.lecture_title}
+  subTitles={
+    allLectures
+      .filter(
+        (l: any) =>
+          l.lecture_title ===
+          lecture.lecture_title
+      )
+      .map((l: any) => l.sub_title)
+  }
+/>
                           {/* NOTES */}
                           <button
                             className="
