@@ -59,8 +59,8 @@ export default async function ExamCoursesPage({
             style={{
               backgroundImage: `
                 linear-gradient(
-                  rgba(8,17,32,0.72),
-                  rgba(8,17,32,0.82)
+                  rgba(7,18,16,0.72),
+                  rgba(7,18,16,0.84)
                 ),
                 url('/bgimg.png')
               `,
@@ -139,8 +139,8 @@ export default async function ExamCoursesPage({
           style={{
             backgroundImage: `
               linear-gradient(
-                rgba(8,17,32,0.72),
-                rgba(8,17,32,0.82)
+                rgba(7,18,16,0.72),
+                rgba(7,18,16,0.84)
               ),
               url('/bgimg.png')
             `,
@@ -275,7 +275,7 @@ export default async function ExamCoursesPage({
                   hover:-translate-y-2
                   hover:border-blue-400/20
 
-                  hover:shadow-[0_0_50px_rgba(59,130,246,0.18)]
+                  hover:shadow-[0_0_50px_rgba(16,185,129,0.2)]
                 "
               >
 

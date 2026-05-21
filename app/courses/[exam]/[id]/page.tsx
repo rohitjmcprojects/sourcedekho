@@ -58,8 +58,8 @@ export default async function CourseDetailPage({
             style={{
               backgroundImage: `
                 linear-gradient(
-                  rgba(8,17,32,0.72),
-                  rgba(8,17,32,0.82)
+                  rgba(7,18,16,0.72),
+                  rgba(7,18,16,0.84)
                 ),
                 url('/bgimg.png')
               `,
@@ -112,8 +112,8 @@ export default async function CourseDetailPage({
           style={{
             backgroundImage: `
               linear-gradient(
-                rgba(8,17,32,0.72),
-                rgba(8,17,32,0.82)
+                rgba(7,18,16,0.72),
+                rgba(7,18,16,0.84)
               ),
               url('/bgimg.png')
             `,
@@ -304,7 +304,7 @@ export default async function CourseDetailPage({
                     border
                     border-white/[0.07]
 
-                    bg-[#0f172a]/60
+                    bg-[#0a1a16]/60
 
                     backdrop-blur-2xl
 
@@ -417,7 +417,7 @@ export default async function CourseDetailPage({
                     border
                     border-white/[0.07]
 
-                    bg-[#0f172a]/60
+                    bg-[#0a1a16]/60
 
                     backdrop-blur-2xl
 

@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #081210;
+  --foreground: #f3f7f5;
+  --shell-glow: rgba(16, 185, 129, 0.14);
+  --shell-warmth: rgba(244, 63, 94, 0.09);
 }
 
 @theme inline {
@@ -10,17 +12,38 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Re-map the app's existing utility colors into the SourceDekho palette. */
+  --color-slate-200: #dfe9e3;
+  --color-slate-300: #bfd0c7;
+  --color-slate-400: #8ea79c;
+  --color-slate-500: #688277;
+  --color-slate-900: #081210;
+
+  --color-blue-300: #75f1cf;
+  --color-blue-400: #34d6aa;
+  --color-blue-500: #10b981;
+
+  --color-indigo-500: #f43f5e;
+  --color-indigo-600: #e11d48;
+
+  --color-cyan-300: #7dd3fc;
+  --color-cyan-400: #38bdf8;
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(
+      circle at 18% 12%,
+      var(--shell-glow),
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at 88% 16%,
+      var(--shell-warmth),
+      transparent 24rem
+    ),
+    var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }

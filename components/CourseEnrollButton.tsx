@@ -277,7 +277,7 @@ export default function CourseEnrollButton({
                     border
                     border-white/[0.08]
 
-                    bg-[#081120]
+                    bg-[#071713]
 
                     shadow-[0_20px_80px_rgba(0,0,0,0.6)]
                   "
@@ -292,8 +292,8 @@ export default function CourseEnrollButton({
                     style={{
                       backgroundImage: `
                         linear-gradient(
-                          rgba(8,17,32,0.92),
-                          rgba(8,17,32,0.96)
+                          rgba(7,18,16,0.92),
+                          rgba(7,18,16,0.96)
                         ),
                         url('/bgimg.png')
                       `,

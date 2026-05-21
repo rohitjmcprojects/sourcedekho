@@ -54,7 +54,7 @@ export default function Sidebar() {
         border
         border-white/[0.08]
 
-        bg-[#0f172a]/80
+        bg-[#0a1a16]/80
 
         backdrop-blur-2xl
 
@@ -224,7 +224,7 @@ export default function Sidebar() {
 
                       backdrop-blur-xl
 
-                      shadow-[0_0_30px_rgba(59,130,246,0.12)]
+                      shadow-[0_0_30px_rgba(16,185,129,0.14)]
                     `
                     : `
                       text-slate-300

@@ -2,7 +2,19 @@ import Link from "next/link";
 import { sql } from "@/lib/db";
 import { Info } from "lucide-react";
 import LectureVideoModal from "@/components/LectureVideoModal";
+import LectureTestModal from "@/components/LectureTestModal";
 
+type SubjectRow = {
+  subject_name: string;
+};
+
+type LectureRow = {
+  id: number;
+  lecture_title: string;
+  sub_title: string;
+  duration: string | null;
+  video_url: string | null;
+};
 
 export default async function LectureDashboardPage({
   params,
@@ -65,8 +77,8 @@ export default async function LectureDashboardPage({
             style={{
               backgroundImage: `
                 linear-gradient(
-                  rgba(8,17,32,0.72),
-                  rgba(8,17,32,0.82)
+                  rgba(7,18,16,0.72),
+                  rgba(7,18,16,0.84)
                 ),
                 url('/bgimg.png')
               `,
@@ -86,18 +98,18 @@ export default async function LectureDashboardPage({
   }
 
   // FETCH SUBJECTS
-  const subjects = await sql`
+  const subjects = (await sql`
     SELECT DISTINCT subject_name
     FROM lectures
     WHERE course_id = ${course.id}
     ORDER BY subject_name ASC
-  `;
+  `) as SubjectRow[];
 
   const activeSubject =
-    subject || subjects[0]?.subject_name;
+    subject || subjects[0]?.subject_name || "";
 
   // FETCH LECTURES
-  const uniqueLectures = await sql`
+  const uniqueLectures = (await sql`
   SELECT *
   FROM (
     SELECT DISTINCT ON (lecture_title)
@@ -108,15 +120,15 @@ export default async function LectureDashboardPage({
     ORDER BY lecture_title, id ASC
   ) unique_lectures
   ORDER BY id ASC
-`;
+`) as LectureRow[];
 
-const allLectures = await sql`
+const allLectures = (await sql`
   SELECT *
   FROM lectures
   WHERE course_id = ${course.id}
     AND subject_name = ${activeSubject}
   ORDER BY id ASC
-`;
+`) as LectureRow[];
 
   return (
     <main className="pl-[120px] pr-5 py-5" >
@@ -152,8 +164,8 @@ const allLectures = await sql`
           style={{
             backgroundImage: `
               linear-gradient(
-                rgba(8,17,32,0.72),
-                rgba(8,17,32,0.82)
+                rgba(7,18,16,0.72),
+                rgba(7,18,16,0.84)
               ),
               url('/bgimg.png')
             `,
@@ -339,7 +351,7 @@ const allLectures = await sql`
                     border
                     border-white/[0.07]
 
-                    bg-[#0f172a]/60
+                    bg-[#0a1a16]/60
 
                     backdrop-blur-2xl
 
@@ -393,7 +405,7 @@ const allLectures = await sql`
                       scrollbar-track-transparent
                     "
                   >
-                    {subjects.map((sub: any) => {
+                    {subjects.map((sub) => {
                       const isActive =
                         sub.subject_name === activeSubject;
 
@@ -430,12 +442,12 @@ const allLectures = await sql`
 
                                   backdrop-blur-xl
 
-                                  shadow-[0_0_25px_rgba(59,130,246,0.12)]
+                                  shadow-[0_0_25px_rgba(16,185,129,0.14)]
                                 `
                                 : `
                                   border-white/[0.07]
 
-                                  bg-[#111827]/60
+                                  bg-[#0c201a]/60
 
                                   backdrop-blur-2xl
 
@@ -501,11 +513,8 @@ const allLectures = await sql`
 
               {/* LECTURES */}
               <div className="space-y-1">
-                                {uniqueLectures.map(
-                  (
-                    lecture: any,
-                    index: number
-                  ) => (
+                {uniqueLectures.map(
+                  (lecture) => (
                     <div
                       key={lecture.id}
                       className="
@@ -518,7 +527,7 @@ const allLectures = await sql`
                         border
                         border-white/[0.07]
 
-                        bg-[#0f172a]/60
+                        bg-[#0a1a16]/60
 
                         backdrop-blur-2xl
 
@@ -529,7 +538,7 @@ const allLectures = await sql`
 
                         hover:border-white/[0.12]
 
-                        hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]
+                        hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]
 
                         shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
 
@@ -678,14 +687,16 @@ const allLectures = await sql`
   videos={
     allLectures
       .filter(
-        (l: any) =>
+        (l) =>
           l.lecture_title ===
           lecture.lecture_title
       )
-      .map((l: any) => ({
+      .map((l) => ({
         sub_title: l.sub_title,
-        video_url: l.video_url,
-        duration: l.duration,
+        video_url:
+          l.video_url || undefined,
+        duration:
+          l.duration || undefined,
       }))
   }
 />
@@ -727,78 +738,48 @@ const allLectures = await sql`
                           </button>
 
                           {/* MCQs */}
-                          <button
-                            className="
-                              group
-
-                              flex
-                              items-center
-                              gap-2.5
-
-                              px-4
-                              py-3
-
-                              rounded-2xl
-
-                              border
-                              border-white/[0.08]
-
-                              bg-white/[0.04]
-
-                              backdrop-blur-xl
-
-                              text-slate-200
-                              text-sm
-                              font-semibold
-
-                              hover:bg-white/[0.08]
-
-                              hover:border-white/[0.12]
-
-                              transition-all
-                              duration-300
-                            "
-                          >
-                            ✔
-                            MCQs
-                          </button>
+                          <LectureTestModal
+                            exam={course.exam_name}
+                            subject={activeSubject}
+                            lectureTitle={
+                              lecture.lecture_title
+                            }
+                            subTitles={
+                              allLectures
+                                .filter(
+                                  (l) =>
+                                    l.lecture_title ===
+                                    lecture.lecture_title
+                                )
+                                .map(
+                                  (l) =>
+                                    l.sub_title
+                                )
+                            }
+                            type="mcqs"
+                          />
 
                           {/* PYQs */}
-                          <button
-                            className="
-                              group
-
-                              flex
-                              items-center
-                              gap-2.5
-
-                              px-4
-                              py-3
-
-                              rounded-2xl
-
-                              border
-                              border-white/[0.08]
-
-                              bg-white/[0.04]
-
-                              backdrop-blur-xl
-
-                              text-slate-200
-                              text-sm
-                              font-semibold
-
-                              hover:bg-white/[0.08]
-
-                              hover:border-white/[0.12]
-
-                              transition-all
-                              duration-300
-                            "
-                          >
-                            📊
-                            PYQs
-                          </button>
+                          <LectureTestModal
+                            exam={course.exam_name}
+                            subject={activeSubject}
+                            lectureTitle={
+                              lecture.lecture_title
+                            }
+                            subTitles={
+                              allLectures
+                                .filter(
+                                  (l) =>
+                                    l.lecture_title ===
+                                    lecture.lecture_title
+                                )
+                                .map(
+                                  (l) =>
+                                    l.sub_title
+                                )
+                            }
+                            type="pyqs"
+                          />
 
                         </div>
 

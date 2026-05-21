@@ -300,7 +300,7 @@ export default function LectureVideoModal({
               overflow-hidden
               border
               border-white/[0.08]
-              bg-[#0b1220]
+              bg-[#071713]
               shadow-[0_20px_80px_rgba(0,0,0,0.7)]
             "
             >
@@ -523,7 +523,7 @@ export default function LectureVideoModal({
                         py-4
                         border-b
                         border-white/[0.08]
-                        bg-[#0b1220]
+                        bg-[#071713]
                       "
                     >
                       <div>
@@ -636,7 +636,7 @@ export default function LectureVideoModal({
                               py-4
                               border-t
                               border-white/[0.08]
-                              bg-[#0b1220]
+                              bg-[#071713]
                             "
                           >
                             {/* PREVIOUS */}
