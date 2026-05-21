@@ -1,23 +1,32 @@
 import Link from "next/link";
 import { sql } from "@/lib/db";
 
+import EnrollmentBadge from "@/components/EnrollmentBadge";
+
 export default async function ExamCoursesPage({
   params,
 }: {
   params: Promise<{ exam: string }>;
 }) {
-  const { exam } = await params;
 
+  const { exam } =
+    await params;
+
+  // ====================================
   // FETCH EXAM
+  // ====================================
+
   const exams = await sql`
     SELECT *
     FROM exams
     WHERE LOWER(name) = LOWER(${exam})
   `;
 
-  const examData = exams[0];
+  const examData =
+    exams[0];
 
   if (!examData) {
+
     return (
       <main className="pl-[120px] pr-5 py-5">
 
@@ -41,7 +50,7 @@ export default async function ExamCoursesPage({
           "
         >
 
-          {/* BG IMAGE */}
+          {/* BG */}
           <div
             className="
               absolute
@@ -61,22 +70,38 @@ export default async function ExamCoursesPage({
           />
 
           <div className="relative z-10">
+
             <h1 className="text-4xl font-bold text-white">
               Exam not found
             </h1>
+
           </div>
 
         </div>
 
       </main>
     );
+
   }
 
+  // ====================================
   // FETCH COURSES
+  // ====================================
+
   const courses = await sql`
-    SELECT *
+    SELECT
+      courses.*,
+
+      EXISTS (
+        SELECT 1
+        FROM enrollments
+        WHERE enrollments.course_id = courses.id
+      ) AS is_enrolled
+
     FROM courses
+
     WHERE exam_id = ${examData.id}
+
     ORDER BY id ASC
   `;
 
@@ -104,7 +129,7 @@ export default async function ExamCoursesPage({
         "
       >
 
-        {/* BACKGROUND IMAGE */}
+        {/* BG IMAGE */}
         <div
           className="
             absolute
@@ -124,7 +149,7 @@ export default async function ExamCoursesPage({
           }}
         />
 
-        {/* DEPTH BLUR */}
+        {/* DEPTH */}
         <div
           className="
             absolute
@@ -134,29 +159,11 @@ export default async function ExamCoursesPage({
           "
         />
 
-        {/* NOISE */}
-        <div
-          className="
-            absolute
-            inset-0
-
-            opacity-[0.03]
-
-            mix-blend-soft-light
-
-            pointer-events-none
-          "
-          style={{
-            backgroundImage:
-              "url('https://grainy-gradients.vercel.app/noise.svg')",
-          }}
-        />
-
         {/* CONTENT */}
         <div className="relative z-10">
 
           {/* HEADER */}
-          <div className="mb-12">
+          <div className="mb-14">
 
             {/* BADGE */}
             <div
@@ -190,7 +197,7 @@ export default async function ExamCoursesPage({
             {/* TITLE */}
             <h1
               className="
-                text-6xl
+                text-7xl
 
                 font-black
 
@@ -199,7 +206,7 @@ export default async function ExamCoursesPage({
 
                 text-white
 
-                max-w-4xl
+                max-w-5xl
               "
             >
               {examData.name}
@@ -209,11 +216,11 @@ export default async function ExamCoursesPage({
             {/* DESCRIPTION */}
             <p
               className="
-                mt-6
+                mt-7
 
                 max-w-2xl
 
-                text-[16px]
+                text-[17px]
                 leading-8
 
                 text-slate-300
@@ -224,52 +231,55 @@ export default async function ExamCoursesPage({
 
           </div>
 
-          {/* COURSES GRID */}
+          {/* COURSES */}
           <div
             className="
               grid
               grid-cols-1
               md:grid-cols-2
               xl:grid-cols-3
-              gap-5
+              gap-6
             "
           >
 
             {courses.map((course: any) => (
+
               <Link
                 key={course.id}
-                href={`/courses/${examData.name.toLowerCase()}/${course.id}`}
+                href={
+                  course.is_enrolled
+                    ? `/courses/${examData.name.toLowerCase()}/${course.id}/dashboard`
+                    : `/courses/${examData.name.toLowerCase()}/${course.id}`
+                }
                 className="
                   group
                   relative
                   overflow-hidden
 
-                  rounded-[30px]
+                  rounded-[34px]
 
                   border
-                  border-white/[0.07]
+                  border-white/[0.08]
 
-                  bg-[#0f172a]/60
+                  bg-[rgba(15,23,42,0.72)]
 
                   backdrop-blur-2xl
 
-                  p-6
+                  p-7
 
-                  min-h-[260px]
+                  min-h-[340px]
 
                   transition-all
                   duration-500
 
-                  hover:-translate-y-1.5
-                  hover:border-white/[0.12]
+                  hover:-translate-y-2
+                  hover:border-blue-400/20
 
-                  hover:shadow-[0_0_40px_rgba(59,130,246,0.16)]
-
-                  shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+                  hover:shadow-[0_0_50px_rgba(59,130,246,0.18)]
                 "
               >
 
-                {/* HOVER GLOW */}
+                {/* GLOW */}
                 <div
                   className="
                     absolute
@@ -283,89 +293,38 @@ export default async function ExamCoursesPage({
 
                     bg-gradient-to-br
                     from-blue-500/10
-                    via-indigo-500/5
-                    to-transparent
-                  "
-                />
-
-                {/* GLASS REFLECTION */}
-                <div
-                  className="
-                    absolute
-                    inset-0
-
-                    bg-gradient-to-b
-                    from-white/[0.05]
                     via-transparent
-                    to-transparent
-
-                    pointer-events-none
-                  "
-                />
-
-                {/* INNER BORDER */}
-                <div
-                  className="
-                    absolute
-                    inset-[1px]
-
-                    rounded-[29px]
-
-                    border
-                    border-white/[0.03]
-
-                    pointer-events-none
+                    to-indigo-500/10
                   "
                 />
 
                 {/* CONTENT */}
-                <div className="relative z-10 flex flex-col h-full">
+                <div className="relative z-10 h-full flex flex-col">
 
-                  {/* TOP */}
-                  <div className="flex justify-between items-start mb-6">
+                  {/* TOP BAR */}
+                  <div
+                    className="
+                      flex
+                      items-start
+                      justify-between
+                      gap-4
+                    "
+                  >
 
-                    <div className="space-y-3">
+                    {/* LEFT */}
+                    <div>
 
-                      {/* STAGE */}
-                      <div
-                        className="
-                          inline-flex
-
-                          px-4
-                          py-2
-
-                          rounded-2xl
-
-                          border
-                          border-white/[0.08]
-
-                          bg-white/[0.05]
-
-                          backdrop-blur-xl
-
-                          text-white
-                          text-sm
-                          font-semibold
-                        "
-                      >
-                        {course.stage}
-                      </div>
-
-                      <div
-                        className="
-                          text-sm
-                          text-slate-400
-                        "
-                      >
-                        {examData.name}
-                      </div>
+                      {/* ENROLLMENT */}
+                      <EnrollmentBadge
+                        courseId={course.id}
+                      />
 
                     </div>
 
-                    {/* PRICE */}
+                    {/* RIGHT */}
                     <div
                       className="
-                        text-3xl
+                        text-5xl
                         font-black
 
                         tracking-tight
@@ -378,57 +337,81 @@ export default async function ExamCoursesPage({
 
                   </div>
 
-                  {/* TITLE */}
-                  <h2
-                    className="
-                      text-[28px]
+                  {/* EXAM */}
+                  <div className="mt-8">
 
-                      font-black
+                    <p
+                      className="
+                        text-slate-400
+                        text-sm
 
-                      tracking-tight
-                      leading-tight
+                        uppercase
+                        tracking-[0.2em]
+                      "
+                    >
+                      {examData.name}
+                    </p>
 
-                      text-white
-                    "
-                  >
-                    {course.title}
-                  </h2>
+                    {/* TITLE */}
+                    <h3
+                      className="
+                        text-[38px]
+                        leading-[1.05]
 
-                  {/* DESCRIPTION */}
-                  <p
-                    className="
-                      mt-4
+                        font-black
 
-                      text-[14px]
-                      leading-7
+                        text-white
 
-                      text-slate-300
-                    "
-                  >
-                    {course.description}
-                  </p>
+                        mt-5
+                      "
+                    >
+                      {course.title}
+                    </h3>
+
+                    {/* DESCRIPTION */}
+                    <p
+                      className="
+                        text-slate-300
+
+                        mt-6
+
+                        leading-8
+                        text-[15px]
+                      "
+                    >
+                      {course.description}
+                    </p>
+
+                  </div>
 
                   {/* SPACER */}
                   <div className="flex-1" />
 
                   {/* FOOTER */}
-                  <div className="flex items-center justify-between mt-8">
+                  <div
+                    className="
+                      flex
+                      items-center
+                      justify-between
 
-                    {/* LABEL */}
+                      mt-10
+                    "
+                  >
+
                     <div>
 
                       <p
                         className="
-                          text-xs
-                          text-slate-400
+                          text-slate-500
+                          text-sm
                         "
                       >
                         Premium Course
                       </p>
 
-                      <h3
+                      <h4
                         className="
-                          text-2xl
+                          text-3xl
                           font-black
 
                           text-white
@@ -436,22 +419,24 @@ export default async function ExamCoursesPage({
                           mt-1
                         "
                       >
-                        Enroll
-                      </h3>
+                        {course.is_enrolled
+                          ? "Continue"
+                          : "Explore"}
+                      </h4>
 
                     </div>
 
-                    {/* CTA */}
+                    {/* BUTTON */}
                     <div
                       className="
                         flex
                         items-center
                         justify-center
 
-                        w-12
-                        h-12
+                        w-16
+                        h-16
 
-                        rounded-2xl
+                        rounded-3xl
 
                         border
                         border-white/[0.08]
@@ -463,14 +448,13 @@ export default async function ExamCoursesPage({
                         backdrop-blur-xl
 
                         text-white
-                        text-lg
+                        text-2xl
 
                         transition-all
                         duration-300
 
+                        group-hover:translate-x-1
                         group-hover:scale-110
-
-                        group-hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]
                       "
                     >
                       →
@@ -481,6 +465,7 @@ export default async function ExamCoursesPage({
                 </div>
 
               </Link>
+
             ))}
 
           </div>
