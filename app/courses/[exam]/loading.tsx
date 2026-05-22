@@ -8,8 +8,7 @@ export default function ExamCoursesLoading() {
           </div>
           <div>
             <p className="text-lg font-semibold text-white">Please wait...</p>
-            <p className="text-sm text-slate-400">Loading courses and waiting time details.</p>
-          </div>
+           </div>
         </div>
       </div>
     </div>

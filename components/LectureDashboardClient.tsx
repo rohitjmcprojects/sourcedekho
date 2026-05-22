@@ -84,6 +84,19 @@ export default function LectureDashboardClient({
     };
   }, [courseId, initialEnrolled, user?.id]);
 
+  // Debug logging for enrollment and lecture rows
+  useEffect(() => {
+    console.debug("LectureDashboardClient - enrolled:", enrolled, "initialEnrolled:", initialEnrolled, "activeSubject:", activeSubject);
+  }, [enrolled, initialEnrolled, activeSubject]);
+
+  useEffect(() => {
+    console.debug(
+      "LectureDashboardClient - lectureRows length:",
+      lectureRows.length,
+      lectureRows.map((r) => ({ id: r.id, lecture_title: r.lecture_title, video_url: r.video_url }))
+    );
+  }, [lectureRows]);
+
   useEffect(() => {
     if (!user?.id || !enrolled || initialEnrolled) return;
 
