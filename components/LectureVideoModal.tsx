@@ -22,6 +22,7 @@ interface VideoItem {
 interface LectureVideoModalProps {
   title: string;
   videos?: VideoItem[];
+  locked?: boolean;
 }
 
 export default function LectureVideoModal({
