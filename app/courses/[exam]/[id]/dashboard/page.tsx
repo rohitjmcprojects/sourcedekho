@@ -109,6 +109,7 @@ export default async function LectureDashboardPage({
           FROM enrollments
           WHERE course_id = ${course.id}
             AND clerk_user_id = ${userId}
+            AND payment_status = 'approved'
           LIMIT 1
         `
       ).length

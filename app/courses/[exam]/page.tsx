@@ -96,6 +96,7 @@ export default async function ExamCoursesPage({
         SELECT 1
         FROM enrollments
         WHERE enrollments.course_id = courses.id
+          AND enrollments.payment_status = 'approved'
       ) AS is_enrolled
 
     FROM courses
@@ -104,6 +105,26 @@ export default async function ExamCoursesPage({
 
     ORDER BY id ASC
   `;
+
+  // enrich courses with lecture stats
+  const courseIds = courses.map((c: any) => c.id);
+  let statsMap: Record<number, any> = {};
+  if (courseIds.length > 0) {
+    const stats = await sql`
+      SELECT
+        course_id,
+        COUNT(DISTINCT subject_name) AS subject_count,
+        COUNT(DISTINCT lecture_title) AS themes_count,
+        COUNT(sub_title) AS total_lectures
+      FROM lectures
+      WHERE course_id = ANY(${courseIds})
+      GROUP BY course_id
+    `;
+
+    for (const s of stats) {
+      statsMap[s.course_id] = s;
+    }
+  }
 
   return (
     <main className="pl-[120px] pr-5 py-5">
@@ -360,7 +381,6 @@ export default async function ExamCoursesPage({
                       >
                         ₹{course.price}
                       </div>
-                      
                       <EnrollmentBadge
                         courseId={course.id}
                       />
@@ -400,6 +420,24 @@ export default async function ExamCoursesPage({
                       {course.description}
                     </p>
 
+                  </div>
+
+                  {/* STATS */}
+                  <div className="mt-4 mb-2 flex items-center gap-4">
+                    <div className="text-sm text-slate-400">
+                      <span className="font-bold text-white mr-1">{statsMap[course.id]?.subject_count ?? 0}</span>
+                      Subjects
+                    </div>
+
+                    <div className="text-sm text-slate-400">
+                      <span className="font-bold text-white mr-1">{statsMap[course.id]?.themes_count ?? 0}</span>
+                      Themes
+                    </div>
+
+                    <div className="text-sm text-slate-400">
+                      <span className="font-bold text-white mr-1">{statsMap[course.id]?.total_lectures ?? 0}</span>
+                      Lectures
+                    </div>
                   </div>
 
                   {/* SPACER */}

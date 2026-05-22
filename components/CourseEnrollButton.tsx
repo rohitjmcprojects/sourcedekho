@@ -18,6 +18,8 @@ export default function CourseEnrollButton({
   const [open, setOpen] =
     useState(false);
 
+  const [enrollmentStatus, setEnrollmentStatus] = useState<string | null>(null);
+
   const [loading, setLoading] =
     useState(false);
 
@@ -94,6 +96,33 @@ export default function CourseEnrollButton({
 
     fetchSavedProfile();
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !course?.id) return;
+
+    let mounted = true;
+
+    const check = async () => {
+      try {
+        const res = await fetch(
+          `/api/check-enrollment?courseId=${course.id}&clerkUserId=${user.id}`
+        );
+        const data = await res.json();
+
+        if (!mounted) return;
+
+        setEnrollmentStatus(data.status ?? null);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    check();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user, course?.id]);
 
   // ====================================
   // ENROLL
@@ -222,40 +251,86 @@ export default function CourseEnrollButton({
           <>
 
             {/* ENROLL */}
-            <button
-              onClick={() =>
-                setOpen(true)
-              }
-              className="
-                px-6
-                py-3
+            {enrollmentStatus === "pending" ? (
+              <button
+                disabled
+                className="
+                  px-6
+                  py-3
 
-                rounded-2xl
+                  rounded-2xl
 
-                border
-                border-white/[0.08]
+                  border
+                  border-amber-400/30
 
-                bg-gradient-to-br
-                from-blue-500/20
-                to-indigo-500/20
+                  bg-amber-500/20
 
-                backdrop-blur-xl
+                  text-amber-200
 
-                text-white
+                  font-semibold
+                  text-sm
+                "
+              >
+                Pending
+              </button>
+            ) : enrollmentStatus === "approved" ? (
+              <button
+                disabled
+                className="
+                  px-6
+                  py-3
 
-                font-semibold
-                text-sm
+                  rounded-2xl
 
-                transition-all
-                duration-300
+                  border
+                  border-emerald-400/30
 
-                hover:border-white/[0.15]
-                hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]
-                hover:-translate-y-1
-              "
-            >
-              Enroll Now
-            </button>
+                  bg-emerald-500/20
+
+                  text-emerald-200
+
+                  font-semibold
+                  text-sm
+                "
+              >
+                Already Enrolled
+              </button>
+            ) : (
+              <button
+                onClick={() =>
+                  setOpen(true)
+                }
+                className="
+                  px-6
+                  py-3
+
+                  rounded-2xl
+
+                  border
+                  border-white/[0.08]
+
+                  bg-gradient-to-br
+                  from-blue-500/20
+                  to-indigo-500/20
+
+                  backdrop-blur-xl
+
+                  text-white
+
+                  font-semibold
+                  text-sm
+
+                  transition-all
+                  duration-300
+
+                  hover:border-white/[0.15]
+                  hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]
+                  hover:-translate-y-1
+                "
+              >
+                Enroll Now
+              </button>
+            )}
 
             {/* MODAL */}
             {open && (

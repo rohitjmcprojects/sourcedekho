@@ -27,15 +27,24 @@ export async function GET(
   }
 
   const result = await sql`
-    SELECT *
+    SELECT payment_status
     FROM enrollments
     WHERE course_id = ${courseId}
     AND clerk_user_id = ${clerkUserId}
     LIMIT 1
   `;
 
+  if (result.length === 0) {
+    return NextResponse.json({
+      enrolled: false,
+      status: null,
+    });
+  }
+
+  const status = result[0].payment_status;
+
   return NextResponse.json({
-    enrolled:
-      result.length > 0,
+    enrolled: status === "approved",
+    status,
   });
 }

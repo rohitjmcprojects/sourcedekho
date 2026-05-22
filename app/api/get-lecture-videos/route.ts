@@ -17,6 +17,7 @@ export async function GET(req: Request) {
     FROM enrollments
     WHERE course_id = ${courseId}
       AND clerk_user_id = ${clerkUserId}
+      AND payment_status = 'approved'
     LIMIT 1
   `;
 

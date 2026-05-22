@@ -44,11 +44,17 @@ export default function LectureDashboardClient({
   const [lectureRows, setLectureRows] = useState<LectureRow[]>(
     allLectures
   );
+  const [loading, setLoading] = useState(false);
 
+  // initialize enrolled from server prop when it changes (do not reset on subject switch)
   useEffect(() => {
     setEnrolled(initialEnrolled);
+  }, [initialEnrolled]);
+
+  // reset lecture rows when server-provided lectures or subject changes
+  useEffect(() => {
     setLectureRows(allLectures);
-  }, [initialEnrolled, allLectures]);
+  }, [allLectures, activeSubject]);
 
   useEffect(() => {
     if (!user?.id || initialEnrolled) return;
@@ -84,6 +90,7 @@ export default function LectureDashboardClient({
     let cancelled = false;
 
     const fetchLectureVideos = async () => {
+      setLoading(true);
       try {
         const res = await fetch(
           `/api/get-lecture-videos?courseId=${courseId}&subject=${encodeURIComponent(
@@ -99,6 +106,8 @@ export default function LectureDashboardClient({
       } catch (error) {
         console.log(error);
         setLectureRows(allLectures);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -107,7 +116,7 @@ export default function LectureDashboardClient({
     return () => {
       cancelled = true;
     };
-  }, [activeSubject, allLectures, courseId, enrolled, initialEnrolled, user?.id]);
+  }, [activeSubject, courseId, enrolled, initialEnrolled, user?.id]);
 
   return (
     <div
@@ -248,26 +257,32 @@ export default function LectureDashboardClient({
       </div>
 
       <div className="lg:col-span-3 space-y-1">
-        {uniqueLectures.map((lecture) => (
-          <div
-            key={lecture.id}
-            className="
-              group
-              relative
-              overflow-hidden
-              rounded-[30px]
-              border
-              border-white/[0.07]
-              bg-[#0a1a16]/60
-              backdrop-blur-2xl
-              p-0
-              transition-all
-              duration-300
-              hover:border-white/[0.12]
-              hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]
-              shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
-            "
-          >
+        {loading ? (
+          <div className="flex items-center justify-center p-12">
+            <div className="h-12 w-12 rounded-full border-4 border-t-blue-400 animate-spin" />
+          </div>
+        ) : (
+          <>
+            {uniqueLectures.map((lecture) => (
+              <div
+                key={lecture.id}
+                className="
+                  group
+                  relative
+                  overflow-hidden
+                  rounded-[30px]
+                  border
+                  border-white/[0.07]
+                  bg-[#0a1a16]/60
+                  backdrop-blur-2xl
+                  p-0
+                  transition-all
+                  duration-300
+                  hover:border-white/[0.12]
+                  hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]
+                  shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+                "
+              >
             <div
               className="
                 absolute
@@ -447,7 +462,9 @@ export default function LectureDashboardClient({
               </div>
             </div>
           </div>
-        ))}
+            ))}
+          </>
+        )}
       </div>
     </div>
   );
