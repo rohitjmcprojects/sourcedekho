@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { currentUser } from "@clerk/nextjs/server";
 import { sql } from "@/lib/db";
 import { Info } from "lucide-react";
-import LectureVideoModal from "@/components/LectureVideoModal";
-import LectureTestModal from "@/components/LectureTestModal";
+import LectureDashboardClient from "@/components/LectureDashboardClient";
+
+export const dynamic = "force-dynamic";
 
 type SubjectRow = {
   subject_name: string;
@@ -31,6 +33,9 @@ export default async function LectureDashboardPage({
   const { id } = await params;
   const { subject } = await searchParams;
 
+  const user = await currentUser();
+  const userId = user?.id;
+
   // FETCH COURSE
   const courses = await sql`
     SELECT
@@ -42,7 +47,6 @@ export default async function LectureDashboardPage({
     WHERE courses.id = ${id}
   `;
 
-  
   const course = courses[0];
 
   if (!course) {
@@ -97,6 +101,19 @@ export default async function LectureDashboardPage({
     );
   }
 
+  const isEnrolled = Boolean(
+    userId &&
+      (
+        await sql`
+          SELECT *
+          FROM enrollments
+          WHERE course_id = ${course.id}
+            AND clerk_user_id = ${userId}
+          LIMIT 1
+        `
+      ).length
+  );
+
   // FETCH SUBJECTS
   const subjects = (await sql`
     SELECT DISTINCT subject_name
@@ -109,26 +126,47 @@ export default async function LectureDashboardPage({
     subject || subjects[0]?.subject_name || "";
 
   // FETCH LECTURES
-  const uniqueLectures = (await sql`
-  SELECT *
-  FROM (
-    SELECT DISTINCT ON (lecture_title)
-      *
-    FROM lectures
-    WHERE course_id = ${course.id}
-      AND subject_name = ${activeSubject}
-    ORDER BY lecture_title, id ASC
-  ) unique_lectures
-  ORDER BY id ASC
-`) as LectureRow[];
+  const uniqueLectures = isEnrolled
+    ? (await sql`
+        SELECT id, lecture_title, sub_title, duration, video_url
+        FROM (
+          SELECT DISTINCT ON (lecture_title)
+            *
+          FROM lectures
+          WHERE course_id = ${course.id}
+            AND subject_name = ${activeSubject}
+          ORDER BY lecture_title, id ASC
+        ) unique_lectures
+        ORDER BY id ASC
+      `) as LectureRow[]
+    : (await sql`
+        SELECT id, lecture_title, sub_title, duration
+        FROM (
+          SELECT DISTINCT ON (lecture_title)
+            id, lecture_title, sub_title, duration
+          FROM lectures
+          WHERE course_id = ${course.id}
+            AND subject_name = ${activeSubject}
+          ORDER BY lecture_title, id ASC
+        ) unique_lectures
+        ORDER BY id ASC
+      `) as LectureRow[];
 
-const allLectures = (await sql`
-  SELECT *
-  FROM lectures
-  WHERE course_id = ${course.id}
-    AND subject_name = ${activeSubject}
-  ORDER BY id ASC
-`) as LectureRow[];
+  const allLectures = isEnrolled
+    ? (await sql`
+        SELECT id, lecture_title, sub_title, duration, video_url
+        FROM lectures
+        WHERE course_id = ${course.id}
+          AND subject_name = ${activeSubject}
+        ORDER BY id ASC
+      `) as LectureRow[]
+    : (await sql`
+        SELECT id, lecture_title, sub_title, duration
+        FROM lectures
+        WHERE course_id = ${course.id}
+          AND subject_name = ${activeSubject}
+        ORDER BY id ASC
+      `) as LectureRow[];
 
   return (
     <main className="pl-[120px] pr-5 py-5" >
@@ -295,7 +333,7 @@ const allLectures = (await sql`
             <div>
 
             {/* TITLE */}
-                    <a
+                    <Link
                       href={`/courses/${course.exam_name.toLowerCase()}/${course.id}/dashboard`}
                       className="
                         flex
@@ -324,476 +362,21 @@ const allLectures = (await sql`
                       {course.title}                      
                       <Info className="w-5 h-5" />
 
-                    </a>
+                    </Link>
           </div>
           </div>
           </div>
 
           {/* BODY */}
-          <div
-            className="
-              grid
-              grid-cols-1
-              lg:grid-cols-4
-              gap-2
-            "
-          >
-
-            {/* SUBJECTS CARD */}
-                <div
-                  className="
-                    flex-1
-                    overflow-y-auto
-
-                   
-                    rounded-[32px]
-                     
-                    border
-                    border-white/[0.07]
-
-                    bg-[#0a1a16]/60
-
-                    backdrop-blur-2xl
-
-                    shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
-
-                    h-[380px]
-
-                    flex
-                    flex-col
-                  "
-                >
-
-                  {/* CARD HEADER */}
-                  <div
-                    className="
-                      p-4
-
-                      border-b
-                      border-white/[0.06]
-
-                      bg-gradient-to-r
-                      from-blue-500/10
-                      to-indigo-500/10
-                    "
-                  >
-                    <h2
-                      className="
-                        text-1xl
-                        font-black
-                        text-white
-                        tracking-tight
-                      "
-                    >
-                      SUBJECTS
-                    </h2>
-
-                  </div>
-
-                  {/* SCROLLABLE SUBJECTS */}
-                  <div
-                    className="
-                      flex-1
-                      overflow-y-auto
-
-                      p-4
-                      space-y-1
-                      
-
-                      scrollbar-thin
-                      scrollbar-thumb-white/10
-                      scrollbar-track-transparent
-                    "
-                  >
-                    {subjects.map((sub) => {
-                      const isActive =
-                        sub.subject_name === activeSubject;
-
-                      return (
-                        <Link
-                          key={sub.subject_name}
-                          href={`?subject=${sub.subject_name}`}
-                          className={`
-                            group
-                            relative
-                            overflow-hidden
-
-                            block
-
-                            rounded-[24px]
-
-                            border
-
-                            p-2
-
-                            transition-all
-                            duration-300
-
-                            shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
-
-                            ${
-                              isActive
-                                ? `
-                                  border-white/[0.08]
-
-                                  bg-gradient-to-br
-                                  from-blue-500/20
-                                  to-indigo-500/20
-
-                                  backdrop-blur-xl
-
-                                  shadow-[0_0_25px_rgba(16,185,129,0.14)]
-                                `
-                                : `
-                                  border-white/[0.07]
-
-                                  bg-[#0c201a]/60
-
-                                  backdrop-blur-2xl
-
-                                  hover:border-white/[0.12]
-
-                                  hover:-translate-y-0.5
-                                `
-                            }
-                          `}
-                        >
-
-                          {/* REFLECTION */}
-                          <div
-                            className="
-                              absolute
-                              inset-0
-
-                              bg-gradient-to-b
-                              from-white/[0.05]
-                              via-transparent
-                              to-transparent
-
-                              pointer-events-none
-                            "
-                          />
-
-                          {/* INNER BORDER */}
-                          <div
-                            className="
-                              absolute
-                              inset-[1px]
-
-                              rounded-[23px]
-
-                              border
-                              border-white/[0.03]
-
-                              pointer-events-none
-                            "
-                          />
-
-                          <h3
-                            className="
-                              relative
-
-                              text-lg
-                              font-bold
-
-                              text-white
-                            "
-                          >
-                            {sub.subject_name}
-                          </h3>
-
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-
-            {/* LECTURES */}
-            <div className="lg:col-span-3">
-
-              {/* LECTURES */}
-              <div className="space-y-1">
-                {uniqueLectures.map(
-                  (lecture) => (
-                    <div
-                      key={lecture.id}
-                      className="
-                        group
-                        relative
-                        overflow-hidden
-
-                        rounded-[30px]
-
-                        border
-                        border-white/[0.07]
-
-                        bg-[#0a1a16]/60
-
-                        backdrop-blur-2xl
-
-                        p-0
-
-                        transition-all
-                        duration-300
-
-                        hover:border-white/[0.12]
-
-                        hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]
-
-                        shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
-
-                        
-                      "
-                    >
-
-                      {/* HOVER GLOW */}
-                      <div
-                        className="
-                          absolute
-                          inset-0
-
-                          opacity-0
-                          group-hover:opacity-100
-
-                          transition-all
-                          duration-500
-
-                          bg-gradient-to-br
-                          from-blue-500/10
-                          via-indigo-500/5
-                          to-transparent
-                        "
-                      />
-
-                      {/* REFLECTION */}
-                      <div
-                        className="
-                          absolute
-                          inset-0
-
-                          bg-gradient-to-b
-                          from-white/[0.05]
-                          via-transparent
-                          to-transparent
-
-                          pointer-events-none
-                        "
-                      />
-
-                      {/* INNER BORDER */}
-                      <div
-                        className="
-                          absolute
-                          inset-[1px]
-
-                          rounded-[29px]
-
-                          border
-                          border-white/[0.03]
-
-                          pointer-events-none
-                        "
-                      />
-
-                      {/* CONTENT */}
-                      <div
-                        className="
-                          relative
-                          z-10
-
-                          flex
-                          flex-col
-                          lg:flex-row
-
-                          lg:items-center
-                          lg:justify-between
-
-                          gap-5
-                        "
-                      >
-
-                        {/* LEFT */}
-                        <div className="flex items-center gap-5">
-
-                          {/* NUMBER */}
-                          <div
-                            className="
-                              w-14
-                              h-14
-
-                              rounded-2xl
-
-                              border
-                              border-white/[0.08]
-
-                              bg-gradient-to-br
-                              from-blue-500/20
-                              to-indigo-500/20
-
-                              backdrop-blur-xl
-
-                              text-white
-
-                              flex
-                              items-center
-                              justify-center
-
-                              font-bold
-                            "
-                          >
-
-                          </div>
-
-                          {/* INFO */}
-                          <div>
-
-                            <h3
-                              className="
-                               text-sm
-                                    md:text-base
-
-                                    font-semibold
-
-                                    text-white
-                              "
-                            >
-                              {
-                                lecture.lecture_title
-                              }
-                            </h3>
-
-                            <p
-                              className="
-                                text-sm
-
-                                text-slate-400
-
-                                mt-2
-                              "
-                            >
-                              
-                            </p>
-
-                          </div>
-
-                        </div>
-
-                        {/* ACTIONS */}
-                        <div className="flex flex-wrap items-center gap-3">
-
-                          {/* VIDEO */}
-<LectureVideoModal
-  title={lecture.lecture_title}
-  videos={
-    allLectures
-      .filter(
-        (l) =>
-          l.lecture_title ===
-          lecture.lecture_title
-      )
-      .map((l) => ({
-        sub_title: l.sub_title,
-        video_url:
-          l.video_url || undefined,
-        duration:
-          l.duration || undefined,
-      }))
-  }
-/>
-                          {/* NOTES */}
-                          <button
-                            className="
-                              group
-
-                              flex
-                              items-center
-                              gap-2.5
-
-                              px-4
-                              py-3
-
-                              rounded-2xl
-
-                              border
-                              border-white/[0.08]
-
-                              bg-white/[0.04]
-
-                              backdrop-blur-xl
-
-                              text-slate-200
-                              text-sm
-                              font-semibold
-
-                              hover:bg-white/[0.08]
-
-                              hover:border-white/[0.12]
-
-                              transition-all
-                              duration-300
-                            "
-                          >
-                            📄
-                            Notes
-                          </button>
-
-                          {/* MCQs */}
-                          <LectureTestModal
-                            exam={course.exam_name}
-                            subject={activeSubject}
-                            lectureTitle={
-                              lecture.lecture_title
-                            }
-                            subTitles={
-                              allLectures
-                                .filter(
-                                  (l) =>
-                                    l.lecture_title ===
-                                    lecture.lecture_title
-                                )
-                                .map(
-                                  (l) =>
-                                    l.sub_title
-                                )
-                            }
-                            type="mcqs"
-                          />
-
-                          {/* PYQs */}
-                          <LectureTestModal
-                            exam={course.exam_name}
-                            subject={activeSubject}
-                            lectureTitle={
-                              lecture.lecture_title
-                            }
-                            subTitles={
-                              allLectures
-                                .filter(
-                                  (l) =>
-                                    l.lecture_title ===
-                                    lecture.lecture_title
-                                )
-                                .map(
-                                  (l) =>
-                                    l.sub_title
-                                )
-                            }
-                            type="pyqs"
-                          />
-
-                        </div>
-
-                      </div>
-
-                    </div>
-                  )
-                )}
-
-              </div>
-
-            </div>
-
-          </div>
+          <LectureDashboardClient
+            courseId={course.id}
+            courseExamName={course.exam_name}
+            activeSubject={activeSubject}
+            subjects={subjects}
+            uniqueLectures={uniqueLectures}
+            allLectures={allLectures}
+            initialEnrolled={isEnrolled}
+          />
 
         </div>
 

@@ -238,7 +238,7 @@ export default async function ExamCoursesPage({
               grid-cols-1
               md:grid-cols-2
               xl:grid-cols-3
-              gap-6
+              gap-4
             "
           >
 
@@ -256,26 +256,28 @@ export default async function ExamCoursesPage({
                   relative
                   overflow-hidden
 
-                  rounded-[34px]
+                  rounded-[24px]
 
                   border
-                  border-white/[0.08]
+                  border-white/[0.07]
 
-                  bg-[rgba(15,23,42,0.72)]
+                  bg-[#0a1a16]/60
+
+                  shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
 
                   backdrop-blur-2xl
 
-                  p-7
+                  p-4
 
-                  min-h-[340px]
+                  min-h-[280px]
 
                   transition-all
                   duration-500
 
-                  hover:-translate-y-2
-                  hover:border-blue-400/20
+                  hover:-translate-y-1.5
+                  hover:border-white/[0.12]
 
-                  hover:shadow-[0_0_50px_rgba(16,185,129,0.2)]
+                  hover:shadow-[0_0_40px_rgba(16,185,129,0.18)]
                 "
               >
 
@@ -293,8 +295,21 @@ export default async function ExamCoursesPage({
 
                     bg-gradient-to-br
                     from-blue-500/10
+                    via-indigo-500/5
+                    to-transparent
+                  "
+                />
+
+                {/* GLASS EFFECT */}
+                <div
+                  className="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    bg-gradient-to-b
+                    from-white/[0.05]
                     via-transparent
-                    to-indigo-500/10
+                    to-transparent
                   "
                 />
 
@@ -307,62 +322,63 @@ export default async function ExamCoursesPage({
                       flex
                       items-start
                       justify-between
-                      gap-4
+                      gap-2
                     "
                   >
 
                     {/* LEFT */}
                     <div>
 
-                      {/* ENROLLMENT */}
-                      <EnrollmentBadge
-                        courseId={course.id}
-                      />
+                      {/* EXAM TAG */}
+                      <p
+                        className="
+                          text-slate-400
+                          text-xs
+
+                          uppercase
+                          tracking-[0.15em]
+                        "
+                      >
+                        {examData.name}
+                      </p>
 
                     </div>
 
-                    {/* RIGHT */}
-                    <div
-                      className="
-                        text-5xl
-                        font-black
+                    {/* RIGHT - PRICE + BADGE */}
+                    <div className="flex flex-col items-end gap-1">
+                      <div
+                        className="
+                          text-2xl
+                          font-black
 
-                        tracking-tight
+                          tracking-tight
 
-                        text-white
-                      "
-                    >
-                      ₹{course.price}
+                          text-white
+
+                          whitespace-nowrap
+                        "
+                      >
+                        ₹{course.price}
+                      </div>
+                      
+                      <EnrollmentBadge
+                        courseId={course.id}
+                      />
                     </div>
 
                   </div>
 
-                  {/* EXAM */}
-                  <div className="mt-8">
+                  {/* TITLE */}
+                  <div className="mt-3">
 
-                    <p
-                      className="
-                        text-slate-400
-                        text-sm
-
-                        uppercase
-                        tracking-[0.2em]
-                      "
-                    >
-                      {examData.name}
-                    </p>
-
-                    {/* TITLE */}
                     <h3
                       className="
-                        text-[38px]
-                        leading-[1.05]
+                        text-[20px]
+                        leading-[1.1]
 
                         font-black
 
                         text-white
-
-                        mt-5
                       "
                     >
                       {course.title}
@@ -373,10 +389,12 @@ export default async function ExamCoursesPage({
                       className="
                         text-slate-300
 
-                        mt-6
+                        mt-2
 
-                        leading-8
-                        text-[15px]
+                        leading-5
+                        text-[12px]
+
+                        line-clamp-2
                       "
                     >
                       {course.description}
@@ -394,7 +412,7 @@ export default async function ExamCoursesPage({
                       items-center
                       justify-between
 
-                      mt-10
+                      mt-3
                     "
                   >
 
@@ -403,20 +421,22 @@ export default async function ExamCoursesPage({
                       <p
                         className="
                           text-slate-500
-                          text-sm
+                          text-xs
                         "
                       >
-                        Premium Course
+                        {course.is_enrolled
+                          ? "Enrolled"
+                          : "Premium Course"}
                       </p>
 
                       <h4
                         className="
-                          text-3xl
+                          text-lg
                           font-black
 
                           text-white
 
-                          mt-1
+                          mt-0.5
                         "
                       >
                         {course.is_enrolled
@@ -433,10 +453,10 @@ export default async function ExamCoursesPage({
                         items-center
                         justify-center
 
-                        w-16
-                        h-16
+                        w-9
+                        h-9
 
-                        rounded-3xl
+                        rounded-2xl
 
                         border
                         border-white/[0.08]
@@ -448,13 +468,13 @@ export default async function ExamCoursesPage({
                         backdrop-blur-xl
 
                         text-white
-                        text-2xl
+                        text-lg
 
                         transition-all
                         duration-300
 
-                        group-hover:translate-x-1
                         group-hover:scale-110
+                        group-hover:shadow-[0_0_20px_rgba(16,185,129,0.28)]
                       "
                     >
                       →

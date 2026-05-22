@@ -22,11 +22,13 @@ interface VideoItem {
 interface LectureVideoModalProps {
   title: string;
   videos?: VideoItem[];
+  locked?: boolean;
 }
 
 export default function LectureVideoModal({
   title,
   videos = [],
+  locked = false,
 }: LectureVideoModalProps) {
   const { user } = useUser();
 
@@ -236,12 +238,19 @@ export default function LectureVideoModal({
         )
       : 0;
 
+  const openModal = () => {
+    if (locked) return;
+    setOpen(true);
+  };
+
   return (
     <>
       {/* OPEN BUTTON */}
       <button
-        onClick={() => setOpen(true)}
-        className="
+        type="button"
+        onClick={openModal}
+        disabled={locked}
+        className={`
           group
           flex
           items-center
@@ -255,11 +264,11 @@ export default function LectureVideoModal({
           text-white
           text-sm
           font-semibold
-          hover:bg-blue-500/30
           transition-all
-        "
+          ${locked ? "cursor-not-allowed bg-white/[0.05] text-slate-500" : "hover:bg-blue-500/30"}
+        `}
       >
-        ▶ Video
+        {locked ? "🔒 Locked" : "▶ Video"}
       </button>
 
       {/* MODAL */}

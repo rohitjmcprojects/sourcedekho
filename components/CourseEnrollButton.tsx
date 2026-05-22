@@ -37,40 +37,62 @@ export default function CourseEnrollButton({
   // ====================================
 
   useEffect(() => {
+    if (!user) return;
 
-    if (user) {
+    const initialForm = {
+      fullName:
+        user.fullName ||
+        `${user.firstName || ""} ${user.lastName || ""}`,
+      email:
+        user.primaryEmailAddress
+          ?.emailAddress || "",
+      phone:
+        (user.publicMetadata
+          ?.phone as string) || "",
+      city:
+        (user.publicMetadata
+          ?.city as string) || "",
+      address:
+        (user.publicMetadata
+          ?.address as string) || "",
+      transactionNo: "",
+      background:
+        (user.publicMetadata
+          ?.background as string) || "",
+    };
 
-      setForm({
-        fullName:
-          user.fullName ||
-          `${user.firstName || ""} ${user.lastName || ""}`,
+    setForm(initialForm);
 
-        email:
-          user
-            .primaryEmailAddress
-            ?.emailAddress || "",
+    const fetchSavedProfile = async () => {
+      try {
+        const res = await fetch(
+          `/api/get-profile?clerkUserId=${user.id}`
+        );
+        const data = await res.json();
 
-        phone:
-          (user.publicMetadata
-            ?.phone as string) || "",
+        if (!data?.profile) return;
 
-        city:
-          (user.publicMetadata
-            ?.city as string) || "",
+        setForm((prev) => ({
+          fullName:
+            prev.fullName || data.profile.full_name || "",
+          email:
+            prev.email || data.profile.email || "",
+          phone:
+            prev.phone || data.profile.phone || "",
+          city:
+            prev.city || data.profile.city || "",
+          address:
+            prev.address || data.profile.address || "",
+          transactionNo: prev.transactionNo,
+          background:
+            prev.background || data.profile.background || "",
+        }));
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
-        address:
-          (user.publicMetadata
-            ?.address as string) || "",
-
-        transactionNo: "",
-
-        background:
-          (user.publicMetadata
-            ?.background as string) || "",
-      });
-
-    }
-
+    fetchSavedProfile();
   }, [user]);
 
   // ====================================
@@ -156,30 +178,6 @@ export default function CourseEnrollButton({
       {/* ACTIONS */}
       <div className="flex gap-4 flex-wrap">
 
-        {/* DASHBOARD */}
-        <a
-          href={`/courses/${course.exam_name.toLowerCase()}/${course.id}/dashboard`}
-          className="
-            px-8
-            py-4
-
-            rounded-2xl
-
-            border
-
-            font-semibold
-            text-lg
-
-            bg-gray-100
-
-            hover:bg-indigo-500/30
-
-            transition
-          "
-        >
-          Lecture Dashboard
-        </a>
-
         {/* LOGIN */}
         {!user ? (
 
@@ -187,21 +185,31 @@ export default function CourseEnrollButton({
 
             <button
               className="
-                px-8
-                py-4
+                px-6
+                py-3
 
                 rounded-2xl
 
-                bg-black
+                border
+                border-white/[0.08]
+
+                bg-gradient-to-br
+                from-blue-500/20
+                to-indigo-500/20
+
+                backdrop-blur-xl
 
                 text-white
 
                 font-semibold
-                text-lg
+                text-sm
 
-                hover:opacity-90
+                transition-all
+                duration-300
 
-                transition
+                hover:border-white/[0.15]
+                hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]
+                hover:-translate-y-1
               "
             >
               Login to Enroll
@@ -219,21 +227,31 @@ export default function CourseEnrollButton({
                 setOpen(true)
               }
               className="
-                px-8
-                py-4
+                px-6
+                py-3
 
                 rounded-2xl
 
-                bg-black
+                border
+                border-white/[0.08]
+
+                bg-gradient-to-br
+                from-blue-500/20
+                to-indigo-500/20
+
+                backdrop-blur-xl
 
                 text-white
 
                 font-semibold
-                text-lg
+                text-sm
 
-                hover:opacity-90
+                transition-all
+                duration-300
 
-                transition
+                hover:border-white/[0.15]
+                hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]
+                hover:-translate-y-1
               "
             >
               Enroll Now
@@ -305,7 +323,7 @@ export default function CourseEnrollButton({
                   />
 
                   {/* CONTENT */}
-                  <div className="relative z-10 p-8 sm:p-10">
+                  <div className="relative z-10 p-6 sm:p-8 max-h-[80vh] overflow-y-auto">
 
                     {/* CLOSE */}
                     <button
@@ -362,398 +380,115 @@ export default function CourseEnrollButton({
 
                     </div>
 
-                    {/* USER */}
-                    <div
-                      className="
-                        rounded-3xl
-
-                        border
-                        border-white/[0.08]
-
-                        bg-white/[0.04]
-
-                        p-6
-                        mb-7
-                      "
-                    >
-
-                      <p className="text-sm text-slate-400 mb-2">
-                        Logged in as
-                      </p>
-
-                      <p className="font-semibold text-xl text-white">
-                        {user.fullName}
-                      </p>
-
-                      <p className="text-slate-400 mt-1">
-                        {
-                          user
-                            .primaryEmailAddress
-                            ?.emailAddress
-                        }
-                      </p>
-
-                    </div>
-
                     {/* FORM */}
-                    <div
-                      className="
-                        grid
-                        grid-cols-1
-                        sm:grid-cols-2
-                        gap-5
-                      "
-                    >
-
-                      {/* FULL NAME */}
-                      <div>
-
-                        <label className="text-sm text-slate-300 block mb-2">
-                          Full Name
-                        </label>
-
-                        <input
-                          value={
-                            form.fullName
-                          }
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              fullName:
-                                e.target
-                                  .value,
-                            })
-                          }
-                          placeholder="Full Name"
-                          className="
-                            w-full
-                            h-14
-
-                            rounded-2xl
-
-                            border
-                            border-white/[0.08]
-
-                            bg-white/[0.05]
-
-                            px-5
-
-                            text-white
-
-                            outline-none
-                          "
-                        />
-
-                      </div>
-
-                      {/* EMAIL */}
-                      <div>
-
-                        <label className="text-sm text-slate-300 block mb-2">
-                          Email
-                        </label>
-
-                        <input
-                          value={
-                            form.email
-                          }
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              email:
-                                e.target
-                                  .value,
-                            })
-                          }
-                          placeholder="Email"
-                          className="
-                            w-full
-                            h-14
-
-                            rounded-2xl
-
-                            border
-                            border-white/[0.08]
-
-                            bg-white/[0.05]
-
-                            px-5
-
-                            text-white
-
-                            outline-none
-                          "
-                        />
-
-                      </div>
-
-                      {/* PHONE */}
-                      <div>
-
-                        <label className="text-sm text-slate-300 block mb-2">
-                          Phone Number
-                        </label>
-
-                        <input
-                          value={
-                            form.phone
-                          }
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              phone:
-                                e.target
-                                  .value,
-                            })
-                          }
-                          placeholder="Phone Number"
-                          className="
-                            w-full
-                            h-14
-
-                            rounded-2xl
-
-                            border
-                            border-white/[0.08]
-
-                            bg-white/[0.05]
-
-                            px-5
-
-                            text-white
-
-                            outline-none
-                          "
-                        />
-
-                      </div>
-
-                      {/* CITY */}
-                      <div>
-
-                        <label className="text-sm text-slate-300 block mb-2">
-                          City
-                        </label>
-
-                        <input
-                          value={
-                            form.city
-                          }
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              city:
-                                e.target
-                                  .value,
-                            })
-                          }
-                          placeholder="City"
-                          className="
-                            w-full
-                            h-14
-
-                            rounded-2xl
-
-                            border
-                            border-white/[0.08]
-
-                            bg-white/[0.05]
-
-                            px-5
-
-                            text-white
-
-                            outline-none
-                          "
-                        />
-
-                      </div>
-
-                    </div>
-
-                    {/* ADDRESS */}
-                    <div className="mt-5">
-
-                      <label className="text-sm text-slate-300 block mb-2">
-                        Address
-                      </label>
-
-                      <textarea
-                        value={
-                          form.address
-                        }
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            address:
-                              e.target
-                                .value,
-                          })
-                        }
-                        placeholder="Enter full address"
-                        className="
-                          w-full
-
-                          rounded-2xl
-
-                          border
-                          border-white/[0.08]
-
-                          bg-white/[0.05]
-
-                          px-5
-                          py-4
-
-                          text-white
-
-                          outline-none
-
-                          min-h-[110px]
-                        "
-                      />
-
-                    </div>
-
-                    {/* QR + RIGHT */}
-                    <div
-                      className="
-                        mt-6
-
-                        grid
-                        grid-cols-1
-                        md:grid-cols-2
-                        gap-6
-                      "
-                    >
-
-                      {/* QR */}
-                      <div
-                        className="
-                          rounded-3xl
-
-                          border
-                          border-white/[0.08]
-
-                          bg-white/[0.04]
-
-                          p-5
-                        "
-                      >
-
-                        <p className="text-white font-semibold mb-4">
-                          Scan QR & Pay
-                        </p>
-
-                        <img
-                          src="/qr.jpeg"
-                          alt="QR"
-                          className="
-                            w-full
-                            max-w-[260px]
-
-                            rounded-2xl
-
-                            border
-                            border-white/[0.08]
-                          "
-                        />
-
-                        <p className="text-slate-400 text-sm mt-4">
-                          Complete payment
-                          before enrollment.
-                        </p>
-
-                      </div>
-
-                      {/* RIGHT */}
-                      <div>
-
-                        {/* TRANSACTION */}
-                        <div>
-
-                          <label className="text-sm text-slate-300 block mb-2">
-                            Transaction Number
-                          </label>
-
+                    <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8">
+
+                      {/* LEFT: PERSONAL DETAILS */}
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                           <input
-                            value={
-                              form.transactionNo
-                            }
+                            value={form.fullName}
                             onChange={(e) =>
                               setForm({
                                 ...form,
-                                transactionNo:
-                                  e.target
-                                    .value,
+                                fullName: e.target.value,
                               })
                             }
-                            placeholder="Enter transaction no."
-                            className="
-                              w-full
-                              h-14
-
-                              rounded-2xl
-
-                              border
-                              border-white/[0.08]
-
-                              bg-white/[0.05]
-
-                              px-5
-
-                              text-white
-
-                              outline-none
-                            "
+                            placeholder="Full Name"
+                            className="h-10 text-sm rounded-2xl border border-white/[0.08] bg-white/[0.05] px-4 text-white outline-none placeholder-slate-500"
                           />
 
-                        </div>
-
-                        {/* BACKGROUND */}
-                        <div className="mt-5">
-
-                          <label className="text-sm text-slate-300 block mb-2">
-                            Preparation Background
-                          </label>
-
-                          <textarea
-                            value={
-                              form.background
-                            }
+                          <input
+                            value={form.email}
                             onChange={(e) =>
                               setForm({
                                 ...form,
-                                background:
-                                  e.target
-                                    .value,
+                                email: e.target.value,
+                              })
+                            }
+                            placeholder="Email Address"
+                            className="h-10 text-sm rounded-2xl border border-white/[0.08] bg-white/[0.05] px-4 text-white outline-none placeholder-slate-500"
+                          />
+
+                          <input
+                            value={form.phone}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                phone: e.target.value,
+                              })
+                            }
+                            placeholder="Phone Number"
+                            className="h-10 text-sm rounded-2xl border border-white/[0.08] bg-white/[0.05] px-4 text-white outline-none placeholder-slate-500"
+                          />
+
+                          <input
+                            value={form.city}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                city: e.target.value,
+                              })
+                            }
+                            placeholder="City"
+                            className="h-10 text-sm rounded-2xl border border-white/[0.08] bg-white/[0.05] px-4 text-white outline-none placeholder-slate-500"
+                          />
+                        </div>
+
+                        <textarea
+                          value={form.address}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              address: e.target.value,
+                            })
+                          }
+                          placeholder="Enter full address"
+                          className="w-full text-sm rounded-2xl border border-white/[0.08] bg-white/[0.05] px-4 py-3 text-white outline-none min-h-[96px] placeholder-slate-500"
+                        />
+
+                        {/* Preparation background moved below address with reduced height */}
+                        <div>
+                          <textarea
+                            value={form.background}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                background: e.target.value,
                               })
                             }
                             placeholder="Tell about your preparation"
-                            className="
-                              w-full
-
-                              rounded-2xl
-
-                              border
-                              border-white/[0.08]
-
-                              bg-white/[0.05]
-
-                              px-5
-                              py-4
-
-                              text-white
-
-                              outline-none
-
-                              min-h-[140px]
-                            "
+                            className="w-full text-sm rounded-2xl border border-white/[0.08] bg-white/[0.05] px-4 py-3 text-white outline-none min-h-[120px] placeholder-slate-500"
                           />
-
                         </div>
-
                       </div>
 
+                      {/* RIGHT: PAYMENT CODE + TRANSACTION */}
+                      <div className="space-y-5">
+                        <div className="rounded-3xl border border-white/[0.08] bg-white/[0.04] p-5">
+                          <p className="text-white font-semibold mb-4 text-sm">Scan QR & Pay</p>
+                          <img
+                            src="/qr.png"
+                            alt="QR"
+                            className="w-full rounded-2xl border border-white/[0.08]"
+                          />
+                          <p className="text-slate-400 text-xs mt-3">Complete payment before enrollment.</p>
+                        </div>
+
+                        <div className="rounded-3xl border border-white/[0.08] bg-white/[0.04] p-5">
+                          <input
+                            value={form.transactionNo}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                transactionNo: e.target.value,
+                              })
+                            }
+                            placeholder="Transaction Number"
+                            className="w-full h-10 text-sm rounded-2xl border border-white/[0.08] bg-white/[0.05] px-4 text-white outline-none placeholder-slate-500"
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     {/* BUTTON */}

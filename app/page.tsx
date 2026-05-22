@@ -39,8 +39,6 @@ export default async function HomePage() {
           relative
           overflow-hidden
 
-          min-h-[calc(100vh-40px)]
-
           rounded-[36px]
 
           border
@@ -56,8 +54,8 @@ export default async function HomePage() {
 
           before:pointer-events-none
 
-          p-6
-          md:p-8
+          p-4
+          md:p-5
         "
       >
 
@@ -95,7 +93,7 @@ export default async function HomePage() {
         <div className="relative z-10">
 
           {/* HEADER */}
-          <div className="mb-5">
+          <div className="mb-2">
 
             {/* BADGE */}
             <div
@@ -183,13 +181,13 @@ function HomeSection({
   title: string;
 }) {
   return (
-    <section className="mt-6 first:mt-0">
-      <div className="mb-3 flex items-end gap-3">
-        <h2 className="text-base font-bold text-white">
+    <section className="mt-3 first:mt-0">
+      <div className="mb-2 flex items-end gap-2">
+        <h2 className="text-sm font-bold text-white">
           {title}
         </h2>
         {eyebrow && (
-          <span className="pb-0.5 text-[11px] font-semibold uppercase text-slate-400">
+          <span className="pb-0.5 text-[10px] font-semibold uppercase text-slate-400">
             {eyebrow}
           </span>
         )}
@@ -209,7 +207,7 @@ function HomeGrid({
       className="
         grid
         grid-cols-1
-        gap-3
+        gap-2
         sm:grid-cols-2
         md:grid-cols-3
         xl:grid-cols-4
@@ -244,7 +242,7 @@ function HomeCard({
 
       <div className="relative z-10 flex h-full flex-col">
         <div>
-          <div className="mb-2 inline-flex rounded-2xl border border-white/[0.08] bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-xl">
+          <div className="mb-1.5 inline-flex rounded-2xl border border-white/[0.08] bg-white/[0.05] px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-xl">
             {tag}
           </div>
 
@@ -256,8 +254,8 @@ function HomeCard({
               text-white
               ${
                 featured
-                  ? "text-[28px]"
-                  : "text-[22px]"
+                  ? "text-[24px]"
+                  : "text-[18px]"
               }
             `}
           >
@@ -265,7 +263,7 @@ function HomeCard({
           </h3>
 
           {description && (
-            <p className="mt-2 line-clamp-2 text-sm text-slate-300">
+            <p className="mt-1.5 line-clamp-2 text-xs text-slate-300">
               {description}
             </p>
           )}
@@ -273,8 +271,8 @@ function HomeCard({
 
         <div className="flex-1" />
 
-        <div className="mt-3 flex items-center">
-          <div className={`${featured ? "h-12 w-12" : "h-10 w-10"} flex items-center justify-center rounded-2xl border border-white/[0.08] bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-white backdrop-blur-xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.28)]`}>
+        <div className="mt-2 flex items-center">
+          <div className={`${featured ? "h-10 w-10" : "h-8 w-8"} flex items-center justify-center rounded-2xl border border-white/[0.08] bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-white backdrop-blur-xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.28)]`}>
             {icon || <ArrowRight className="h-4 w-4" />}
           </div>
         </div>
@@ -290,7 +288,7 @@ function HomeCard({
     border
     border-white/[0.07]
     bg-[#0a1a16]/60
-    p-4
+    p-3
     shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
     backdrop-blur-2xl
     transition-all
@@ -298,7 +296,7 @@ function HomeCard({
     hover:-translate-y-1.5
     hover:border-white/[0.12]
     hover:shadow-[0_0_40px_rgba(16,185,129,0.18)]
-    ${featured ? "min-h-[188px] p-5" : "min-h-[156px]"}
+    ${featured ? "min-h-[160px] p-4" : "min-h-[130px]"}
   `;
 
   return href ? (

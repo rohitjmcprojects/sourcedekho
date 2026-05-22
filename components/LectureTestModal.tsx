@@ -23,6 +23,7 @@ interface LectureTestModalProps {
   lectureTitle: string;
   subTitles?: string[];
   type: TestType;
+  locked?: boolean;
 }
 
 export default function LectureTestModal({
@@ -31,6 +32,7 @@ export default function LectureTestModal({
   lectureTitle,
   subTitles = [],
   type,
+  locked = false,
 }: LectureTestModalProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -93,6 +95,8 @@ export default function LectureTestModal({
   };
 
   const openModal = () => {
+    if (locked) return;
+
     setSelectedSubTitle(
       (currentSubTitle) =>
         currentSubTitle ||
@@ -120,7 +124,8 @@ export default function LectureTestModal({
       <button
         type="button"
         onClick={openModal}
-        className="
+        disabled={locked}
+        className={`
           group
           flex
           items-center
@@ -135,14 +140,21 @@ export default function LectureTestModal({
           text-slate-200
           text-sm
           font-semibold
-          hover:bg-white/[0.08]
-          hover:border-white/[0.12]
           transition-all
           duration-300
-        "
+          ${locked ? "cursor-not-allowed bg-white/[0.02] text-slate-500 border-white/[0.04]" : "hover:bg-white/[0.08] hover:border-white/[0.12]"}
+        `}
       >
-        <Icon className="h-4 w-4" />
-        {label}
+        {locked ? (
+          <span className="inline-flex items-center gap-2">
+            🔒 {label}
+          </span>
+        ) : (
+          <>
+            <Icon className="h-4 w-4" />
+            {label}
+          </>
+        )}
       </button>
 
       {open &&

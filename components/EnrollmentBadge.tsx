@@ -53,17 +53,12 @@ export default function EnrollmentBadge({
   return (
     <div
       className={`
-        absolute
-        top-5
-        right-5
-        z-20
+        px-2.5
+        py-1
 
-        px-4
-        py-2
+        rounded-xl
 
-        rounded-2xl
-
-        text-xs
+        text-[10px]
         font-bold
 
         border

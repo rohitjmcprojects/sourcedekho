@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { sql } from "@/lib/db";
 import CourseEnrollButton from "@/components/CourseEnrollButton";
 
@@ -89,8 +90,6 @@ export default async function CourseDetailPage({
           relative
           overflow-hidden
 
-          min-h-[calc(100vh-40px)]
-
           rounded-[36px]
 
           border
@@ -156,7 +155,7 @@ export default async function CourseDetailPage({
           {/* HERO */}
           <div
             className="
-              p-10
+              p-6
 
               border-b
               border-white/[0.08]
@@ -268,6 +267,40 @@ export default async function CourseDetailPage({
                 ₹{course.price}
               </div>
 
+              {/* DASHBOARD LINK */}
+              <Link
+                href={`/courses/${course.exam_name.toLowerCase()}/${course.id}/dashboard`}
+                className="
+                  px-6
+                  py-3
+
+                  rounded-2xl
+
+                  border
+                  border-white/[0.08]
+
+                  bg-gradient-to-br
+                  from-blue-500/10
+                  to-indigo-500/10
+
+                  backdrop-blur-xl
+
+                  font-semibold
+                  text-sm
+
+                  text-white
+
+                  transition-all
+                  duration-300
+
+                  hover:border-white/[0.15]
+                  hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]
+                  hover:-translate-y-1
+                "
+              >
+                Lecture Dashboard
+              </Link>
+
               {/* ENROLL */}
               <CourseEnrollButton
                 course={course}
@@ -278,19 +311,18 @@ export default async function CourseDetailPage({
           </div>
 
           {/* BODY */}
-          <div className="p-8">
+          <div className="p-5">
 
             <div
               className="
                 grid
                 grid-cols-1
-                lg:grid-cols-3
                 gap-5
               "
             >
 
               {/* LEFT */}
-              <div className="lg:col-span-2">
+              <div>
 
                 {/* ABOUT CARD */}
                 <div
@@ -395,188 +427,6 @@ export default async function CourseDetailPage({
                       lectures, notes and tests will be
                       available here.
                     </p>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* RIGHT */}
-              <div>
-
-                {/* INFO CARD */}
-                <div
-                  className="
-                    group
-                    relative
-                    overflow-hidden
-
-                    rounded-[30px]
-
-                    border
-                    border-white/[0.07]
-
-                    bg-[#0a1a16]/60
-
-                    backdrop-blur-2xl
-
-                    p-8
-
-                    shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
-                  "
-                >
-
-                  {/* HOVER GLOW */}
-                  <div
-                    className="
-                      absolute
-                      inset-0
-
-                      opacity-0
-                      group-hover:opacity-100
-
-                      transition-all
-                      duration-500
-
-                      bg-gradient-to-br
-                      from-blue-500/10
-                      via-indigo-500/5
-                      to-transparent
-                    "
-                  />
-
-                  {/* REFLECTION */}
-                  <div
-                    className="
-                      absolute
-                      inset-0
-
-                      bg-gradient-to-b
-                      from-white/[0.05]
-                      via-transparent
-                      to-transparent
-                    "
-                  />
-
-                  {/* INNER BORDER */}
-                  <div
-                    className="
-                      absolute
-                      inset-[1px]
-
-                      rounded-[29px]
-
-                      border
-                      border-white/[0.03]
-
-                      pointer-events-none
-                    "
-                  />
-
-                  {/* CONTENT */}
-                  <div className="relative z-10">
-
-                    <h3
-                      className="
-                        text-2xl
-
-                        font-black
-
-                        tracking-tight
-
-                        text-white
-
-                        mb-7
-                      "
-                    >
-                      Course Info
-                    </h3>
-
-                    <div className="space-y-6">
-
-                      {/* EXAM */}
-                      <div>
-                        <p
-                          className="
-                            text-xs
-
-                            uppercase
-                            tracking-[0.25em]
-
-                            text-slate-500
-
-                            mb-2
-                          "
-                        >
-                          Exam
-                        </p>
-
-                        <p
-                          className="
-                            text-white
-                            font-semibold
-                          "
-                        >
-                          {course.exam_name}
-                        </p>
-                      </div>
-
-                      {/* STAGE */}
-                      <div>
-                        <p
-                          className="
-                            text-xs
-
-                            uppercase
-                            tracking-[0.25em]
-
-                            text-slate-500
-
-                            mb-2
-                          "
-                        >
-                          Stage
-                        </p>
-
-                        <p
-                          className="
-                            text-white
-                            font-semibold
-                          "
-                        >
-                          {course.stage}
-                        </p>
-                      </div>
-
-                      {/* PRICE */}
-                      <div>
-                        <p
-                          className="
-                            text-xs
-
-                            uppercase
-                            tracking-[0.25em]
-
-                            text-slate-500
-
-                            mb-2
-                          "
-                        >
-                          Price
-                        </p>
-
-                        <p
-                          className="
-                            text-white
-                            font-semibold
-                          "
-                        >
-                          ₹{course.price}
-                        </p>
-                      </div>
-
-                    </div>
 
                   </div>
 
