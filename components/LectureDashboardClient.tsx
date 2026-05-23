@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
+
 import LectureVideoModal from "@/components/LectureVideoModal";
 import LectureTestModal from "@/components/LectureTestModal";
 
@@ -38,98 +39,124 @@ export default function LectureDashboardClient({
   initialEnrolled,
 }: LectureDashboardClientProps) {
   const { user } = useUser();
-  const [enrolled, setEnrolled] = useState(
-    initialEnrolled
-  );
-  const [lectureRows, setLectureRows] = useState<LectureRow[]>(
-    allLectures
-  );
-  const [loading, setLoading] = useState(false);
 
-  // initialize enrolled from server prop when it changes (do not reset on subject switch)
+  const [enrolled, setEnrolled] =
+    useState(initialEnrolled);
+
+  const [lectureRows, setLectureRows] =
+    useState<LectureRow[]>(
+      allLectures
+    );
+
+  const [loading, setLoading] =
+    useState(false);
+
+  // INIT ENROLLED
   useEffect(() => {
     setEnrolled(initialEnrolled);
   }, [initialEnrolled]);
 
-  // reset lecture rows when server-provided lectures or subject changes
+  // RESET LECTURES
   useEffect(() => {
     setLectureRows(allLectures);
   }, [allLectures, activeSubject]);
 
+  // CHECK ENROLLMENT
   useEffect(() => {
-    if (!user?.id || initialEnrolled) return;
+    if (!user?.id || initialEnrolled)
+      return;
 
     let cancelled = false;
 
-    const fetchEnrollment = async () => {
-      try {
-        const res = await fetch(
-          `/api/check-enrollment?courseId=${courseId}&clerkUserId=${user.id}`
-        );
+    const fetchEnrollment =
+      async () => {
+        try {
+          const res = await fetch(
+            `/api/check-enrollment?courseId=${courseId}&clerkUserId=${user.id}`
+          );
 
-        const data = await res.json();
+          const data =
+            await res.json();
 
-        if (!cancelled) {
-          setEnrolled(Boolean(data.enrolled));
+          if (!cancelled) {
+            setEnrolled(
+              Boolean(data.enrolled)
+            );
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
-      }
-    };
+      };
 
     fetchEnrollment();
 
     return () => {
       cancelled = true;
     };
-  }, [courseId, initialEnrolled, user?.id]);
+  }, [
+    courseId,
+    initialEnrolled,
+    user?.id,
+  ]);
 
-  // Debug logging for enrollment and lecture rows
+  // FETCH VIDEOS
   useEffect(() => {
-    console.debug("LectureDashboardClient - enrolled:", enrolled, "initialEnrolled:", initialEnrolled, "activeSubject:", activeSubject);
-  }, [enrolled, initialEnrolled, activeSubject]);
-
-  useEffect(() => {
-    console.debug(
-      "LectureDashboardClient - lectureRows length:",
-      lectureRows.length,
-      lectureRows.map((r) => ({ id: r.id, lecture_title: r.lecture_title, video_url: r.video_url }))
-    );
-  }, [lectureRows]);
-
-  useEffect(() => {
-    if (!user?.id || !enrolled || initialEnrolled) return;
+    if (
+      !user?.id ||
+      !enrolled ||
+      initialEnrolled
+    )
+      return;
 
     let cancelled = false;
 
-    const fetchLectureVideos = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `/api/get-lecture-videos?courseId=${courseId}&subject=${encodeURIComponent(
-            activeSubject
-          )}&clerkUserId=${user.id}`
-        );
+    const fetchLectureVideos =
+      async () => {
+        setLoading(true);
 
-        const data = await res.json();
+        try {
+          const res = await fetch(
+            `/api/get-lecture-videos?courseId=${courseId}&subject=${encodeURIComponent(
+              activeSubject
+            )}&clerkUserId=${user.id}`
+          );
 
-        if (!cancelled && Array.isArray(data.lectures)) {
-          setLectureRows(data.lectures);
+          const data =
+            await res.json();
+
+          if (
+            !cancelled &&
+            Array.isArray(
+              data.lectures
+            )
+          ) {
+            setLectureRows(
+              data.lectures
+            );
+          }
+        } catch (error) {
+          console.log(error);
+
+          setLectureRows(
+            allLectures
+          );
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.log(error);
-        setLectureRows(allLectures);
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
     fetchLectureVideos();
 
     return () => {
       cancelled = true;
     };
-  }, [activeSubject, courseId, enrolled, initialEnrolled, user?.id]);
+  }, [
+    activeSubject,
+    courseId,
+    enrolled,
+    initialEnrolled,
+    user?.id,
+  ]);
 
   return (
     <div
@@ -140,6 +167,7 @@ export default function LectureDashboardClient({
         gap-2
       "
     >
+      {/* SUBJECTS */}
       <div
         className="
           flex-1
@@ -157,7 +185,7 @@ export default function LectureDashboardClient({
       >
         <div
           className="
-            p-4
+            p-3
             border-b
             border-white/[0.06]
             bg-gradient-to-r
@@ -181,7 +209,7 @@ export default function LectureDashboardClient({
           className="
             flex-1
             overflow-y-auto
-            p-4
+            p-1
             space-y-1
             scrollbar-thin
             scrollbar-thumb-white/10
@@ -200,67 +228,32 @@ export default function LectureDashboardClient({
                   sub.subject_name
                 )}`}
                 className={`
-                  group
-                  relative
-                  overflow-hidden
-                  block
-                  rounded-[24px]
-                  border
-                  p-2
+                  flex
+                  items-center
+                  justify-between
+                  px-4
+                  py-3
+                  rounded-2xl
                   transition-all
-                  duration-300
-                  shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+                  border
+
                   ${
                     isActive
                       ? `
-                        border-white/[0.08]
-                        bg-gradient-to-br
-                        from-blue-500/20
-                        to-indigo-500/20
-                        backdrop-blur-xl
-                        shadow-[0_0_25px_rgba(16,185,129,0.14)]
+                        border-blue-500/30
+                        bg-blue-500/15
+                        text-white
                       `
                       : `
-                        border-white/[0.07]
-                        bg-[#0c201a]/60
-                        backdrop-blur-2xl
-                        hover:border-white/[0.12]
-                        hover:-translate-y-0.5
+                        border-transparent
+                        text-slate-400
+                        hover:text-white
+                        hover:bg-white/[0.03]
                       `
                   }
                 `}
               >
-                <div
-                  className="
-                    absolute
-                    inset-0
-                    bg-gradient-to-b
-                    from-white/[0.05]
-                    via-transparent
-                    to-transparent
-                    pointer-events-none
-                  "
-                />
-
-                <div
-                  className="
-                    absolute
-                    inset-[1px]
-                    rounded-[23px]
-                    border
-                    border-white/[0.03]
-                    pointer-events-none
-                  "
-                />
-
-                <h3
-                  className="
-                    relative
-                    text-lg
-                    font-bold
-                    text-white
-                  "
-                >
+                <h3 className="font-medium">
                   {sub.subject_name}
                 </h3>
               </Link>
@@ -269,6 +262,7 @@ export default function LectureDashboardClient({
         </div>
       </div>
 
+      {/* LECTURES */}
       <div className="lg:col-span-3 space-y-1">
         {loading ? (
           <div className="flex items-center justify-center p-12">
@@ -276,206 +270,273 @@ export default function LectureDashboardClient({
           </div>
         ) : (
           <>
-            {uniqueLectures.map((lecture) => (
-              <div
-                key={lecture.id}
-                className="
-                  group
-                  relative
-                  overflow-hidden
-                  rounded-[30px]
-                  border
-                  border-white/[0.07]
-                  bg-[#0a1a16]/60
-                  backdrop-blur-2xl
-                  p-0
-                  transition-all
-                  duration-300
-                  hover:border-white/[0.12]
-                  hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]
-                  shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
-                "
-              >
-            <div
-              className="
-                absolute
-                inset-0
-                opacity-0
-                group-hover:opacity-100
-                transition-all
-                duration-500
-                bg-gradient-to-br
-                from-blue-500/10
-                via-indigo-500/5
-                to-transparent
-              "
-            />
-
-            <div
-              className="
-                absolute
-                inset-0
-                bg-gradient-to-b
-                from-white/[0.05]
-                via-transparent
-                to-transparent
-                pointer-events-none
-              "
-            />
-
-            <div
-              className="
-                absolute
-                inset-[1px]
-                rounded-[29px]
-                border
-                border-white/[0.03]
-                pointer-events-none
-              "
-            />
-
-            <div
-              className="
-                relative
-                z-10
-                flex
-                flex-col
-                lg:flex-row
-                lg:items-center
-                lg:justify-between
-                gap-4
-              "
-            >
-              <div className="flex items-center gap-4 p-4">
+            {uniqueLectures.map(
+              (lecture, index) => (
                 <div
+                  key={lecture.id}
                   className="
-                    w-14
-                    h-14
-                    rounded-2xl
-                    border
-                    border-white/[0.08]
-                    bg-gradient-to-br
-                    from-blue-500/20
-                    to-indigo-500/20
-                    backdrop-blur-xl
-                    text-white
-                    flex
-                    items-center
-                    justify-center
-                    font-bold
-                  "
-                />
-
-                <div>
-                  <h3
-                    className="
-                      text-sm
-                      md:text-base
-                      font-semibold
-                      text-white
-                    "
-                  >
-                    {lecture.lecture_title}
-                  </h3>
-                  <p
-                    className="
-                      text-sm
-                      text-slate-400
-                      mt-2
-                    "
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 p-4">
-                <LectureVideoModal
-                  title={lecture.lecture_title}
-                  videos={
-                    lectureRows
-                      .filter(
-                        (l) =>
-                          l.lecture_title ===
-                          lecture.lecture_title
-                      )
-                      .map((l) => ({
-                        sub_title: l.sub_title,
-                        video_url:
-                          enrolled
-                            ? l.video_url || undefined
-                            : undefined,
-                        duration:
-                          l.duration || undefined,
-                      }))
-                  }
-                  locked={!enrolled}
-                />
-
-                <button
-                  disabled={!enrolled}
-                  className={`
                     group
-                    flex
-                    items-center
-                    gap-2.5
-                    px-4
-                    py-3
-                    rounded-2xl
+                    relative
+                    overflow-hidden
+                    rounded-[30px]
                     border
-                    border-white/[0.08]
-                    bg-white/[0.04]
-                    backdrop-blur-xl
-                    text-slate-200
-                    text-sm
-                    font-semibold
+                    border-white/[0.07]
+                    bg-[#0a1a16]/60
+                    backdrop-blur-2xl
+                    p-0
                     transition-all
                     duration-300
-                    ${
-                      !enrolled
-                        ? "cursor-not-allowed bg-white/[0.02] text-slate-500 border-white/[0.04]"
-                        : "hover:bg-white/[0.08] hover:border-white/[0.12]"
-                    }
-                  `}
+                    hover:border-white/[0.12]
+                    hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]
+                    shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+                  "
                 >
-                  {enrolled ? "Notes" : "🔒 Notes"}
-                </button>
+                  {/* HOVER EFFECT */}
+                  <div
+                    className="
+                      absolute
+                      inset-0
+                      opacity-0
+                      group-hover:opacity-100
+                      transition-all
+                      duration-500
+                      bg-gradient-to-br
+                      from-blue-500/10
+                      via-indigo-500/5
+                      to-transparent
+                    "
+                  />
 
-                <LectureTestModal
-                  exam={courseExamName}
-                  subject={activeSubject}
-                  lectureTitle={lecture.lecture_title}
-                  subTitles={
-                    allLectures
-                      .filter(
-                        (l) =>
-                          l.lecture_title ===
-                          lecture.lecture_title
-                      )
-                      .map((l) => l.sub_title)
-                  }
-                  type="mcqs"
-                  locked={!enrolled}
-                />
+                  {/* TOP LIGHT */}
+                  <div
+                    className="
+                      absolute
+                      inset-0
+                      bg-gradient-to-b
+                      from-white/[0.05]
+                      via-transparent
+                      to-transparent
+                      pointer-events-none
+                    "
+                  />
 
-                <LectureTestModal
-                  exam={courseExamName}
-                  subject={activeSubject}
-                  lectureTitle={lecture.lecture_title}
-                  subTitles={
-                    allLectures
-                      .filter(
-                        (l) =>
-                          l.lecture_title ===
+                  {/* INNER BORDER */}
+                  <div
+                    className="
+                      absolute
+                      inset-[1px]
+                      rounded-[29px]
+                      border
+                      border-white/[0.03]
+                      pointer-events-none
+                    "
+                  />
+
+                  {/* CONTENT */}
+                  <div
+                    className="
+                      relative
+                      z-10
+                      flex
+                      flex-col
+                      lg:flex-row
+                      lg:items-center
+                      lg:justify-between
+                      gap-4
+                    "
+                  >
+                    {/* LEFT */}
+                    <div className="flex items-center gap-2 p-2">
+                      <div
+                        className="
+                          w-11
+                          h-10
+                          rounded-2xl
+                          border
+                          border-white/[0.08]
+                          bg-gradient-to-br
+                          from-blue-500/20
+                          to-indigo-500/20
+                          backdrop-blur-xl
+                          text-white
+                          flex
+                          items-center
+                          justify-center
+                          font-bold
+                        "
+                      >
+                        {index + 1}
+                      </div>
+
+                      <div>
+                        <h3
+                          className="
+                            text-sm
+                            md:text-base
+                            font-semibold
+                            text-white
+                          "
+                        >
+                          {
+                            lecture.lecture_title
+                          }
+                        </h3>
+
+                        <p
+                          className="
+                            text-sm
+                            text-slate-400
+                            mt-2
+                          "
+                        >
+                          {
+                            allLectures.filter(
+                              (l) =>
+                                l.lecture_title ===
+                                lecture.lecture_title
+                            ).length
+                          }{" "}
+                          lectures
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* ACTION BAR */}
+                    <div
+                      className="
+                        flex
+                        items-stretch
+                        overflow-hidden
+                        rounded-2xl
+                        border
+                        border-white/[0.08]
+                        bg-white/[0.03]
+                        backdrop-blur-xl
+                        shrink-0
+                        m-4
+                      "
+                    >
+                      {/* VIDEO */}
+                      <LectureVideoModal
+                        title={
                           lecture.lecture_title
-                      )
-                      .map((l) => l.sub_title)
-                  }
-                  type="pyqs"
-                  locked={!enrolled}
-                />
-              </div>
-            </div>
-          </div>
-            ))}
+                        }
+                        videos={lectureRows
+                          .filter(
+                            (l) =>
+                              l.lecture_title ===
+                              lecture.lecture_title
+                          )
+                          .map((l) => ({
+                            sub_title:
+                              l.sub_title,
+
+                            video_url:
+                              enrolled
+                                ? l.video_url ||
+                                  undefined
+                                : undefined,
+
+                            duration:
+                              l.duration ||
+                              undefined,
+                          }))}
+                        locked={!enrolled}
+                      />
+
+                      {/* DIVIDER */}
+                      <div className="w-px bg-white/[0.08]" />
+
+                      {/* NOTES */}
+                      <button
+                        disabled={
+                          !enrolled
+                        }
+                        className={`
+                          h-12
+                          px-6
+                          flex
+                          items-center
+                          justify-center
+                          text-sm
+                          font-medium
+                          transition-all
+                          ${
+                            !enrolled
+                              ? "cursor-not-allowed text-slate-500"
+                              : "text-white hover:bg-white/[0.05]"
+                          }
+                        `}
+                      >
+                        {enrolled
+                          ? "Notes"
+                          : "🔒 Notes"}
+                      </button>
+
+                      {/* DIVIDER */}
+                      <div className="w-px bg-white/[0.08]" />
+
+                      {/* MCQS */}
+                      <LectureTestModal
+                        exam={
+                          courseExamName
+                        }
+                        subject={
+                          activeSubject
+                        }
+                        lectureTitle={
+                          lecture.lecture_title
+                        }
+                        subTitles={allLectures
+                          .filter(
+                            (l) =>
+                              l.lecture_title ===
+                              lecture.lecture_title
+                          )
+                          .map(
+                            (l) =>
+                              l.sub_title
+                          )}
+                        type="mcqs"
+                        locked={
+                          !enrolled
+                        }
+                      />
+
+                      {/* DIVIDER */}
+                      <div className="w-px bg-white/[0.08]" />
+
+                      {/* PYQS */}
+                      <LectureTestModal
+                        exam={
+                          courseExamName
+                        }
+                        subject={
+                          activeSubject
+                        }
+                        lectureTitle={
+                          lecture.lecture_title
+                        }
+                        subTitles={allLectures
+                          .filter(
+                            (l) =>
+                              l.lecture_title ===
+                              lecture.lecture_title
+                          )
+                          .map(
+                            (l) =>
+                              l.sub_title
+                          )}
+                        type="pyqs"
+                        locked={
+                          !enrolled
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
           </>
         )}
       </div>

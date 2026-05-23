@@ -1,28 +1,22 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import {
-  type FormEvent,
-  useEffect,
-  useId,
-  useState,
-} from "react";
-import { createPortal } from "react-dom";
-import {
-  ArrowRight,
   BookOpen,
   FileQuestion,
+  Lock,
   X,
 } from "lucide-react";
 
-type TestType = "mcqs" | "pyqs";
+import { createPortal } from "react-dom";
 
 interface LectureTestModalProps {
   exam: string;
   subject: string;
   lectureTitle: string;
-  subTitles?: string[];
-  type: TestType;
+  subTitles: string[];
+  type: "mcqs" | "pyqs";
   locked?: boolean;
 }
 
@@ -30,345 +24,372 @@ export default function LectureTestModal({
   exam,
   subject,
   lectureTitle,
-  subTitles = [],
+  subTitles,
   type,
   locked = false,
 }: LectureTestModalProps) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [selectedSubTitle, setSelectedSubTitle] =
-    useState(subTitles[0] || "");
-  const titleId = useId();
-
-  const label =
-    type === "mcqs" ? "MCQs" : "PYQs";
-
-  const Icon =
-    type === "mcqs"
-      ? FileQuestion
-      : BookOpen;
-
-  useEffect(() => {
-    if (!open) return;
-
-    const closeOnEscape = (
-      event: KeyboardEvent
-    ) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    };
-
-    const previousOverflow =
-      document.body.style.overflow;
-
-    document.body.style.overflow =
-      "hidden";
-    window.addEventListener(
-      "keydown",
-      closeOnEscape
-    );
-
-    return () => {
-      document.body.style.overflow =
-        previousOverflow;
-      window.removeEventListener(
-        "keydown",
-        closeOnEscape
-      );
-    };
-  }, [open]);
-
-  const buildTestHref = (
-    subTitle: string
-  ) => {
-    const query =
-      new URLSearchParams({
-        exam,
-        subject,
-        lecture_title: lectureTitle,
-        sub_title: subTitle,
-        type,
-      });
-
-    return `/test-portal?${query.toString()}`;
-  };
-
-  const openModal = () => {
-    if (locked) return;
-
-    setSelectedSubTitle(
-      (currentSubTitle) =>
-        currentSubTitle ||
-        subTitles[0] ||
-        ""
-    );
-    setOpen(true);
-  };
-
-  const handleSubmit = (
-    event: FormEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault();
-
-    if (!selectedSubTitle) return;
-
-    setOpen(false);
-    router.push(
-      buildTestHref(selectedSubTitle)
-    );
-  };
+  const [open, setOpen] =
+    useState(false);
 
   return (
     <>
+      {/* OPEN BUTTON */}
       <button
-        type="button"
-        onClick={openModal}
+        onClick={() =>
+          setOpen(true)
+        }
         disabled={locked}
         className={`
-          group
+          h-12
+          px-6
           flex
           items-center
-          gap-2.5
-          px-4
-          py-3
-          rounded-2xl
-          border
-          border-white/[0.08]
-          bg-white/[0.04]
-          backdrop-blur-xl
-          text-slate-200
+          justify-center
+          gap-2
           text-sm
-          font-semibold
+          font-medium
           transition-all
-          duration-300
-          ${locked ? "cursor-not-allowed bg-white/[0.02] text-slate-500 border-white/[0.04]" : "hover:bg-white/[0.08] hover:border-white/[0.12]"}
+
+          ${
+            locked
+              ? `
+                cursor-not-allowed
+                text-slate-500
+              `
+              : `
+                text-white
+                hover:bg-white/[0.05]
+              `
+          }
         `}
       >
-        {locked ? (
-          <span className="inline-flex items-center gap-2">
-            🔒 {label}
-          </span>
+        {type === "mcqs" ? (
+          <>
+            <FileQuestion className="w-4 h-4" />
+
+            <span>MCQs</span>
+          </>
         ) : (
           <>
-            <Icon className="h-4 w-4" />
-            {label}
+            <BookOpen className="w-4 h-4" />
+
+            <span>PYQs</span>
           </>
         )}
       </button>
 
+      {/* MODAL */}
       {open &&
         createPortal(
           <div
             className="
               fixed
               inset-0
-              z-[999999]
+              z-[9999]
               flex
               items-center
               justify-center
               bg-black/80
-              px-4
-              py-6
               backdrop-blur-md
+              p-4
             "
           >
-            <button
-              type="button"
-              aria-label={`Close ${label} modal`}
+            {/* BACKDROP */}
+            <div
               className="absolute inset-0"
-              onClick={() => setOpen(false)}
+              onClick={() =>
+                setOpen(false)
+              }
             />
 
-            <section
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
+            {/* MAIN */}
+            <div
               className="
                 relative
                 z-10
-                flex
-                max-h-[min(720px,92vh)]
                 w-full
                 max-w-3xl
-                flex-col
-                overflow-hidden
                 rounded-[32px]
+                overflow-hidden
                 border
                 border-white/[0.08]
                 bg-[#071713]
                 shadow-[0_20px_80px_rgba(0,0,0,0.7)]
               "
             >
-              <header
+              {/* HEADER */}
+              <div
                 className="
-                  flex
-                  items-start
-                  gap-4
-                  border-b
-                  border-white/[0.08]
                   px-6
                   py-5
+                  border-b
+                  border-white/[0.08]
+                  flex
+                  items-start
+                  justify-between
+                  gap-4
                 "
               >
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-blue-300">
-                    {label} Test
-                  </p>
+                {/* LEFT */}
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="
+                        w-12
+                        h-12
+                        rounded-2xl
+                        bg-blue-500/15
+                        border
+                        border-blue-500/20
+                        flex
+                        items-center
+                        justify-center
+                        text-blue-400
+                      "
+                    >
+                      {type ===
+                      "mcqs" ? (
+                        <FileQuestion className="w-6 h-6" />
+                      ) : (
+                        <BookOpen className="w-6 h-6" />
+                      )}
+                    </div>
 
-                  <h2
-                    id={titleId}
-                    className="mt-1 break-words text-2xl font-bold text-white"
-                  >
-                    {lectureTitle}
-                  </h2>
+                    <div>
+                      <div className="text-white text-xl font-bold">
+                        {type ===
+                        "mcqs"
+                          ? "MCQs Test"
+                          : "PYQs Test"}
+                      </div>
+
+                      <div className="text-white/50 text-sm mt-1">
+                        {
+                          lectureTitle
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* META */}
+                  <div className="flex flex-wrap gap-3 mt-5">
+                    <div
+                      className="
+                        px-4
+                        py-2
+                        rounded-2xl
+                        border
+                        border-white/[0.08]
+                        bg-white/[0.03]
+                        text-white
+                        text-sm
+                      "
+                    >
+                      {exam}
+                    </div>
+
+                    <div
+                      className="
+                        px-4
+                        py-2
+                        rounded-2xl
+                        border
+                        border-white/[0.08]
+                        bg-white/[0.03]
+                        text-white
+                        text-sm
+                      "
+                    >
+                      {subject}
+                    </div>
+
+                    <div
+                      className="
+                        px-4
+                        py-2
+                        rounded-2xl
+                        border
+                        border-white/[0.08]
+                        bg-white/[0.03]
+                        text-white
+                        text-sm
+                      "
+                    >
+                      {subTitles.length}{" "}
+                      Topics
+                    </div>
+                  </div>
                 </div>
 
+                {/* CLOSE */}
                 <button
-                  type="button"
-                  aria-label={`Close ${label} modal`}
-                  onClick={() => setOpen(false)}
+                  onClick={() =>
+                    setOpen(false)
+                  }
                   className="
-                    flex
-                    h-10
-                    w-10
                     shrink-0
-                    items-center
-                    justify-center
+                    w-10
+                    h-10
                     rounded-2xl
                     bg-white/[0.06]
+                    flex
+                    items-center
+                    justify-center
                     text-white
-                    transition-all
                     hover:bg-white/[0.10]
+                    transition-all
                   "
                 >
-                  <X className="h-5 w-5" />
+                  <X className="w-5 h-5" />
                 </button>
-              </header>
+              </div>
 
-              <form
-                onSubmit={handleSubmit}
-                className="overflow-y-auto p-6"
-              >
-                <dl
-                  className="
-                    grid
-                    grid-cols-1
-                    gap-3
-                    sm:grid-cols-2
-                  "
-                >
-                  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
-                    <dt className="text-xs font-semibold uppercase text-slate-400">
-                      Exam
-                    </dt>
-                    <dd className="mt-2 break-words text-base font-semibold text-white">
-                      {exam}
-                    </dd>
+              {/* BODY */}
+              <div className="p-6">
+                {/* SUBTOPICS */}
+                <div>
+                  <div className="text-white font-semibold mb-4">
+                    Included Topics
                   </div>
 
-                  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
-                    <dt className="text-xs font-semibold uppercase text-slate-400">
-                      Subject
-                    </dt>
-                    <dd className="mt-2 break-words text-base font-semibold text-white">
-                      {subject}
-                    </dd>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 sm:col-span-2">
-                    <dt className="text-xs font-semibold uppercase text-slate-400">
-                      Lecture Title
-                    </dt>
-                    <dd className="mt-2 break-words text-base font-semibold text-white">
-                      {lectureTitle}
-                    </dd>
-                  </div>
-                </dl>
-
-                <div className="mt-6">
-                  <label
-                    htmlFor={`${titleId}-subtitle`}
-                    className="text-sm font-semibold uppercase text-slate-400"
-                  >
-                    Sub Title
-                  </label>
-
-                  <div className="mt-3">
-                    {subTitles.length > 0 ? (
-                      <select
-                        id={`${titleId}-subtitle`}
-                        value={selectedSubTitle}
-                        onChange={(event) =>
-                          setSelectedSubTitle(
-                            event.target.value
-                          )
-                        }
-                        required
-                        className="
-                          w-full
-                          rounded-2xl
-                          border
-                          border-white/[0.08]
-                          bg-white/[0.04]
-                          px-4
-                          py-4
-                          font-medium
-                          text-white
-                          outline-none
-                          transition-all
-                          focus:border-blue-400/50
-                        "
-                      >
-                        {subTitles.map(
-                          (subTitle) => (
-                            <option
-                              key={subTitle}
-                              value={subTitle}
-                              className="bg-slate-900"
-                            >
-                              {subTitle}
-                            </option>
-                          )
-                        )}
-                      </select>
-                    ) : (
-                      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-slate-300">
-                        No sub titles available.
-                      </div>
+                  <div className="flex flex-wrap gap-3">
+                    {subTitles.map(
+                      (
+                        sub,
+                        index
+                      ) => (
+                        <div
+                          key={index}
+                          className="
+                            px-4
+                            py-2
+                            rounded-2xl
+                            border
+                            border-white/[0.08]
+                            bg-white/[0.03]
+                            text-white/80
+                            text-sm
+                          "
+                        >
+                          {sub}
+                        </div>
+                      )
                     )}
                   </div>
                 </div>
 
-                <div className="mt-6 flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={!selectedSubTitle}
+                {/* ACTION CARD */}
+                <div
+                  className="
+                    mt-8
+                    rounded-3xl
+                    border
+                    border-white/[0.08]
+                    bg-gradient-to-br
+                    from-blue-500/10
+                    to-indigo-500/10
+                    p-6
+                  "
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="
+                        w-14
+                        h-14
+                        rounded-2xl
+                        bg-white/[0.06]
+                        flex
+                        items-center
+                        justify-center
+                        text-white
+                        shrink-0
+                      "
+                    >
+                      {type ===
+                      "mcqs" ? (
+                        <FileQuestion className="w-7 h-7" />
+                      ) : (
+                        <BookOpen className="w-7 h-7" />
+                      )}
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="text-white text-xl font-bold">
+                        Ready to start?
+                      </div>
+
+                      <div className="text-white/60 mt-2">
+                        Attempt{" "}
+                        {type ===
+                        "mcqs"
+                          ? "MCQs"
+                          : "PYQs"}{" "}
+                        based on this
+                        lecture and track
+                        your preparation
+                        progress.
+                      </div>
+
+                      <button
+                        className="
+                          mt-6
+                          h-12
+                          px-6
+                          rounded-2xl
+                          bg-blue-500
+                          hover:bg-blue-400
+                          transition-all
+                          text-white
+                          font-semibold
+                          flex
+                          items-center
+                          justify-center
+                          gap-2
+                        "
+                      >
+                        {type ===
+                        "mcqs" ? (
+                          <FileQuestion className="w-5 h-5" />
+                        ) : (
+                          <BookOpen className="w-5 h-5" />
+                        )}
+
+                        Start{" "}
+                        {type ===
+                        "mcqs"
+                          ? "MCQs"
+                          : "PYQs"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* LOCKED */}
+                {locked && (
+                  <div
                     className="
+                      mt-6
+                      rounded-2xl
+                      border
+                      border-red-500/20
+                      bg-red-500/10
+                      p-4
                       flex
                       items-center
-                      gap-2
-                      rounded-2xl
-                      bg-gradient-to-r
-                      from-blue-500
-                      to-indigo-500
-                      px-5
-                      py-3
-                      font-semibold
-                      text-white
-                      shadow-[0_10px_35px_rgba(16,185,129,0.28)]
-                      transition-all
-                      hover:brightness-110
-                      disabled:cursor-not-allowed
-                      disabled:opacity-40
+                      gap-3
                     "
                   >
-                    Continue to Test Portal
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </form>
-            </section>
+                    <Lock className="w-5 h-5 text-red-400 shrink-0" />
+
+                    <div className="text-red-200 text-sm">
+                      You need to enroll
+                      in this course to
+                      access tests.
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>,
           document.body
         )}

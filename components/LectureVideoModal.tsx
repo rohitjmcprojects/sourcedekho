@@ -31,7 +31,8 @@ export default function LectureVideoModal({
 }: LectureVideoModalProps) {
   const { user } = useUser();
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] =
+    useState(false);
 
   const [selectedVideo, setSelectedVideo] =
     useState<VideoItem | null>(null);
@@ -243,24 +244,22 @@ export default function LectureVideoModal({
       <button
         onClick={() => setOpen(true)}
         className="
-          group
+          h-12
+          px-6
           flex
           items-center
+          justify-center
           gap-2
-          px-5
-          py-3
-          rounded-2xl
-          border
-          border-white/[0.08]
-          bg-blue-500/20
           text-white
-          text-sm
-          font-semibold
-          hover:bg-blue-500/30
+          hover:bg-white/[0.05]
           transition-all
         "
       >
-        ▶ Video
+        <PlayCircle className="w-4 h-4" />
+
+        <span className="text-sm font-medium">
+          Video
+        </span>
       </button>
 
       {/* MODAL */}
@@ -270,14 +269,13 @@ export default function LectureVideoModal({
             className="
               fixed
               inset-0
-              z-[999999]
+              z-[9999]
               flex
               items-center
               justify-center
               bg-black/80
               backdrop-blur-md
-              px-4
-              py-2
+              p-4
             "
           >
             {/* BACKDROP */}
@@ -292,18 +290,18 @@ export default function LectureVideoModal({
             {/* MAIN */}
             <div
               className="
-              relative
-              z-10
-              w-full
-              max-w-[1400px]
-              h-[92vh]
-              rounded-[32px]
-              overflow-hidden
-              border
-              border-white/[0.08]
-              bg-[#071713]
-              shadow-[0_20px_80px_rgba(0,0,0,0.7)]
-            "
+                relative
+                z-10
+                w-full
+                max-w-[1400px]
+                h-[92vh]
+                rounded-[32px]
+                overflow-hidden
+                border
+                border-white/[0.08]
+                bg-[#071713]
+                shadow-[0_20px_80px_rgba(0,0,0,0.7)]
+              "
             >
               {/* HEADER */}
               <div
@@ -370,7 +368,8 @@ export default function LectureVideoModal({
                       setSelectedVideo(null);
                     }}
                     className="
-                      ml-auto shrink-0
+                      ml-auto
+                      shrink-0
                       w-10
                       h-10
                       rounded-2xl
@@ -396,7 +395,8 @@ export default function LectureVideoModal({
                     grid-cols-1
                     lg:grid-cols-[380px_1fr]
                     gap-4
-                    min-h-[85vh] max-h-[92vh]
+                    min-h-[85vh]
+                    max-h-[92vh]
                   "
                 >
                   {/* LEFT PANEL */}
@@ -407,7 +407,8 @@ export default function LectureVideoModal({
                       border-white/[0.08]
                       bg-white/[0.03]
                       p-4
-                      overflow-y-auto max-h-[calc(100vh-250px)]
+                      overflow-y-auto
+                      max-h-[calc(100vh-250px)]
                     "
                   >
                     <div className="text-white font-semibold mb-4">
@@ -469,18 +470,17 @@ export default function LectureVideoModal({
                                       video.sub_title
                                     }
                                   </span>
-                                  <span className="flex items-center gap-2 mt-2 text-white/40 text-xs">
-                                  <div className="flex items-center gap-2 mt-2 text-white/40 text-xs">
-                                  <Clock3 className="w-3 h-3" />
-                                    {
-                                      (video.duration)
-                                    }
-                                  </div></span>
                                 </div>
 
+                                <div className="flex items-center gap-2 mt-2 text-white/40 text-xs">
+                                  <Clock3 className="w-3 h-3" />
+
+                                  {
+                                    video.duration
+                                  }
+                                </div>
                               </div>
 
-                              {/* PLAY ICON */}
                               <PlayCircle
                                 className="
                                   w-6
@@ -511,7 +511,8 @@ export default function LectureVideoModal({
                       border
                       border-white/[0.08]
                       bg-black
-                      flex flex-col overflow-hidden
+                      flex
+                      flex-col
                     "
                   >
                     {/* TOP BAR */}
@@ -696,15 +697,11 @@ export default function LectureVideoModal({
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center">
+                        <div className="text-center pt-20">
                           <PlayCircle className="w-14 h-14 text-white/30 mx-auto mb-4" />
 
                           <div className="text-white/70 text-lg font-medium">
                             Select a lecture
-                          </div>
-
-                          <div className="text-white/40 text-sm mt-2">
-                            Choose a video from left panel
                           </div>
                         </div>
                       )}
