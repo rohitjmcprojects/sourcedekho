@@ -13,6 +13,7 @@ type ExamRow = {
 type CommunityRow = {
   id: number;
   name: string;
+  slug: string;
 };
 
 export default async function HomePage() {
@@ -25,7 +26,8 @@ export default async function HomePage() {
   const communities = (await sql`
     SELECT
       id,
-      name
+      name,
+      slug
     FROM communities
     ORDER BY id ASC
   `) as CommunityRow[];
@@ -158,6 +160,7 @@ export default async function HomePage() {
                   key={community.id}
                   tag="Community"
                   title={community.name}
+                  href={`/community/${community.slug}`}
                 />
               ))}
             </HomeGrid>

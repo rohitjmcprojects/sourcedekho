@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 
 import LectureVideoModal from "@/components/LectureVideoModal";
 import LectureTestModal from "@/components/LectureTestModal";
+import { NotebookPen } from "lucide-react";
 
 type SubjectRow = {
   subject_name: string;
@@ -346,10 +347,10 @@ export default function LectureDashboardClient({
                     "
                   >
                     {/* LEFT */}
-                    <div className="flex items-center gap-2 p-2">
+                    <div className="flex items-center gap-3 px-4 py-2 h-full">
                       <div
                         className="
-                          w-11
+                          w-8
                           h-10
                           rounded-2xl
                           border
@@ -365,10 +366,11 @@ export default function LectureDashboardClient({
                           font-bold
                         "
                       >
-                        {index + 1}
+                        
                       </div>
 
                       <div>
+                        
                         <h3
                           className="
                             text-sm
@@ -413,7 +415,7 @@ export default function LectureDashboardClient({
                         bg-white/[0.03]
                         backdrop-blur-xl
                         shrink-0
-                        m-4
+                        mr-4
                       "
                     >
                       {/* VIDEO */}
@@ -454,13 +456,14 @@ export default function LectureDashboardClient({
                         }
                         className={`
                           h-12
-                          px-6
+                          px-4
                           flex
                           items-center
                           justify-center
                           text-sm
                           font-medium
                           transition-all
+                          gap-2
                           ${
                             !enrolled
                               ? "cursor-not-allowed text-slate-500"
@@ -468,9 +471,13 @@ export default function LectureDashboardClient({
                           }
                         `}
                       >
+                        
+                        <NotebookPen className="w-4 h-4" />
+
+                      <span>
                         {enrolled
-                          ? "Notes"
-                          : "🔒 Notes"}
+                          ?  " Notes"
+                          : "🔒 Notes"} </span>
                       </button>
 
                       {/* DIVIDER */}
