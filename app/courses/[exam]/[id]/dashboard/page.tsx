@@ -16,7 +16,74 @@ type LectureRow = {
   sub_title: string;
   duration: string | null;
   video_url: string | null;
+
+  is_video_public: boolean;
+  is_notes_public: boolean;
+  is_pyqs_public: boolean;
+  is_mcqs_public: boolean;
 };
+
+type CourseContentKey =
+  | "videos"
+  | "notes"
+  | "mcqs"
+  | "pyqs";
+
+type CourseRow = {
+  id: number;
+  exam_name: string;
+  title: string;
+  stage?: string | null;
+  [key: string]: unknown;
+};
+
+const contentFlagColumns: Record<CourseContentKey, string[]> = {
+  videos: [
+    "allow_videos",
+    "videos_allowed",
+    "enable_videos",
+    "allow_lectures",
+    "lectures_allowed",
+    "enable_lectures",
+  ],
+  notes: [
+    "allow_notes",
+    "notes_allowed",
+    "enable_notes",
+  ],
+  mcqs: [
+    "allow_mcqs",
+    "mcqs_allowed",
+    "enable_mcqs",
+  ],
+  pyqs: [
+    "allow_pyqs",
+    "pyqs_allowed",
+    "enable_pyqs",
+  ],
+};
+
+function isContentEnabled(
+  course: CourseRow,
+  key: CourseContentKey
+) {
+  return contentFlagColumns[key].some(
+    (column) => {
+      const value = course[column];
+
+      return (
+        value === true ||
+        value === 1 ||
+        (typeof value === "string" &&
+          [
+            "true",
+            "yes",
+            "1",
+          ].includes(value.toLowerCase()))
+      );
+    }
+  );
+}
 
 export default async function LectureDashboardPage({
   params,
@@ -37,7 +104,7 @@ export default async function LectureDashboardPage({
   const userId = user?.id;
 
   // FETCH COURSE
-  const courses = await sql`
+  const courses = (await sql`
     SELECT
       courses.*,
       exams.name AS exam_name
@@ -45,7 +112,7 @@ export default async function LectureDashboardPage({
     JOIN exams
       ON exams.id = courses.exam_id
     WHERE courses.id = ${id}
-  `;
+  `) as CourseRow[];
 
   const course = courses[0];
 
@@ -115,6 +182,13 @@ export default async function LectureDashboardPage({
       ).length
   );
 
+  const contentAccess = {
+    videos: isEnrolled && isContentEnabled(course, "videos"),
+    notes: isEnrolled && isContentEnabled(course, "notes"),
+    mcqs: isEnrolled && isContentEnabled(course, "mcqs"),
+    pyqs: isEnrolled && isContentEnabled(course, "pyqs"),
+  };
+
   // FETCH SUBJECTS
   const subjects = (await sql`
     SELECT DISTINCT subject_name
@@ -127,47 +201,48 @@ export default async function LectureDashboardPage({
     subject || subjects[0]?.subject_name || "";
 
   // FETCH LECTURES
-  const uniqueLectures = isEnrolled
-    ? (await sql`
-        SELECT id, lecture_title, sub_title, duration, video_url
-        FROM (
-          SELECT DISTINCT ON (lecture_title)
-            *
-          FROM lectures
-          WHERE course_id = ${course.id}
-            AND subject_name = ${activeSubject}
-          ORDER BY lecture_title, id ASC
-        ) unique_lectures
-        ORDER BY id ASC
-      `) as LectureRow[]
-    : (await sql`
-        SELECT id, lecture_title, sub_title, duration
-        FROM (
-          SELECT DISTINCT ON (lecture_title)
-            id, lecture_title, sub_title, duration
-          FROM lectures
-          WHERE course_id = ${course.id}
-            AND subject_name = ${activeSubject}
-          ORDER BY lecture_title, id ASC
-        ) unique_lectures
-        ORDER BY id ASC
-      `) as LectureRow[];
+  const uniqueLectures = (
+  await sql`
+    SELECT
+      id,
+      lecture_title,
+      sub_title,
+      duration,
+      video_url,
+      is_video_public,
+      is_notes_public,
+      is_pyqs_public,
+      is_mcqs_public
+    FROM (
+      SELECT DISTINCT ON (lecture_title)
+        *
+      FROM lectures
+      WHERE course_id = ${course.id}
+        AND subject_name = ${activeSubject}
+      ORDER BY lecture_title, id ASC
+    ) unique_lectures
+    ORDER BY id ASC
+  `
+) as LectureRow[];
 
-  const allLectures = isEnrolled
-    ? (await sql`
-        SELECT id, lecture_title, sub_title, duration, video_url
-        FROM lectures
-        WHERE course_id = ${course.id}
-          AND subject_name = ${activeSubject}
-        ORDER BY id ASC
-      `) as LectureRow[]
-    : (await sql`
-        SELECT id, lecture_title, sub_title, duration
-        FROM lectures
-        WHERE course_id = ${course.id}
-          AND subject_name = ${activeSubject}
-        ORDER BY id ASC
-      `) as LectureRow[];
+const allLectures = (
+  await sql`
+    SELECT
+      id,
+      lecture_title,
+      sub_title,
+      duration,
+      video_url,
+      is_video_public,
+      is_notes_public,
+      is_pyqs_public,
+      is_mcqs_public
+    FROM lectures
+    WHERE course_id = ${course.id}
+      AND subject_name = ${activeSubject}
+    ORDER BY id ASC
+  `
+) as LectureRow[];
 
   return (
     <main className="pl-[120px] pr-5 py-5" >
@@ -377,6 +452,7 @@ export default async function LectureDashboardPage({
             uniqueLectures={uniqueLectures}
             allLectures={allLectures}
             initialEnrolled={isEnrolled}
+            contentAccess={contentAccess}
           />
 
         </div>

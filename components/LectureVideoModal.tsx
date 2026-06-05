@@ -7,6 +7,7 @@ import {
   PlayCircle,
   CheckCircle2,
   Clock3,
+  Lock,
 } from "lucide-react";
 
 import { createPortal } from "react-dom";
@@ -28,6 +29,7 @@ interface LectureVideoModalProps {
 export default function LectureVideoModal({
   title,
   videos = [],
+  locked = false,
 }: LectureVideoModalProps) {
   const { user } = useUser();
 
@@ -98,7 +100,7 @@ export default function LectureVideoModal({
       };
 
     fetchData();
-  }, [user?.id, title]);
+  }, [user?.id, title, videos]);
 
   // SAVE LAST WATCHED
   const handleVideoSelect =
@@ -242,20 +244,28 @@ export default function LectureVideoModal({
     <>
       {/* OPEN BUTTON */}
       <button
+        disabled={locked}
         onClick={() => setOpen(true)}
-        className="
+        className={`
           h-12
           px-6
           flex
           items-center
           justify-center
           gap-2
-          text-white
-          hover:bg-white/[0.05]
           transition-all
-        "
+          ${
+            locked
+              ? "cursor-not-allowed text-slate-500"
+              : "text-white hover:bg-white/[0.05]"
+          }
+        `}
       >
-        <PlayCircle className="w-4 h-4" />
+        {locked ? (
+          <Lock className="w-4 h-4" />
+        ) : (
+          <PlayCircle className="w-4 h-4" />
+        )}
 
         <span className="text-sm font-medium">
           Video

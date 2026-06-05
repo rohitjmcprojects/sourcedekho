@@ -65,13 +65,21 @@ export default function LectureTestModal({
       >
         {type === "mcqs" ? (
           <>
-            <FileQuestion className="w-4 h-4" />
+            {locked ? (
+              <Lock className="w-4 h-4" />
+            ) : (
+              <FileQuestion className="w-4 h-4" />
+            )}
 
             <span>MCQs</span>
           </>
         ) : (
           <>
-            <BookOpen className="w-4 h-4" />
+            {locked ? (
+              <Lock className="w-4 h-4" />
+            ) : (
+              <BookOpen className="w-4 h-4" />
+            )}
 
             <span>PYQs</span>
           </>

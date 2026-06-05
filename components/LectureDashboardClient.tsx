@@ -6,7 +6,12 @@ import { useUser } from "@clerk/nextjs";
 
 import LectureVideoModal from "@/components/LectureVideoModal";
 import LectureTestModal from "@/components/LectureTestModal";
-import { NotebookPen } from "lucide-react";
+import {
+  Lock,
+  NotebookPen,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 
 type SubjectRow = {
   subject_name: string;
@@ -18,6 +23,18 @@ type LectureRow = {
   sub_title: string;
   duration: string | null;
   video_url?: string | null;
+
+  is_video_public?: boolean;
+  is_notes_public?: boolean;
+  is_pyqs_public?: boolean;
+  is_mcqs_public?: boolean;
+};
+
+type ContentAccess = {
+  videos: boolean;
+  notes: boolean;
+  mcqs: boolean;
+  pyqs: boolean;
 };
 
 interface LectureDashboardClientProps {
@@ -28,6 +45,7 @@ interface LectureDashboardClientProps {
   uniqueLectures: LectureRow[];
   allLectures: LectureRow[];
   initialEnrolled: boolean;
+  contentAccess: ContentAccess;
 }
 
 export default function LectureDashboardClient({
@@ -38,29 +56,29 @@ export default function LectureDashboardClient({
   uniqueLectures,
   allLectures,
   initialEnrolled,
+  contentAccess,
 }: LectureDashboardClientProps) {
   const { user } = useUser();
 
   const [enrolled, setEnrolled] =
     useState(initialEnrolled);
 
-  const [lectureRows, setLectureRows] =
-    useState<LectureRow[]>(
-      allLectures
-    );
+  const [lectureState, setLectureState] =
+    useState<{
+      subject: string;
+      rows: LectureRow[];
+    }>({
+      subject: activeSubject,
+      rows: allLectures,
+    });
+
+  const lectureRows =
+    lectureState.subject === activeSubject
+      ? lectureState.rows
+      : allLectures;
 
   const [loading, setLoading] =
     useState(false);
-
-  // INIT ENROLLED
-  useEffect(() => {
-    setEnrolled(initialEnrolled);
-  }, [initialEnrolled]);
-
-  // RESET LECTURES
-  useEffect(() => {
-    setLectureRows(allLectures);
-  }, [allLectures, activeSubject]);
 
   // CHECK ENROLLMENT
   useEffect(() => {
@@ -105,6 +123,7 @@ export default function LectureDashboardClient({
     if (
       !user?.id ||
       !enrolled ||
+      !contentAccess.videos ||
       initialEnrolled
     )
       return;
@@ -131,16 +150,18 @@ export default function LectureDashboardClient({
               data.lectures
             )
           ) {
-            setLectureRows(
-              data.lectures
-            );
+            setLectureState({
+              subject: activeSubject,
+              rows: data.lectures,
+            });
           }
         } catch (error) {
           console.log(error);
 
-          setLectureRows(
-            allLectures
-          );
+          setLectureState({
+            subject: activeSubject,
+            rows: allLectures,
+          });
         } finally {
           setLoading(false);
         }
@@ -153,6 +174,8 @@ export default function LectureDashboardClient({
     };
   }, [
     activeSubject,
+    allLectures,
+    contentAccess.videos,
     courseId,
     enrolled,
     initialEnrolled,
@@ -272,7 +295,24 @@ export default function LectureDashboardClient({
         ) : (
           <>
             {uniqueLectures.map(
-              (lecture, index) => (
+              (lecture) => {
+                const videoLocked =
+                  !enrolled &&
+                  !lecture.is_video_public;
+
+                const notesLocked =
+                  !enrolled &&
+                  !lecture.is_notes_public;
+
+                const mcqsLocked =
+                  !enrolled &&
+                  !lecture.is_mcqs_public;
+
+                const pyqsLocked =
+                  !enrolled &&
+                  !lecture.is_pyqs_public;
+
+                return (
                 <div
                   key={lecture.id}
                   className="
@@ -419,6 +459,7 @@ export default function LectureDashboardClient({
                       "
                     >
                       {/* VIDEO */}
+                    <div className="relative">
                       <LectureVideoModal
                         title={
                           lecture.lecture_title
@@ -434,7 +475,8 @@ export default function LectureDashboardClient({
                               l.sub_title,
 
                             video_url:
-                              enrolled
+                              enrolled &&
+                              contentAccess.videos
                                 ? l.video_url ||
                                   undefined
                                 : undefined,
@@ -443,106 +485,184 @@ export default function LectureDashboardClient({
                               l.duration ||
                               undefined,
                           }))}
-                        locked={!enrolled}
+                        locked={videoLocked}
                       />
+
+                      <span
+                        className={`
+                          absolute
+                          top-2
+                          right-2
+                          h-2.5
+                          w-2.5
+                          rounded-full
+                          border
+                          border-white/30
+                          ${
+                            lecture.is_video_public
+                              ? "bg-green-500"
+                              : "bg-red-500"
+                          }
+                        `}
+                      />
+                    </div>  
 
                       {/* DIVIDER */}
                       <div className="w-px bg-white/[0.08]" />
 
                       {/* NOTES */}
-                      <button
-                        disabled={
-                          !enrolled
-                        }
-                        className={`
-                          h-12
-                          px-4
-                          flex
-                          items-center
-                          justify-center
-                          text-sm
-                          font-medium
-                          transition-all
-                          gap-2
-                          ${
-                            !enrolled
-                              ? "cursor-not-allowed text-slate-500"
-                              : "text-white hover:bg-white/[0.05]"
-                          }
-                        `}
-                      >
-                        
-                        <NotebookPen className="w-4 h-4" />
+                      <div className="relative">
+                        <button
+                          disabled={notesLocked}
+                          className={`
+                            h-12
+                            px-4
+                            flex
+                            items-center
+                            justify-center
+                            text-sm
+                            font-medium
+                            transition-all
+                            gap-2
+                            ${
+                              notesLocked
+                                ? "cursor-not-allowed text-slate-500"
+                                : "text-white hover:bg-white/[0.05]"
+                            }
+                          `}
+                        >
+                          {notesLocked ? (
+                            <Lock className="w-4 h-4" />
+                          ) : (
+                            <NotebookPen className="w-4 h-4" />
+                          )}
 
-                      <span>
-                        {enrolled
-                          ?  " Notes"
-                          : "🔒 Notes"} </span>
-                      </button>
+                          <span>
+                            Notes
+                          </span>
+                        </button>
 
+                        <span
+                          className={`
+                            absolute
+                            top-2
+                            right-2
+                            z-50
+                            h-2.5
+                            w-2.5
+                            rounded-full
+                            border
+                            border-white/30
+                            ${
+                              lecture.is_notes_public
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }
+                          `}
+                        />
+                      </div>
                       {/* DIVIDER */}
                       <div className="w-px bg-white/[0.08]" />
 
                       {/* MCQS */}
-                      <LectureTestModal
-                        exam={
-                          courseExamName
-                        }
-                        subject={
-                          activeSubject
-                        }
-                        lectureTitle={
-                          lecture.lecture_title
-                        }
-                        subTitles={allLectures
-                          .filter(
-                            (l) =>
-                              l.lecture_title ===
-                              lecture.lecture_title
-                          )
-                          .map(
-                            (l) =>
-                              l.sub_title
-                          )}
-                        type="mcqs"
-                        locked={
-                          !enrolled
-                        }
-                      />
+                      <div className="relative">
+                        <LectureTestModal
+                          exam={
+                            courseExamName
+                          }
+                          subject={
+                            activeSubject
+                          }
+                          lectureTitle={
+                            lecture.lecture_title
+                          }
+                          subTitles={allLectures
+                            .filter(
+                              (l) =>
+                                l.lecture_title ===
+                                lecture.lecture_title
+                            )
+                            .map(
+                              (l) =>
+                                l.sub_title
+                            )}
+                          type="mcqs"
+                          locked={mcqsLocked}
+                        />
+
+                        <span
+                          className={`
+                            absolute
+                            top-2
+                            right-2
+                            z-50
+                            h-2.5
+                            w-2.5
+                            rounded-full
+                            border
+                            border-white/30
+                            ${
+                              lecture.is_mcqs_public
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }
+                          `}
+                        />
+                      </div>
 
                       {/* DIVIDER */}
                       <div className="w-px bg-white/[0.08]" />
 
                       {/* PYQS */}
-                      <LectureTestModal
-                        exam={
-                          courseExamName
-                        }
-                        subject={
-                          activeSubject
-                        }
-                        lectureTitle={
-                          lecture.lecture_title
-                        }
-                        subTitles={allLectures
-                          .filter(
-                            (l) =>
-                              l.lecture_title ===
-                              lecture.lecture_title
-                          )
-                          .map(
-                            (l) =>
-                              l.sub_title
-                          )}
-                        type="pyqs"
-                        locked={
-                          !enrolled
-                        }
-                      />
+<div className="relative">
+  <LectureTestModal
+    exam={
+      courseExamName
+    }
+    subject={
+      activeSubject
+    }
+    lectureTitle={
+      lecture.lecture_title
+    }
+    subTitles={allLectures
+      .filter(
+        (l) =>
+          l.lecture_title ===
+          lecture.lecture_title
+      )
+      .map(
+        (l) =>
+          l.sub_title
+      )}
+    type="pyqs"
+    locked={pyqsLocked}
+  />
+
+  <span
+    className={`
+      absolute
+      top-2
+      right-2
+      z-50
+      h-2.5
+      w-2.5
+      rounded-full
+      border
+      border-white/30
+      ${
+        lecture.is_pyqs_public
+          ? "bg-green-500"
+          : "bg-red-500"
+      }
+    `}
+  />
+</div>
                     </div>
                   </div>
                 </div>
-              )
+                );
+              }
             )}
           </>
         )}

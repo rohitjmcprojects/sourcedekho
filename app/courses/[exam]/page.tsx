@@ -1,7 +1,25 @@
 import Link from "next/link";
+import { currentUser } from "@clerk/nextjs/server";
 import { sql } from "@/lib/db";
 
 import EnrollmentBadge from "@/components/EnrollmentBadge";
+
+export const dynamic = "force-dynamic";
+
+type CourseRow = {
+  id: number;
+  title: string;
+  description: string | null;
+  price: number | string;
+  is_enrolled: boolean;
+};
+
+type CourseStats = {
+  course_id: number;
+  subject_count: number | string;
+  themes_count: number | string;
+  total_lectures: number | string;
+};
 
 export default async function ExamCoursesPage({
   params,
@@ -88,7 +106,13 @@ export default async function ExamCoursesPage({
   // FETCH COURSES
   // ====================================
 
-  const courses = await sql`
+  const user =
+    await currentUser();
+
+  const userId =
+    user?.id ?? null;
+
+  const courses = (await sql`
     SELECT
       courses.*,
 
@@ -96,6 +120,7 @@ export default async function ExamCoursesPage({
         SELECT 1
         FROM enrollments
         WHERE enrollments.course_id = courses.id
+          AND enrollments.clerk_user_id = ${userId}
           AND enrollments.payment_status = 'approved'
       ) AS is_enrolled
 
@@ -104,11 +129,11 @@ export default async function ExamCoursesPage({
     WHERE exam_id = ${examData.id}
 
     ORDER BY id ASC
-  `;
+  `) as CourseRow[];
 
   // enrich courses with lecture stats
-  const courseIds = courses.map((c: any) => c.id);
-  let statsMap: Record<number, any> = {};
+  const courseIds = courses.map((c) => c.id);
+  const statsMap: Record<number, CourseStats> = {};
   if (courseIds.length > 0) {
     const stats = await sql`
       SELECT
@@ -122,7 +147,7 @@ export default async function ExamCoursesPage({
     `;
 
     for (const s of stats) {
-      statsMap[s.course_id] = s;
+      statsMap[s.course_id] = s as CourseStats;
     }
   }
 
@@ -263,7 +288,7 @@ export default async function ExamCoursesPage({
             "
           >
 
-            {courses.map((course: any) => (
+            {courses.map((course) => (
 
               <Link
                 key={course.id}
