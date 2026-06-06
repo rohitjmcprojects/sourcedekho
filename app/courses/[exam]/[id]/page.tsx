@@ -49,6 +49,7 @@ export default async function CourseDetailPage({
             p-10
           "
         >
+          
 
           {/* BG IMAGE */}
           <div
@@ -84,6 +85,7 @@ export default async function CourseDetailPage({
   return (
     <main className="pl-[120px] pr-5 py-5">
 
+      
       {/* MAIN CONTAINER */}
       <div
         className="
@@ -164,54 +166,46 @@ export default async function CourseDetailPage({
 
             {/* TAGS */}
             <div className="flex gap-3 mb-7 flex-wrap">
+              
 
-              {/* EXAM */}
-              <div
-                className="
-                  px-4
-                  py-2
+             
 
-                  rounded-2xl
+                     {/* HEADER */}
 
-                  border
-                  border-white/[0.08]
+            {/* BACK BUTTON */}
+            <Link
+              href="/"
+              className="
+                inline-flex
+                items-center
+                gap-2
 
-                  bg-gradient-to-br
-                  from-blue-500/20
-                  to-indigo-500/20
+                px-4
+                py-2
 
-                  backdrop-blur-xl
+                rounded-2xl
 
-                  text-white
-                  text-sm
-                  font-semibold
-                "
-              >
-                {course.exam_name}
-              </div>
+                border
+                border-white/[0.08]
 
-              {/* STAGE */}
-              <div
-                className="
-                  px-4
-                  py-2
+                bg-white/[0.04]
 
-                  rounded-2xl
+                backdrop-blur-xl
 
-                  border
-                  border-white/[0.08]
+                text-white
+                text-sm
+                font-medium
 
-                  bg-white/[0.05]
+                hover:bg-white/[0.08]
+                transition-all
+                duration-300
 
-                  backdrop-blur-xl
+                mb-4
+              "
+            >
+              ← Back
+            </Link>
 
-                  text-slate-200
-                  text-sm
-                  font-semibold
-                "
-              >
-                {course.stage}
-              </div>
 
             </div>
 

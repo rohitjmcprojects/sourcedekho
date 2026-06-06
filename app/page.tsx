@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { sql } from "@/lib/db";
+
 import {
   ArrowRight,
   BookOpenText,
@@ -33,280 +34,538 @@ export default async function HomePage() {
   `) as CommunityRow[];
 
   return (
-    <main className="pl-[120px] pr-5 py-5">
+    <main
+      className="
+        relative
+        h-screen
+        overflow-hidden
 
-      {/* MAIN CONTAINER */}
+        pl-[120px]
+        pr-8
+        py-8
+      "
+    >
+      {/* BACKGROUND */}
       <div
         className="
-          relative
-          overflow-hidden
+          absolute
+          inset-0
+          -z-10
+        "
+        style={{
+  backgroundImage: `
+    linear-gradient(
+      rgba(255,255,255,0.45),
+      rgba(255,255,255,0.65)
+    ),
+    url('/bgimg.png')
+  `,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+}}
+      />
 
-          rounded-[36px]
-
-          border
-          border-white/[0.06]
-
-          backdrop-blur-3xl
-
-          shadow-[0_20px_80px_rgba(0,0,0,0.45)]
-
-          before:absolute
-          before:inset-0
-          before:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),transparent_30%)]
-
-          before:pointer-events-none
-
-          p-4
-          md:p-5
+      <div
+        className="
+          flex
+          h-full
+          flex-col
+          gap-5
         "
       >
-
-        {/* BACKGROUND IMAGE */}
+        {/* TOP SECTION */}
         <div
           className="
-            absolute
-            inset-0
-            z-0
+            grid
+            grid-cols-12
+            gap-5
+            h-[46%]
+            min-h-0
           "
-          style={{
-            backgroundImage: `
-              linear-gradient(
-                rgba(7,18,16,0.72),
-                rgba(7,18,16,0.84)
-              ),
-              url('/bgimg.png')
-            `,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-
-        {/* DEPTH BLUR */}
-        <div
-          className="
-            absolute
-            inset-0
-
-            backdrop-blur-[1px]
-          "
-        />
-
-        {/* CONTENT */}
-        <div className="relative z-10">
-
-          {/* HEADER */}
-          <div className="mb-2">
-
-            {/* BADGE */}
-            <div
-              className="
-                inline-flex
-
-                px-4
-                py-2
-
-                rounded-2xl
-
-                border
-                border-white/[0.08]
-
-                bg-gradient-to-br
-                from-blue-500/20
-                to-indigo-500/20
-
-                backdrop-blur-xl
-
-                text-white
-                text-sm
-                font-semibold
-
-              "
-            >
-              SourceDekho
-            </div>
+        >
+          <div className="col-span-7">
+            <LibraryCard />
           </div>
 
-          <HomeSection
-            eyebrow="Reading Room"
-            title="Virtual Library"
-          >
-            <div className="w-full max-w-[420px]">
-              <HomeCard
-                featured
-                icon={<BookOpenText className="h-5 w-5" />}
-                tag="Study Resources"
-                title="Virtual Library"
-              />
-            </div>
-          </HomeSection>
-
-          <HomeSection title="Exams">
-            <HomeGrid>
-              {exams.map((exam) => (
-                <HomeCard
-                  key={exam.id}
-                  href={`/courses/${exam.name.toLowerCase()}`}
-                  tag="Civil Services"
-                  title={exam.name}
-                />
-              ))}
-            </HomeGrid>
-          </HomeSection>
-
-          <HomeSection title="Communities">
-            <HomeGrid>
-              {communities.map((community) => (
-                <HomeCard
-                  key={community.id}
-                  tag="Community"
-                  title={community.name}
-                  href={`/community/${community.slug}`}
-                />
-              ))}
-            </HomeGrid>
-          </HomeSection>
-
+          <div className="col-span-5 min-h-0">
+            <CommunityPanel
+              communities={communities}
+            />
+          </div>
         </div>
 
+        {/* BOTTOM SECTION */}
+        <div
+          className="
+             flex-1
+            min-h-0
+          "
+        >
+          <ExamPanel
+            exams={exams}
+          />
+        </div>
       </div>
-
     </main>
   );
 }
 
-function HomeSection({
-  children,
-  eyebrow,
-  title,
-}: {
-  children: React.ReactNode;
-  eyebrow?: string;
-  title: string;
-}) {
-  return (
-    <section className="mt-3 first:mt-0">
-      <div className="mb-2 flex items-end gap-2">
-        <h2 className="text-sm font-bold text-white">
-          {title}
-        </h2>
-        {eyebrow && (
-          <span className="pb-0.5 text-[10px] font-semibold uppercase text-slate-400">
-            {eyebrow}
-          </span>
-        )}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function HomeGrid({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function LibraryCard() {
   return (
     <div
-      className="
-        grid
-        grid-cols-1
-        gap-2
-        sm:grid-cols-2
-        md:grid-cols-3
-        xl:grid-cols-4
-        2xl:grid-cols-6
-      "
-    >
-      {children}
+  className="
+    h-full
+
+    rounded-[32px]
+
+    border-3
+    border-black/20
+
+    bg-transparent
+
+    p-6
+
+    flex
+    flex-col
+  "
+>
+      {/* LIGHT EFFECT */}
+      <div
+        className="
+          absolute
+          inset-0
+
+          bg-gradient-to-br
+          from-white/20
+          via-transparent
+          to-transparent
+
+          pointer-events-none
+        "
+      />
+
+      <div
+        className="
+          relative
+          z-10
+
+          flex
+          h-full
+          flex-col
+        "
+      >
+
+        {/* TITLE */}
+        <h1
+          className="
+            mt-6
+
+            text-6xl
+
+            font-semibold
+
+            tracking-tight
+
+            text-slate-900
+          "
+        >
+          Virtual
+
+          Library
+        </h1>
+
+        {/* DESCRIPTION */}
+        <p
+          className="
+            mt-6
+
+            max-w-xl
+
+            text-lg
+            leading-8
+
+            text-slate-600
+          "
+        >
+          Notes, PDFs, PYQs,
+          current affairs, books and
+          premium study resources
+          curated for serious aspirants.
+        </p>
+
+        <div className="flex-1" />
+
+        
+      </div>
     </div>
   );
 }
 
-function HomeCard({
-  description,
-  featured = false,
+function CommunityPanel({
+  communities,
+}: {
+  communities: CommunityRow[];
+}) {
+  return (
+    <div
+  className="
+    h-full
+
+    rounded-[32px]
+
+    border-3
+    border-black/20
+
+    bg-transparent
+
+    p-6
+
+    flex
+    flex-col
+  "
+>
+      <div
+  className="
+    mb-4
+
+    flex
+    items-center
+    justify-between
+  "
+>
+  <h2
+    className="
+      text-2xl
+      font-semibold
+      text-slate-900
+    "
+  >
+    Communities
+  </h2>
+
+  <p
+    className="
+      text-sm
+      text-slate-500
+    "
+  >
+    Learn together
+  </p>
+</div>
+
+      {/* LIST */}
+      <div
+        className="
+          flex-1
+
+          overflow-y-auto
+
+          space-y-3
+          
+
+          pr-1
+        "
+      >
+        {communities.map(
+          (community) => (
+            <Link
+              key={community.id}
+              href={`/community/${community.slug}`}
+              className="
+                group
+
+                flex
+                items-center
+                justify-between
+
+                rounded-2xl
+
+                border-2
+                border-slate-200
+
+
+                bg-[#EFE8DE]/50
+
+                shadow-sm
+
+                px-4
+                py-4
+
+                transition-all
+
+                hover:bg-white/90
+              "
+            >
+              <span
+                className="
+                  font-medium
+
+                  text-slate-800
+                "
+              >
+                {community.name}
+              </span>
+
+              <ArrowRight
+                className="
+                  h-4
+                  w-4
+
+                  text-slate-500
+
+                  transition-transform
+
+                  group-hover:translate-x-1
+                "
+              />
+            </Link>
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ExamPanel({
+  exams,
+}: {
+  exams: ExamRow[];
+}) {
+  return (
+    <div
+  className="
+    h-full
+
+    rounded-[32px]
+
+    border-3
+    border-black/20
+
+    bg-transparent
+
+    p-6
+
+    flex
+    flex-col
+  "
+>
+      {/* HEADER */}
+      <div
+        className="
+          mb-5
+
+          flex
+          items-center
+          gap-3
+        "
+      >
+        <h2
+          className="
+            text-2xl
+            font-semibold
+            text-slate-900
+          "
+        >
+          Exams
+        </h2>
+
+        <span
+          className="
+            text-sm
+            text-slate-500
+          "
+        >
+          - Select your preparation track
+        </span>
+      </div>
+
+      {/* GRID */}
+      <div
+        className="
+          flex-1
+
+          grid
+
+          grid-cols-2
+          lg:grid-cols-4
+
+          gap-5
+        "
+      >
+        {exams.map((exam) => (
+          <ExamCard
+            key={exam.id}
+            title={exam.name}
+            href={`/courses/${exam.name.toLowerCase()}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ExamCard({
   href,
-  icon,
-  tag,
   title,
 }: {
-  description?: string;
-  featured?: boolean;
-  href?: string;
-  icon?: React.ReactNode;
-  tag: string;
+  href: string;
   title: string;
 }) {
-  const card = (
-    <>
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-transparent opacity-0 transition-all duration-500 group-hover:opacity-100" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.05] via-transparent to-transparent" />
-      <div className="pointer-events-none absolute inset-[1px] rounded-[23px] border border-white/[0.03]" />
+  return (
+    <Link
+      href={href}
+      className="
+        group
 
-      <div className="relative z-10 flex h-full flex-col">
-        <div>
-          <div className="mb-1.5 inline-flex rounded-2xl border border-white/[0.08] bg-white/[0.05] px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-xl">
-            {tag}
-          </div>
+        relative
 
-          <h3
-            className={`
-              break-words
-              font-black
-              leading-tight
-              text-white
-              ${
-                featured
-                  ? "text-[24px]"
-                  : "text-[18px]"
-              }
-            `}
-          >
-            {title}
-          </h3>
+        overflow-hidden
 
-          {description && (
-            <p className="mt-1.5 line-clamp-2 text-xs text-slate-300">
-              {description}
-            </p>
-          )}
+        rounded-[26px]
+
+        border
+        border-slate-200
+
+
+        bg-[#EFE8DE]/50
+        shadow-md
+
+        p-6
+
+        transition-all
+        duration-300
+
+        hover:-translate-y-1
+        hover:shadow-2xl
+        hover:border-slate-300
+      "
+    >
+      {/* TOP ACCENT */}
+      <div
+        className="
+          absolute
+          top-0
+          left-0
+
+          h-1
+          w-full
+
+          bg-gradient-to-r
+          from-slate-900
+          via-slate-700
+          to-slate-400
+        "
+      />
+
+      {/* SOFT GLOW */}
+      <div
+        className="
+          absolute
+          inset-0
+
+          bg-gradient-to-br
+          from-slate-50
+          via-transparent
+          to-transparent
+
+          pointer-events-none
+        "
+      />
+
+      <div
+        className="
+          relative
+          z-10
+
+          flex
+          h-full
+          flex-col
+        "
+      >
+        {/* SMALL LABEL */}
+        <div
+          className="
+            inline-flex
+            w-fit
+
+            rounded-full
+
+            bg-slate-100
+
+            px-3
+            py-1
+
+            text-[11px]
+            font-medium
+
+            text-slate-600
+          "
+        >
+          Civil Services
         </div>
 
         <div className="flex-1" />
 
-        <div className="mt-2 flex items-center">
-          <div className={`${featured ? "h-10 w-10" : "h-8 w-8"} flex items-center justify-center rounded-2xl border border-white/[0.08] bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-white backdrop-blur-xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.28)]`}>
-            {icon || <ArrowRight className="h-4 w-4" />}
+        {/* TITLE */}
+        <h3
+          className="
+            text-3xl
+
+            font-semibold
+
+            tracking-tight
+
+            text-slate-900
+          "
+        >
+          {title}
+        </h3>
+
+        {/* FOOTER */}
+        <div
+          className="
+            mt-5
+
+            flex
+            items-center
+            justify-between
+          "
+        >
+          <span
+            className="
+              text-sm
+
+              font-medium
+
+              text-slate-500
+            "
+          >
+            Open Course
+          </span>
+
+          <div
+            className="
+              flex
+              h-10
+              w-10
+
+              items-center
+              justify-center
+
+              rounded-xl
+
+              bg-slate-100
+
+              transition-all
+
+              group-hover:bg-slate-900
+              group-hover:text-white
+            "
+          >
+            <ArrowRight className="h-4 w-4" />
           </div>
         </div>
       </div>
-    </>
-  );
-
-  const className = `
-    group
-    relative
-    overflow-hidden
-    rounded-[24px]
-    border
-    border-white/[0.07]
-    bg-[#0a1a16]/60
-    p-3
-    shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
-    backdrop-blur-2xl
-    transition-all
-    duration-500
-    hover:-translate-y-1.5
-    hover:border-white/[0.12]
-    hover:shadow-[0_0_40px_rgba(16,185,129,0.18)]
-    ${featured ? "min-h-[160px] p-4" : "min-h-[130px]"}
-  `;
-
-  return href ? (
-    <Link href={href} className={className}>
-      {card}
     </Link>
-  ) : (
-    <div className={className}>{card}</div>
   );
 }
