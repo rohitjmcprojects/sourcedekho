@@ -5,10 +5,6 @@ import Link from "next/link";
 
 import {
   LayoutDashboard,
-  Users,
-  BookOpen,
-  GraduationCap,
-  Settings,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -28,7 +24,8 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] =
+    useState(true);
 
   const { user } = useUser();
 
@@ -38,73 +35,63 @@ export default function Sidebar() {
         fixed
         top-5
         left-5
+
         h-[calc(100vh-40px)]
+
         z-50
+
         flex
         flex-col
+
         overflow-hidden
 
         transition-all
         duration-500
 
-        ${collapsed ? "w-24" : "w-72"}
+        ${
+          collapsed
+            ? "w-24"
+            : "w-72"
+        }
 
         rounded-[32px]
 
         border
-        border-white/[0.08]
+        border-[#D8CFC2]
 
-        bg-[#0a1a16]/80
+        bg-[#EFE8DE]/95
 
-        backdrop-blur-2xl
+        backdrop-blur-xl
 
-        shadow-[0_8px_50px_rgba(0,0,0,0.55)]
-
-        before:absolute
-        before:inset-0
-        before:bg-gradient-to-b
-        before:from-white/[0.06]
-        before:to-transparent
-        before:pointer-events-none
+        shadow-[0_10px_40px_rgba(0,0,0,0.08)]
       `}
     >
-      {/* AMBIENT GLOW */}
-      <div
-        className="
-          absolute
-          -top-24
-          -left-24
-          w-60
-          h-60
-          bg-blue-500/10
-          blur-3xl
-          rounded-full
-          pointer-events-none
-        "
-      />
 
       {/* HEADER */}
       <div
         className="
-          relative
           flex
           items-center
           justify-between
+
           px-5
           py-5
 
           border-b
-          border-white/[0.08]
+          border-[#D8CFC2]
         "
       >
         {!collapsed && (
           <div>
             <h1
               className="
-                text-[30px]
+                text-[28px]
+
                 font-bold
+
                 tracking-tight
-                text-white
+
+                text-[#16212F]
               "
             >
               SourceDekho
@@ -112,59 +99,65 @@ export default function Sidebar() {
 
             <p
               className="
-                text-xs
-                text-slate-400
                 mt-1
+
+                text-xs
+
+                text-[#6A6A6A]
               "
             >
-              Competitive Exam Platform
+              Civil Services Preparation
             </p>
           </div>
         )}
 
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() =>
+            setCollapsed(
+              !collapsed
+            )
+          }
           className="
             flex
             items-center
             justify-center
 
-            w-11
             h-11
+            w-11
 
             rounded-2xl
 
             border
-            border-white/[0.08]
+            border-[#D8CFC2]
 
-            bg-white/[0.04]
+            bg-[#F7F3ED]
 
-            hover:bg-white/[0.08]
+            text-[#16212F]
 
             transition-all
-            duration-300
 
-            text-white
+            hover:bg-white
           "
         >
           {collapsed ? (
-            <ChevronRight size={18} />
+            <ChevronRight
+              size={18}
+            />
           ) : (
-            <ChevronLeft size={18} />
+            <ChevronLeft
+              size={18}
+            />
           )}
         </button>
       </div>
 
-      {/* MENU */}
+            {/* NAVIGATION */}
       <nav
         className="
-          relative
           flex-1
 
           px-4
           py-5
-
-          space-y-3
 
           overflow-y-auto
         "
@@ -172,142 +165,123 @@ export default function Sidebar() {
         {!collapsed && (
           <p
             className="
-              px-4
-              mb-2
+              mb-4
+
+              px-3
 
               text-[11px]
               font-semibold
 
-              tracking-[0.25em]
-
-              text-slate-500
+              tracking-[0.18em]
 
               uppercase
+
+              text-[#6A6A6A]
             "
           >
-            Main
+            Navigation
           </p>
         )}
 
-        {menuItems.map((item, index) => {
-          const Icon = item.icon;
+        <div className="space-y-2">
+          {menuItems.map((item, index) => {
+            const Icon = item.icon;
 
-          return (
-            <Link
-              key={item.title}
-              href={item.href}
-              className={`
-                group
-                relative
+            return (
+              <Link
+                key={item.title}
+                href={item.href}
+                className={`
+                  group
 
-                flex
-                items-center
-                gap-4
+                  flex
+                  items-center
 
-                px-4
-                py-4
-
-                rounded-2xl
-
-                transition-all
-                duration-300
-
-                ${
-                  index === 0
-                    ? `
-                      bg-gradient-to-r
-                      from-blue-500/20
-                      to-indigo-500/20
-
-                      border
-                      border-white/[0.08]
-
-                      backdrop-blur-xl
-
-                      shadow-[0_0_30px_rgba(16,185,129,0.14)]
-                    `
-                    : `
-                      text-slate-300
-
-                      hover:bg-white/[0.04]
-
-                      hover:border
-                      hover:border-white/[0.06]
-                    `
-                }
-              `}
-            >
-              {/* HOVER LIGHT */}
-              <div
-                className="
-                  absolute
-                  inset-0
+                  ${
+                    collapsed
+                      ? "justify-center"
+                      : "gap-4"
+                  }
 
                   rounded-2xl
 
-                  opacity-0
-                  group-hover:opacity-100
+                  px-4
+                  py-4
 
-                  transition
-                  duration-300
+                  transition-all
+                  duration-200
 
-                  bg-gradient-to-r
-                  from-white/[0.03]
-                  to-transparent
-                "
-              />
+                  ${
+                    index === 0
+                      ? `
+                        bg-[#E8DED2]
 
-              <div
-                className="
-                  relative
-                  min-w-[24px]
+                        border
+                        border-[#D8CFC2]
 
-                  flex
-                  justify-center
-
-                  text-white
-                "
+                        shadow-sm
+                      `
+                      : `
+                        hover:bg-[#F7F3ED]
+                      `
+                  }
+                `}
               >
-                <Icon
-                  size={21}
-                  strokeWidth={2.2}
-                />
-              </div>
-
-              {!collapsed && (
-                <span
+                {/* ICON */}
+                <div
                   className="
-                    relative
+                    flex
+                    items-center
+                    justify-center
 
-                    text-[15px]
-                    font-medium
+                    min-w-[24px]
 
-                    text-slate-200
+                    text-[#1F3D5A]
                   "
                 >
-                  {item.title}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+                  <Icon
+                    size={20}
+                    strokeWidth={2.2}
+                  />
+                </div>
+
+                {/* LABEL */}
+                {!collapsed && (
+                  <span
+                    className="
+                      text-[15px]
+
+                      font-medium
+
+                      text-[#16212F]
+                    "
+                  >
+                    {item.title}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
-      {/* FOOTER */}
+            {/* FOOTER */}
       <div
         className="
-          relative
-
           p-4
 
           border-t
-          border-white/[0.08]
-
-          space-y-4
+          border-[#D8CFC2]
         "
       >
         {/* USER */}
-        <div className="flex items-center justify-center">
+        <div
+          className="
+            flex
+            items-center
+            justify-center
+          "
+        >
           {user ? (
             <div
               className={`
@@ -324,29 +298,42 @@ export default function Sidebar() {
               <UserButton />
 
               {!collapsed && (
-                <div className="flex flex-col overflow-hidden">
+                <div
+                  className="
+                    flex
+                    flex-col
+
+                    overflow-hidden
+                  "
+                >
                   <p
                     className="
+                      truncate
+
                       text-sm
                       font-semibold
-                      text-white
-                      truncate
+
+                      text-[#16212F]
                     "
                   >
-                    {user.fullName || "User"}
+                    {user.fullName ||
+                      "User"}
                   </p>
 
                   <p
                     className="
-                      text-xs
-                      text-slate-400
-
                       truncate
-                      max-w-[150px]
+
+                      text-xs
+
+                      text-[#6A6A6A]
+
+                      max-w-[160px]
                     "
                   >
                     {
-                      user.primaryEmailAddress
+                      user
+                        .primaryEmailAddress
                         ?.emailAddress
                     }
                   </p>
@@ -360,72 +347,63 @@ export default function Sidebar() {
                   rounded-2xl
 
                   border
-                  border-white/[0.08]
+                  border-[#D8CFC2]
 
-                  bg-white/[0.05]
+                  bg-[#F7F3ED]
 
-                  text-white
-
-                  hover:bg-white/[0.08]
+                  text-[#16212F]
 
                   transition-all
-                  duration-300
+
+                  hover:bg-white
 
                   ${
                     collapsed
-                      ? "w-12 h-12 text-sm"
-                      : "w-full px-4 py-3 font-medium"
+                      ? `
+                        h-12
+                        w-12
+                      `
+                      : `
+                        w-full
+                        py-3
+                        px-4
+
+                        font-medium
+                      `
                   }
                 `}
               >
-                {collapsed ? "→" : "Sign In"}
+                {collapsed
+                  ? "→"
+                  : "Sign In"}
               </button>
             </SignInButton>
           )}
         </div>
 
-        {/* FOOTER CARD */}
+        {/* BRAND CARD */}
         {!collapsed ? (
           <div
             className="
-              relative
-              overflow-hidden
+              mt-4
 
-              rounded-3xl
+              rounded-[24px]
 
               border
-              border-white/[0.06]
+              border-[#D8CFC2]
 
-              bg-white/[0.04]
-
-              backdrop-blur-xl
+              bg-[#F7F3ED]
 
               p-4
             "
           >
-            {/* INNER GLOW */}
-            <div
-              className="
-                absolute
-                inset-0
-
-                bg-gradient-to-br
-                from-blue-500/10
-                via-indigo-500/5
-                to-transparent
-
-                pointer-events-none
-              "
-            />
-
             <p
               className="
-                relative
-
                 text-sm
+
                 font-semibold
 
-                text-white
+                text-[#16212F]
               "
             >
               SourceDekho
@@ -433,35 +411,42 @@ export default function Sidebar() {
 
             <p
               className="
-                relative
+                mt-1
 
                 text-xs
 
-                text-slate-400
+                leading-5
 
-                mt-1
+                text-[#6A6A6A]
               "
             >
-              Modern learning dashboard
+              Premium preparation
+              platform for UPSC,
+              HCS, UPPCS and
+              other Civil Services
+              examinations.
             </p>
           </div>
         ) : (
-          <div className="flex justify-center">
+          <div
+            className="
+              mt-4
+
+              flex
+              justify-center
+            "
+          >
             <div
               className="
-                w-10
                 h-10
+                w-10
 
                 rounded-2xl
 
                 border
-                border-white/[0.08]
+                border-[#D8CFC2]
 
-                bg-gradient-to-br
-                from-blue-500/20
-                to-indigo-500/20
-
-                backdrop-blur-xl
+                bg-[#F7F3ED]
               "
             />
           </div>

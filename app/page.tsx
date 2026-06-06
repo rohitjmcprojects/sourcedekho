@@ -284,7 +284,7 @@ function CommunityPanel({
                 border-slate-200
 
 
-                bg-[#EFE8DE]/50
+                bg-[#EFE8DE]/70
 
                 shadow-sm
 
@@ -427,7 +427,7 @@ function ExamCard({
         border-slate-200
 
 
-        bg-[#EFE8DE]/50
+        bg-[#EFE8DE]/70
         shadow-md
 
         p-6
