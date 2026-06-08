@@ -112,32 +112,57 @@ export default async function HomePage() {
 
 function LibraryCard() {
   return (
-    <div
-  className="
-    h-full
+    <Link
+      href="/library"
+      className="
+        group
 
-    rounded-[32px]
+        relative
 
-    border-3
-    border-black/20
+        h-full
 
-    bg-transparent
+        overflow-hidden
 
-    p-6
+        rounded-[32px]
 
-    flex
-    flex-col
-  "
->
-      {/* LIGHT EFFECT */}
+        border-2
+        border-black/20
+
+        bg-white/10
+
+        backdrop-blur-[2px]
+
+        p-6
+
+        flex
+        flex-col
+
+        transition-all
+        duration-300
+
+        hover:bg-white/20
+        hover:border-black/30
+        hover:-translate-y-1
+
+        hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]
+      "
+    >
+      {/* HOVER LIGHT */}
       <div
         className="
           absolute
           inset-0
 
+          opacity-0
+
+          transition-opacity
+          duration-500
+
+          group-hover:opacity-100
+
           bg-gradient-to-br
-          from-white/20
-          via-transparent
+          from-white/30
+          via-white/10
           to-transparent
 
           pointer-events-none
@@ -154,24 +179,23 @@ function LibraryCard() {
           flex-col
         "
       >
-
         {/* TITLE */}
         <h1
           className="
             mt-6
 
-            text-6xl
+            text-7xl
 
             font-semibold
 
-            tracking-tight
+            tracking-[-0.05em]
 
-            text-slate-900
+            leading-[0.9]
+
+            text-[#16212F]
           "
         >
-          Virtual
-
-          Library
+          Virtual Library
         </h1>
 
         {/* DESCRIPTION */}
@@ -184,7 +208,7 @@ function LibraryCard() {
             text-lg
             leading-8
 
-            text-slate-600
+            text-[#6A6A6A]
           "
         >
           Notes, PDFs, PYQs,
@@ -195,9 +219,58 @@ function LibraryCard() {
 
         <div className="flex-1" />
 
-        
+        {/* CTA */}
+        <div
+          className="
+            flex
+            items-center
+            justify-between
+
+            pt-6
+          "
+        >
+          <span
+            className="
+              text-sm
+              font-medium
+
+              text-[#16212F]
+            "
+          >
+            Explore Resources
+          </span>
+
+          <div
+            className="
+              flex
+              items-center
+              justify-center
+
+              h-12
+              w-12
+
+              rounded-2xl
+
+              border
+              border-black/10
+
+              bg-white/60
+
+              text-[#16212F]
+
+              transition-all
+              duration-300
+
+              group-hover:bg-[#16212F]
+              group-hover:text-white
+              group-hover:translate-x-1
+            "
+          >
+            <ArrowRight className="h-5 w-5" />
+          </div>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

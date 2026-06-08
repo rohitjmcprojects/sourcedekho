@@ -26,95 +26,35 @@ export default async function CourseDetailPage({
 
   const course = courses[0];
 
+  // =====================================
+  // NOT FOUND
+  // =====================================
+
   if (!course) {
     return (
-      <main className="pl-[120px] pr-5 py-5">
-
-        <div
-          className="
-            relative
-            overflow-hidden
-
-            min-h-[calc(100vh-40px)]
-
-            rounded-[36px]
-
-            border
-            border-white/[0.06]
-
-            backdrop-blur-3xl
-
-            shadow-[0_20px_80px_rgba(0,0,0,0.45)]
-
-            p-10
-          "
-        >
-          
-
-          {/* BG IMAGE */}
-          <div
-            className="
-              absolute
-              inset-0
-            "
-            style={{
-              backgroundImage: `
-                linear-gradient(
-                  rgba(7,18,16,0.72),
-                  rgba(7,18,16,0.84)
-                ),
-                url('/bgimg.png')
-              `,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-
-          <div className="relative z-10">
-            <h1 className="text-4xl font-bold text-white">
-              Course not found
-            </h1>
-          </div>
-
-        </div>
-
-      </main>
-    );
-  }
-
-  return (
-    <main className="pl-[120px] pr-5 py-5">
-
-      
-      {/* MAIN CONTAINER */}
-      <div
+      <main
         className="
           relative
+          h-screen
           overflow-hidden
 
-          rounded-[36px]
-
-          border
-          border-white/[0.06]
-
-          backdrop-blur-3xl
-
-          shadow-[0_20px_80px_rgba(0,0,0,0.45)]
+          pl-[120px]
+          pr-8
+          py-8
         "
       >
-
-        {/* BACKGROUND IMAGE */}
+        {/* BACKGROUND */}
         <div
           className="
             absolute
             inset-0
-            z-0
+            -z-10
           "
           style={{
             backgroundImage: `
               linear-gradient(
-                rgba(7,18,16,0.72),
-                rgba(7,18,16,0.84)
+                rgba(255,255,255,0.45),
+                rgba(255,255,255,0.65)
               ),
               url('/bgimg.png')
             `,
@@ -123,319 +63,435 @@ export default async function CourseDetailPage({
           }}
         />
 
-        {/* DEPTH BLUR */}
         <div
           className="
-            absolute
-            inset-0
+            h-full
 
-            backdrop-blur-[1px]
+            rounded-[32px]
+
+            border-2
+            border-black/10
+
+            p-10
           "
-        />
-
-        {/* NOISE */}
-        <div
-          className="
-            absolute
-            inset-0
-
-            opacity-[0.03]
-
-            mix-blend-soft-light
-
-            pointer-events-none
-          "
-          style={{
-            backgroundImage:
-              "url('https://grainy-gradients.vercel.app/noise.svg')",
-          }}
-        />
-
-        {/* CONTENT */}
-        <div className="relative z-10">
-
-          {/* HERO */}
-          <div
+        >
+          <h1
             className="
-              p-6
+              text-5xl
+              font-bold
 
-              border-b
-              border-white/[0.08]
+              text-[#16212F]
             "
           >
+            Course not found
+          </h1>
+        </div>
+      </main>
+    );
+  }
 
-            {/* TAGS */}
-            <div className="flex gap-3 mb-7 flex-wrap">
-              
+  return (
+    <main
+      className="
+        relative
 
-             
+        h-screen
 
-                     {/* HEADER */}
+        overflow-hidden
 
-            {/* BACK BUTTON */}
-            <Link
-              href="/"
+        pl-[120px]
+        pr-8
+        py-8
+      "
+    >
+      {/* BACKGROUND */}
+      <div
+        className="
+          absolute
+          inset-0
+          -z-10
+        "
+        style={{
+          backgroundImage: `
+            linear-gradient(
+              rgba(255,255,255,0.45),
+              rgba(255,255,255,0.65)
+            ),
+            url('/bgimg.png')
+          `,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+
+      {/* PAGE */}
+      <div
+        className="
+          h-full
+
+          rounded-[32px]
+
+          border-2
+          border-black/10
+
+          p-8
+
+          flex
+          flex-col
+        "
+      >
+        {/* HERO */}
+        <div className="mb-10">
+
+          {/* BACK */}
+          <Link
+            href="/"
+            className="
+              inline-flex
+              items-center
+              gap-2
+
+              rounded-full
+
+              border
+              border-[#D8CFC2]
+
+              bg-[#F7F3ED]
+
+              px-4
+              py-2
+
+              text-sm
+              font-medium
+
+              text-[#16212F]
+
+              transition-all
+
+              hover:bg-white
+            "
+          >
+            ← Back
+          </Link>
+
+          {/* EXAM TAG */}
+          <div
+            className="
+              mt-6
+
+              inline-flex
+
+              rounded-full
+
+              border
+              border-[#D8CFC2]
+
+              bg-[#EFE8DE]
+
+              px-4
+              py-2
+
+              text-sm
+              font-medium
+
+              text-[#16212F]
+            "
+          >
+            {course.exam_name}
+          </div>
+
+          {/* TITLE */}
+          <h1
+            className="
+              mt-6
+
+              text-5xl
+              xl:text-6xl
+
+              font-bold
+
+              tracking-tight
+
+              text-[#16212F]
+
+              max-w-5xl
+            "
+          >
+            {course.title}
+          </h1>
+
+          {/* DESCRIPTION */}
+          <p
+            className="
+              mt-5
+
+              max-w-3xl
+
+              text-lg
+              leading-8
+
+              text-[#6A6A6A]
+            "
+          >
+            {course.description}
+          </p>
+
+          {/* ACTIONS */}
+          <div
+            className="
+              mt-8
+
+              flex
+              items-center
+              gap-4
+              flex-wrap
+            "
+          >
+            {/* PRICE */}
+            <div
               className="
-                inline-flex
-                items-center
-                gap-2
+                text-4xl
 
-                px-4
-                py-2
+                font-bold
 
+                text-[#16212F]
+              "
+            >
+              ₹{course.price}
+            </div>
+
+            {/* DASHBOARD */}
+            <Link
+              href={`/courses/${course.exam_name.toLowerCase()}/${course.id}/dashboard`}
+              className="
                 rounded-2xl
 
                 border
-                border-white/[0.08]
+                border-[#D8CFC2]
 
-                bg-white/[0.04]
+                bg-[#F7F3ED]
 
-                backdrop-blur-xl
+                px-5
+                py-3
 
-                text-white
                 text-sm
-                font-medium
+                font-semibold
 
-                hover:bg-white/[0.08]
+                text-[#16212F]
+
                 transition-all
-                duration-300
 
-                mb-4
+                hover:bg-white
               "
             >
-              ← Back
+              Lecture Dashboard
             </Link>
 
+            <CourseEnrollButton
+              course={course}
+            />
+          </div>
+        </div>
+                {/* BODY */}
+        <div
+          className="
+            flex-1
 
-            </div>
+            min-h-0
 
-            {/* TITLE */}
-            <h1
+            overflow-y-auto
+          "
+        >
+          <div
+            className="
+              grid
+              grid-cols-1
+
+              gap-6
+            "
+          >
+            {/* ABOUT COURSE */}
+            <div
               className="
-                text-6xl
+                rounded-[28px]
 
-                font-black
+                border
+                border-[#D8CFC2]
 
-                tracking-tight
-                leading-[0.95]
+                bg-[#EFE8DE]/80
 
-                text-white
-
-                max-w-5xl
+                p-8
               "
             >
-              {course.title}
-            </h1>
-
-            {/* DESCRIPTION */}
-            <p
-              className="
-                mt-6
-
-                max-w-3xl
-
-                text-[16px]
-                leading-8
-
-                text-slate-300
-              "
-            >
-              {course.description}
-            </p>
-
-            {/* ACTIONS */}
-            <div className="flex items-center gap-5 mt-10 flex-wrap">
-
-              {/* PRICE */}
-              <div
+              <h2
                 className="
-                  text-5xl
+                  text-3xl
 
-                  font-black
+                  font-semibold
 
                   tracking-tight
 
-                  text-white
+                  text-[#16212F]
+
+                  mb-5
                 "
               >
-                ₹{course.price}
-              </div>
+                About Course
+              </h2>
 
-              {/* DASHBOARD LINK */}
-              <Link
-                href={`/courses/${course.exam_name.toLowerCase()}/${course.id}/dashboard`}
+              <p
                 className="
-                  px-6
-                  py-3
+                  text-[15px]
 
-                  rounded-2xl
+                  leading-8
 
-                  border
-                  border-white/[0.08]
-
-                  bg-gradient-to-br
-                  from-blue-500/10
-                  to-indigo-500/10
-
-                  backdrop-blur-xl
-
-                  font-semibold
-                  text-sm
-
-                  text-white
-
-                  transition-all
-                  duration-300
-
-                  hover:border-white/[0.15]
-                  hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]
-                  hover:-translate-y-1
+                  text-[#6A6A6A]
                 "
               >
-                Lecture Dashboard
-              </Link>
-
-              {/* ENROLL */}
-              <CourseEnrollButton
-                course={course}
-              />
-
+                This course is specially
+                designed for serious
+                aspirants preparing for
+                {" "}
+                <span className="font-medium text-[#16212F]">
+                  {course.exam_name}
+                </span>.
+                Complete structured
+                preparation, mentorship,
+                lectures, notes and tests
+                are organized in a premium
+                learning experience focused
+                on consistency, conceptual
+                clarity and examination
+                success.
+              </p>
             </div>
 
-          </div>
-
-          {/* BODY */}
-          <div className="p-5">
-
+            {/* COURSE FEATURES */}
             <div
               className="
                 grid
+
                 grid-cols-1
+                md:grid-cols-3
+
                 gap-5
               "
             >
+              <div
+                className="
+                  rounded-[24px]
 
-              {/* LEFT */}
-              <div>
+                  border
+                  border-[#D8CFC2]
 
-                {/* ABOUT CARD */}
-                <div
+                  bg-[#F7F3ED]
+
+                  p-6
+                "
+              >
+                <p
                   className="
-                    group
-                    relative
-                    overflow-hidden
+                    text-sm
 
-                    rounded-[30px]
-
-                    border
-                    border-white/[0.07]
-
-                    bg-[#0a1a16]/60
-
-                    backdrop-blur-2xl
-
-                    p-8
-
-                    shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+                    text-[#6A6A6A]
                   "
                 >
+                  Structured
+                </p>
 
-                  {/* HOVER GLOW */}
-                  <div
-                    className="
-                      absolute
-                      inset-0
+                <h3
+                  className="
+                    mt-2
 
-                      opacity-0
-                      group-hover:opacity-100
+                    text-xl
 
-                      transition-all
-                      duration-500
+                    font-semibold
 
-                      bg-gradient-to-br
-                      from-blue-500/10
-                      via-indigo-500/5
-                      to-transparent
-                    "
-                  />
-
-                  {/* REFLECTION */}
-                  <div
-                    className="
-                      absolute
-                      inset-0
-
-                      bg-gradient-to-b
-                      from-white/[0.05]
-                      via-transparent
-                      to-transparent
-                    "
-                  />
-
-                  {/* INNER BORDER */}
-                  <div
-                    className="
-                      absolute
-                      inset-[1px]
-
-                      rounded-[29px]
-
-                      border
-                      border-white/[0.03]
-
-                      pointer-events-none
-                    "
-                  />
-
-                  {/* CONTENT */}
-                  <div className="relative z-10">
-
-                    <h2
-                      className="
-                        text-3xl
-
-                        font-black
-
-                        tracking-tight
-
-                        text-white
-
-                        mb-6
-                      "
-                    >
-                      About Course
-                    </h2>
-
-                    <p
-                      className="
-                        text-[15px]
-                        leading-8
-
-                        text-slate-300
-                      "
-                    >
-                      This course is specially designed for
-                      serious aspirants preparing for{" "}
-                      {course.exam_name}. Complete
-                      structured preparation, mentorship,
-                      lectures, notes and tests will be
-                      available here.
-                    </p>
-
-                  </div>
-
-                </div>
-
+                    text-[#16212F]
+                  "
+                >
+                  Learning Path
+                </h3>
               </div>
 
+              <div
+                className="
+                  rounded-[24px]
+
+                  border
+                  border-[#D8CFC2]
+
+                  bg-[#F7F3ED]
+
+                  p-6
+                "
+              >
+                <p
+                  className="
+                    text-sm
+
+                    text-[#6A6A6A]
+                  "
+                >
+                  Premium
+                </p>
+
+                <h3
+                  className="
+                    mt-2
+
+                    text-xl
+
+                    font-semibold
+
+                    text-[#16212F]
+                  "
+                >
+                  Notes & Resources
+                </h3>
+              </div>
+
+              <div
+                className="
+                  rounded-[24px]
+
+                  border
+                  border-[#D8CFC2]
+
+                  bg-[#F7F3ED]
+
+                  p-6
+                "
+              >
+                <p
+                  className="
+                    text-sm
+
+                    text-[#6A6A6A]
+                  "
+                >
+                  Exam Focused
+                </p>
+
+                <h3
+                  className="
+                    mt-2
+
+                    text-xl
+
+                    font-semibold
+
+                    text-[#16212F]
+                  "
+                >
+                  Tests & Practice
+                </h3>
+              </div>
             </div>
 
-          </div>
-
+                      </div>
         </div>
-
       </div>
-
     </main>
   );
 }

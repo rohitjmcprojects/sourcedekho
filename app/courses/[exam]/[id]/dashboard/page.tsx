@@ -2,6 +2,7 @@ import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { sql } from "@/lib/db";
 import { Info } from "lucide-react";
+
 import LectureDashboardClient from "@/components/LectureDashboardClient";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,10 @@ type CourseRow = {
   [key: string]: unknown;
 };
 
-const contentFlagColumns: Record<CourseContentKey, string[]> = {
+const contentFlagColumns: Record<
+  CourseContentKey,
+  string[]
+> = {
   videos: [
     "allow_videos",
     "videos_allowed",
@@ -46,16 +50,19 @@ const contentFlagColumns: Record<CourseContentKey, string[]> = {
     "lectures_allowed",
     "enable_lectures",
   ],
+
   notes: [
     "allow_notes",
     "notes_allowed",
     "enable_notes",
   ],
+
   mcqs: [
     "allow_mcqs",
     "mcqs_allowed",
     "enable_mcqs",
   ],
+
   pyqs: [
     "allow_pyqs",
     "pyqs_allowed",
@@ -74,12 +81,16 @@ function isContentEnabled(
       return (
         value === true ||
         value === 1 ||
-        (typeof value === "string" &&
+        (
+          typeof value === "string" &&
           [
             "true",
             "yes",
             "1",
-          ].includes(value.toLowerCase()))
+          ].includes(
+            value.toLowerCase()
+          )
+        )
       );
     }
   );
@@ -93,17 +104,23 @@ export default async function LectureDashboardPage({
     exam: string;
     id: string;
   }>;
+
   searchParams: Promise<{
     subject?: string;
   }>;
 }) {
-  const { id } = await params;
-  const { subject } = await searchParams;
+  const { id } =
+    await params;
 
-  const user = await currentUser();
-  const userId = user?.id;
+  const { subject } =
+    await searchParams;
 
-  // FETCH COURSE
+  const user =
+    await currentUser();
+
+  const userId =
+    user?.id;
+
   const courses = (await sql`
     SELECT
       courses.*,
@@ -114,59 +131,77 @@ export default async function LectureDashboardPage({
     WHERE courses.id = ${id}
   `) as CourseRow[];
 
-  const course = courses[0];
+  const course =
+    courses[0];
+    
+      // ====================================
+  // COURSE NOT FOUND
+  // ====================================
 
   if (!course) {
     return (
-      <main className="pl-[120px] pr-5 py-5">
-        
+      <main
+        className="
+          relative
+
+          h-screen
+
+          overflow-hidden
+
+          pl-[120px]
+          pr-8
+          py-8
+        "
+      >
         <div
           className="
-            relative
-            overflow-hidden
+            absolute
+            inset-0
+            -z-10
+          "
+          style={{
+            backgroundImage: `
+              linear-gradient(
+                rgba(255,255,255,0.45),
+                rgba(255,255,255,0.65)
+              ),
+              url('/bgimg.png')
+            `,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
 
-            
+        <div
+          className="
+            h-full
 
-            rounded-[36px]
+            rounded-[32px]
 
-            border
-            border-white/[0.06]
-
-            backdrop-blur-3xl
-
-            shadow-[0_20px_80px_rgba(0,0,0,0.45)]
+            border-2
+            border-black/10
 
             p-10
           "
         >
-          {/* BG IMAGE */}
-          <div
+          <h1
             className="
-              absolute
-              inset-0
-            "
-            style={{
-              backgroundImage: `
-                linear-gradient(
-                  rgba(7,18,16,0.72),
-                  rgba(7,18,16,0.84)
-                ),
-                url('/bgimg.png')
-              `,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
+              text-5xl
+              font-bold
 
-          <div className="relative z-10">
-            <h1 className="text-4xl font-bold text-white">
-              Dashboard not found
-            </h1>
-          </div>
+              text-[#16212F]
+            "
+          >
+            Dashboard not found
+          </h1>
         </div>
       </main>
     );
   }
+
+  // ====================================
+  // ENROLLMENT
+  // ====================================
 
   const isEnrolled = Boolean(
     userId &&
@@ -183,13 +218,39 @@ export default async function LectureDashboardPage({
   );
 
   const contentAccess = {
-    videos: isEnrolled && isContentEnabled(course, "videos"),
-    notes: isEnrolled && isContentEnabled(course, "notes"),
-    mcqs: isEnrolled && isContentEnabled(course, "mcqs"),
-    pyqs: isEnrolled && isContentEnabled(course, "pyqs"),
+    videos:
+      isEnrolled &&
+      isContentEnabled(
+        course,
+        "videos"
+      ),
+
+    notes:
+      isEnrolled &&
+      isContentEnabled(
+        course,
+        "notes"
+      ),
+
+    mcqs:
+      isEnrolled &&
+      isContentEnabled(
+        course,
+        "mcqs"
+      ),
+
+    pyqs:
+      isEnrolled &&
+      isContentEnabled(
+        course,
+        "pyqs"
+      ),
   };
 
-  // FETCH SUBJECTS
+  // ====================================
+  // SUBJECTS
+  // ====================================
+
   const subjects = (await sql`
     SELECT DISTINCT subject_name
     FROM lectures
@@ -198,252 +259,290 @@ export default async function LectureDashboardPage({
   `) as SubjectRow[];
 
   const activeSubject =
-    subject || subjects[0]?.subject_name || "";
+    subject ||
+    subjects[0]?.subject_name ||
+    "";
 
-  // FETCH LECTURES
+  // ====================================
+  // UNIQUE LECTURES
+  // ====================================
+
   const uniqueLectures = (
-  await sql`
-    SELECT
-      id,
-      lecture_title,
-      sub_title,
-      duration,
-      video_url,
-      is_video_public,
-      is_notes_public,
-      is_pyqs_public,
-      is_mcqs_public
-    FROM (
-      SELECT DISTINCT ON (lecture_title)
-        *
-      FROM lectures
-      WHERE course_id = ${course.id}
-        AND subject_name = ${activeSubject}
-      ORDER BY lecture_title, id ASC
-    ) unique_lectures
-    ORDER BY id ASC
-  `
-) as LectureRow[];
+    await sql`
+      SELECT
+        id,
+        lecture_title,
+        sub_title,
+        duration,
+        video_url,
 
-const allLectures = (
-  await sql`
-    SELECT
-      id,
-      lecture_title,
-      sub_title,
-      duration,
-      video_url,
-      is_video_public,
-      is_notes_public,
-      is_pyqs_public,
-      is_mcqs_public
-    FROM lectures
-    WHERE course_id = ${course.id}
-      AND subject_name = ${activeSubject}
-    ORDER BY id ASC
-  `
-) as LectureRow[];
+        is_video_public,
+        is_notes_public,
+        is_pyqs_public,
+        is_mcqs_public
+
+      FROM (
+        SELECT DISTINCT ON (
+          lecture_title
+        )
+          *
+
+        FROM lectures
+
+        WHERE course_id =
+          ${course.id}
+
+          AND subject_name =
+          ${activeSubject}
+
+        ORDER BY
+          lecture_title,
+          id ASC
+      ) unique_lectures
+
+      ORDER BY id ASC
+    `
+  ) as LectureRow[];
+
+  // ====================================
+  // ALL LECTURES
+  // ====================================
+
+  const allLectures = (
+    await sql`
+      SELECT
+        id,
+        lecture_title,
+        sub_title,
+        duration,
+        video_url,
+
+        is_video_public,
+        is_notes_public,
+        is_pyqs_public,
+        is_mcqs_public
+
+      FROM lectures
+
+      WHERE course_id =
+        ${course.id}
+
+        AND subject_name =
+        ${activeSubject}
+
+      ORDER BY id ASC
+    `
+  ) as LectureRow[];
 
   return (
-    <main className="pl-[120px] pr-5 py-5" >
+    <main
+      className="
+        relative
 
-      
-      {/* MAIN WRAPPER */}
+        h-screen
+
+        overflow-hidden
+
+        pl-[120px]
+        pr-8
+        py-8
+      "
+    >
+        {/* BACKGROUND */}
       <div
         className="
-          relative
-          overflow-hidden
+          absolute
+          inset-0
+          -z-10
+        "
+        style={{
+          backgroundImage: `
+            linear-gradient(
+              rgba(255,255,255,0.45),
+              rgba(255,255,255,0.65)
+            ),
+            url('/bgimg.png')
+          `,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
 
-          
-          rounded-[36px]
+      <div
+        className="
+          h-full
 
-          border
-          border-white/[0.06]
+          rounded-[32px]
 
-          backdrop-blur-3xl
-
-          shadow-[0_20px_80px_rgba(0,0,0,0.45)]
+          border-2
+          border-black/10
 
           p-8
+
+          flex
+          flex-col
         "
       >
+        {/* HEADER */}
+        <div className="mb-8">
 
-        {/* BACKGROUND IMAGE */}
-        <div
-          className="
-            absolute
-            inset-0
-            z-0
-          "
-          style={{
-            backgroundImage: `
-              linear-gradient(
-                rgba(7,18,16,0.72),
-                rgba(7,18,16,0.84)
-              ),
-              url('/bgimg.png')
-            `,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
+          {/* BACK BUTTON */}
+          <Link
+            href={`/courses/${course.exam_name.toLowerCase()}/${course.id}`}
+            className="
+              inline-flex
+              items-center
+              gap-2
 
-        {/* DEPTH BLUR */}
-        <div
-          className="
-            absolute
-            inset-0
+              mb-6
 
-            backdrop-blur-[1px]
-          "
-        />
+              rounded-full
 
-        {/* NOISE */}
-        <div
-          className="
-            absolute
-            inset-0
+              border
+              border-[#D8CFC2]
 
-            opacity-[0.03]
+              bg-[#F7F3ED]
 
-            mix-blend-soft-light
+              px-4
+              py-2
 
-            pointer-events-none
-          "
-          style={{
-            backgroundImage:
-              "url('https://grainy-gradients.vercel.app/noise.svg')",
-          }}
-        />
+              text-sm
+              font-medium
 
-        {/* CONTENT */}
-        <div className="relative z-10">
+              text-[#16212F]
 
-          {/* HEADER */}
-          <div className="mb-1">
+              transition-all
 
-            {/* TOP ROW */}
-                <div
-                  className="
-                    flex
-                    items-start
-                    justify-between
-                    gap-6
-                  "
-                >
+              hover:bg-white
+              hover:-translate-x-1
+            "
+          >
+            ← Back
+          </Link>
 
-     {/* LEFT */}
-      <div>
+          {/* TOP ROW */}
+          <div
+            className="
+              flex
+              items-start
+              justify-between
 
-            {/* SUBTITLE */}
-            <p
-              className="
-                text-[11px]
-
-                uppercase
-                tracking-[0.25em]
-
-                text-slate-500
-
-                mb-3
-              "
-            >
-              Lecture Dashboard
-            </p>
-
-            {/* BADGES */}
-            <div className="flex gap-3 mb-6 flex-wrap">
-
-              {/* EXAM */}
-              <div
-                className="
-                  px-4
-                  py-2
-
-                  rounded-2xl
-
-                  border
-                  border-white/[0.08]
-
-                  bg-gradient-to-br
-                  from-blue-500/20
-                  to-indigo-500/20
-
-                  backdrop-blur-xl
-
-                  text-white
-                  text-sm
-                  font-semibold
-                "
-              >
-                {course.exam_name}
-              </div>
-
-              {/* STAGE */}
-              <div
-                className="
-                  px-4
-                  py-2
-
-                  rounded-2xl
-
-                  border
-                  border-white/[0.08]
-
-                  bg-white/[0.05]
-
-                  backdrop-blur-xl
-
-                  text-slate-200
-                  text-sm
-                  font-semibold
-                "
-              >
-                {course.stage}
-              </div>
-
-            </div>
-            </div>
-
-            {/* Right */}
+              gap-6
+            "
+          >
+            {/* LEFT */}
             <div>
 
-            {/* TITLE */}
-                    <Link
-                      href={`/courses/${course.exam_name.toLowerCase()}/${course.id}/dashboard`}
-                      className="
-                        flex
-                        items-center
-                        gap-5
+              <p
+                className="
+                  text-[11px]
 
-                        px-8
-                        py-4
+                  uppercase
 
-                        rounded-4xl
+                  tracking-[0.25em]
 
-                        border
-                        border-white/10
+                  text-[#6A6A6A]
 
-                        bg-indigo-500/20
+                  mb-3
+                "
+              >
+                Lecture Dashboard
+              </p>
 
-                        text-white
-                        font-semibold
-                        text-lg
+              <div
+                className="
+                  flex
+                  gap-3
 
-                        hover:bg-indigo-500/30
+                  flex-wrap
+                "
+              >
+                <div
+                  className="
+                    rounded-full
 
-                        transition-all
-                      "
-                    >
-                      {course.title}                      
-                      <Info className="w-5 h-5" />
+                    border
+                    border-[#D8CFC2]
 
-                    </Link>
+                    bg-[#EFE8DE]
+
+                    px-4
+                    py-2
+
+                    text-sm
+                    font-medium
+
+                    text-[#16212F]
+                  "
+                >
+                  {course.exam_name}
+                </div>
+
+                <div
+                  className="
+                    rounded-full
+
+                    border
+                    border-[#D8CFC2]
+
+                    bg-[#F7F3ED]
+
+                    px-4
+                    py-2
+
+                    text-sm
+                    font-medium
+
+                    text-[#6A6A6A]
+                  "
+                >
+                  {course.stage}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT */}
+            <Link
+              href={`/courses/${course.exam_name.toLowerCase()}/${course.id}`}
+              className="
+                flex
+                items-center
+                gap-4
+
+                rounded-[24px]
+
+                border
+                border-[#D8CFC2]
+
+                bg-[#EFE8DE]
+
+                px-6
+                py-4
+
+                text-[#16212F]
+
+                font-semibold
+
+                transition-all
+
+                hover:bg-[#E8DED2]
+              "
+            >
+              {course.title}
+
+              <Info className="w-5 h-5" />
+            </Link>
           </div>
-          </div>
-          </div>
+        </div>
 
-          {/* BODY */}
+        {/* CONTENT */}
+        <div
+          className="
+            flex-1
+
+            min-h-0
+          "
+        >
           <LectureDashboardClient
             courseId={course.id}
             courseExamName={course.exam_name}
@@ -454,11 +553,8 @@ const allLectures = (
             initialEnrolled={isEnrolled}
             contentAccess={contentAccess}
           />
-
         </div>
-
       </div>
-
     </main>
   );
 }

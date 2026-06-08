@@ -206,6 +206,44 @@ export default async function ExamCoursesPage({
       >
         {/* HEADER */}
         <div className="mb-10">
+           {/* BACK BUTTON */}
+  <Link
+    href="/"
+    className="
+      inline-flex
+      items-center
+      gap-2
+
+      mb-6
+
+      rounded-full
+
+      border
+      border-[#D8CFC2]
+
+      bg-[#F7F3ED]
+
+      px-4
+      py-2
+
+      text-sm
+      font-medium
+
+      text-[#16212F]
+
+      transition-all
+      duration-300
+
+      hover:bg-white
+      hover:border-[#C8BFB1]
+
+      hover:-translate-x-1
+    "
+  >
+    <span className="text-base">←</span>
+    Back
+  </Link>
+
           <div
             className="
               inline-flex
