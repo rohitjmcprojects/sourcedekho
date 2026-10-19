@@ -19,7 +19,9 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className="relative m-0 bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] text-slate-900">
-          <div className="relative z-10 min-h-screen p-4 pl-[160px]">{children}</div>
+          <div className="relative z-10 min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] p-4 pl-[160px]">
+            {children}
+          </div>
           <BrandRibbon />
         </body>
       </html>
