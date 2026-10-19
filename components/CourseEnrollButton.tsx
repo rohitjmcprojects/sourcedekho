@@ -383,17 +383,8 @@ export default function CourseEnrollButton({
                       inset-0
                     "
                     style={{
-                      backgroundImage: `
-                        linear-gradient(
-                          rgba(7,18,16,0.92),
-                          rgba(7,18,16,0.96)
-                        ),
-                        url('/bgimg.png')
-                      `,
-                      backgroundSize:
-                        "cover",
-                      backgroundPosition:
-                        "center",
+                      background:
+                        "linear-gradient(rgba(7,18,16,0.92), rgba(7,18,16,0.96))",
                     }}
                   />
 

@@ -51,15 +51,8 @@ export default async function CourseDetailPage({
             -z-10
           "
           style={{
-            backgroundImage: `
-              linear-gradient(
-                rgba(255,255,255,0.45),
-                rgba(255,255,255,0.65)
-              ),
-              url('/bgimg.png')
-            `,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            background:
+              "linear-gradient(rgba(255,255,255,0.45), rgba(255,255,255,0.65))",
           }}
         />
 
@@ -112,15 +105,8 @@ export default async function CourseDetailPage({
           -z-10
         "
         style={{
-          backgroundImage: `
-            linear-gradient(
-              rgba(255,255,255,0.45),
-              rgba(255,255,255,0.65)
-            ),
-            url('/bgimg.png')
-          `,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          background:
+            "linear-gradient(rgba(255,255,255,0.45), rgba(255,255,255,0.65))",
         }}
       />
 

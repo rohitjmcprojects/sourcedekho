@@ -25,15 +25,8 @@ export default async function ExamToolsPage({
         <div
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: `
-              linear-gradient(
-                rgba(7,18,16,0.72),
-                rgba(7,18,16,0.84)
-              ),
-              url('/bgimg.png')
-            `,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            background:
+              "linear-gradient(rgba(7,18,16,0.72), rgba(7,18,16,0.84))",
           }}
         />
         <div className="absolute inset-0 backdrop-blur-[1px]" />
