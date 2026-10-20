@@ -7,17 +7,53 @@ type ExamRow = {
   description: string | null;
 };
 
+const fallbackExams: ExamRow[] = [
+  {
+    id: 1,
+    name: "HCS 2026",
+    description: "Complete preparation community for Haryana Civil Services 2026.",
+  },
+  {
+    id: 2,
+    name: "UPPCS 2026",
+    description: "Daily classes, notes, MCQs, and PYQs for UPPCS aspirants.",
+  },
+  {
+    id: 3,
+    name: "RAS 2026",
+    description: "Focused Rajasthan Administrative Services preparation.",
+  },
+  {
+    id: 4,
+    name: "UPSC 2027",
+    description: "Premium UPSC preparation ecosystem for 2027 aspirants.",
+  },
+];
+
+function toExamSlug(name: string) {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export default async function DashboardPage() {
-  let exams: ExamRow[] = [];
+  let exams: ExamRow[] = fallbackExams;
 
   try {
-    exams = await sql<ExamRow[]>`
+    const rows = await sql<ExamRow[]>`
       SELECT id, name, description
       FROM exams
       ORDER BY name ASC
     `;
+
+    if (rows.length > 0) {
+      exams = rows;
+    }
   } catch (error) {
     console.error("Failed to load exams:", error);
+    exams = fallbackExams;
   }
 
   return (
@@ -32,7 +68,7 @@ export default async function DashboardPage() {
             {exams.map((exam) => (
               <Link
                 key={exam.id}
-                href={`/courses/${exam.name.toLowerCase()}`}
+                href={`/courses/${toExamSlug(exam.name)}`}
                 className="group relative flex h-[190px] w-full max-w-[390px] items-center justify-center gap-2 rounded-[26px] border border-white/80 bg-white/15 px-2 py-3 shadow-[0_18px_35px_-22px_rgba(15,23,42,0.5)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:drop-shadow-[0_20px_30px_rgba(15,23,42,0.12)]"
                 aria-label={exam.name}
               >

@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sourcedekho
 
-## Getting Started
+Sourcedekho is a Next.js exam-preparation portal built around an exam-first structure. The home dashboard lists exams, and each exam leads to a course/category experience.
 
-First, run the development server:
+## Project structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+app/
+  (dashboard)/
+    page.tsx            # landing page showing exam cards
+  api/
+    init-db/
+      route.ts          # creates DB tables and seeds exam data
+  globals.css
+  layout.tsx
+components/
+  BrandRibbon.tsx
+  DashboardContainer.tsx
+  LectureDashboardClient.tsx
+  LoggedInUser.tsx
+  Sidebar.tsx
+lib/
+  communityData.ts      # fallback exam/community data for empty DB states
+  db.ts                 # PostgreSQL connection client
+sql/
+  test-questions.sql    # sample SQL for subject/test-question data
+public/
+  hcs.png
+  telegram.png
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## App flow
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. The landing page shows exam cards from the `exams` table.
+2. Clicking an exam routes to the exam-specific course/category area.
+3. Category and subject logic lives under the exam/course route, not on the home page.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Core rule
 
-## Learn More
+The homepage must read from `exams`, not from `courses`.
 
-To learn more about Next.js, take a look at the following resources:
+## Database setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Initialize the schema and seed data once:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+http://localhost:3000/api/init-db
+```
 
-## Deploy on Vercel
+This route creates the required tables, including:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `communities`
+- `exams`
+- `courses`
+- `course_categories`
+- `enrollments`
+- `subjects`
+- `lectures`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+## Fallback behavior
+
+If the database is not ready or the `exams` table is empty, the app falls back to data from `lib/communityData.ts` so the page still renders without crashing.
+
+## Important conventions
+
+- Keep `/` as an exam selection page only.
+- Keep course/category logic under the exam route.
+- Use `exams` as the source of truth for the dashboard.
+- Keep fallback/demo data in `lib/communityData.ts` for recovery and testing.
