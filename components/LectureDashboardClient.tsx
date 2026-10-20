@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 
-import LectureVideoModal from "@/components/LectureVideoModal";
 import LectureTestModal from "@/components/LectureTestModal";
 import {
   Lock,
@@ -460,33 +459,61 @@ export default function LectureDashboardClient({
                     >
                       {/* VIDEO */}
                     <div className="relative">
-                      <LectureVideoModal
-                        title={
-                          lecture.lecture_title
-                        }
-                        videos={lectureRows
+                      {(() => {
+                        const lectureVideos = lectureRows
                           .filter(
                             (l) =>
                               l.lecture_title ===
                               lecture.lecture_title
                           )
                           .map((l) => ({
-                            sub_title:
-                              l.sub_title,
-
+                            sub_title: l.sub_title,
                             video_url:
                               enrolled &&
                               contentAccess.videos
-                                ? l.video_url ||
-                                  undefined
+                                ? l.video_url || undefined
                                 : undefined,
+                            duration: l.duration || undefined,
+                          }));
 
-                            duration:
-                              l.duration ||
-                              undefined,
-                          }))}
-                        locked={videoLocked}
-                      />
+                        const firstVideoUrl = lectureVideos[0]?.video_url;
+
+                        return (
+                          <>
+                            <button
+                              type="button"
+                              disabled={videoLocked || !firstVideoUrl}
+                              onClick={() => {
+                                if (firstVideoUrl) {
+                                  window.open(
+                                    firstVideoUrl,
+                                    "_blank",
+                                    "noopener,noreferrer"
+                                  );
+                                }
+                              }}
+                              className={`
+                                h-12
+                                px-4
+                                flex
+                                items-center
+                                justify-center
+                                text-sm
+                                font-medium
+                                transition-all
+                                gap-2
+                                ${
+                                  videoLocked || !firstVideoUrl
+                                    ? "cursor-not-allowed text-slate-500"
+                                    : "text-white hover:bg-white/[0.05]"
+                                }
+                              `}
+                            >
+                              <span>Video</span>
+                            </button>
+                          </>
+                        );
+                      })()}
 
                       <span
                         className={`
@@ -505,7 +532,7 @@ export default function LectureDashboardClient({
                           }
                         `}
                       />
-                    </div>  
+                    </div>
 
                       {/* DIVIDER */}
                       <div className="w-px bg-white/[0.08]" />

@@ -1,4 +1,14 @@
-import type { TestLaunchConfig } from "@/components/TestLauncherModal";
+export type TestLaunchConfig = {
+  scope: {
+    exam: string;
+    subject: string;
+    lectureTitle: string;
+    subTitle: string;
+    type: "mcqs" | "pyqs";
+  };
+  shuffleQuestions: boolean;
+  shuffleOptions: boolean;
+};
 
 export type AttemptOption = {
   id: string;
