@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   ChevronLeft,
   ChevronRight,
+  Send,
 } from "lucide-react";
 
 import {
@@ -20,6 +21,12 @@ const menuItems = [
     title: "Home",
     href: "/",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Telegram Channel",
+    href: "https://t.me/sourcedekho",
+    icon: Send,
+    external: true,
   },
 ];
 
@@ -186,11 +193,14 @@ export default function Sidebar() {
         <div className="space-y-2">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
+            const isExternal = Boolean(item.external);
 
             return (
               <Link
                 key={item.title}
                 href={item.href}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
                 className={`
                   group
 
