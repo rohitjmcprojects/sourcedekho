@@ -7,13 +7,31 @@ type ExamRow = {
   description: string | null;
 };
 
-type CourseRow = {
+type SyllabusRow = {
   id: number;
   exam_id: number | null;
-  category: string;
-  title: string;
-  description: string | null;
-  price: number | null;
+  course_id: number | null;
+  stage: string | null;
+  paper: string | null;
+  subject: string | null;
+  theme: string | null;
+  topic: string | null;
+  video_name: string | null;
+  video_url: string | null;
+  notes_name: string | null;
+  notes_url: string | null;
+  mcqtest_name: string | null;
+  mcqtest_url: string | null;
+  pyq_name: string | null;
+  pyq_url: string | null;
+};
+
+type SubjectFallbackRow = {
+  id: number;
+  course_id: number | null;
+  title?: string | null;
+  name?: string | null;
+  subject_name?: string | null;
 };
 
 function slugify(value: string) {
@@ -33,7 +51,7 @@ export default async function SyllabusWisePage({
   const examSlug = exam ?? "";
 
   let selectedExam: ExamRow | null = null;
-  let courseRows: CourseRow[] = [];
+  let syllabusRows: SyllabusRow[] = [];
 
   try {
     const exams = await sql<ExamRow[]>`
@@ -45,44 +63,116 @@ export default async function SyllabusWisePage({
     selectedExam = exams.find((item) => slugify(item.name) === examSlug) ?? null;
 
     if (selectedExam) {
-      courseRows = await sql<CourseRow[]>`
-        SELECT id, exam_id, category, title, description, price
-        FROM courses
-        WHERE exam_id = ${selectedExam.id}
-          AND category ILIKE '%syllabus%'
-        ORDER BY title ASC
+      const subjectColumns = await sql<{ column_name: string }[]>`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'subjects'
       `;
+
+      const subjectColumnNames = new Set(subjectColumns.map((column) => column.column_name));
+      const hasStageColumn = subjectColumnNames.has("stage");
+      const hasPaperColumn = subjectColumnNames.has("paper");
+
+      if (hasStageColumn || hasPaperColumn) {
+        const rows = await sql<any[]>`
+          SELECT s.*
+          FROM subjects s
+          INNER JOIN courses c ON c.id = s.course_id
+          WHERE c.exam_id = ${selectedExam.id}
+        `;
+
+        syllabusRows = rows.map((row) => ({
+          id: Number(row.id),
+          exam_id: selectedExam?.id ?? null,
+          course_id: row.course_id ?? null,
+          stage: row.stage ?? row.subject_stage ?? null,
+          paper: row.paper ?? row.paper_name ?? null,
+          subject: row.subject ?? row.subject_name ?? row.title ?? row.name ?? null,
+          theme: null,
+          topic: null,
+          video_name: null,
+          video_url: null,
+          notes_name: null,
+          notes_url: null,
+          mcqtest_name: null,
+          mcqtest_url: null,
+          pyq_name: null,
+          pyq_url: null,
+        }));
+      } else {
+        const hasSyllabusTable = await sql<{ exists: boolean }[]>`
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.tables
+            WHERE table_schema = 'public' AND table_name = 'syllabus_wise'
+          ) AS exists
+        `;
+
+        if (hasSyllabusTable[0]?.exists) {
+          syllabusRows = await sql<SyllabusRow[]>`
+            SELECT *
+            FROM syllabus_wise
+            WHERE exam_id = ${selectedExam.id}
+            ORDER BY stage ASC, paper ASC, subject ASC
+          `;
+        } else {
+          const fallbackRows = await sql<SubjectFallbackRow[]>`
+            SELECT s.*
+            FROM subjects s
+            INNER JOIN courses c ON c.id = s.course_id
+            WHERE c.exam_id = ${selectedExam.id}
+          `;
+
+          syllabusRows = fallbackRows.map((row) => ({
+            id: row.id,
+            exam_id: selectedExam?.id ?? null,
+            course_id: row.course_id,
+            stage: null,
+            paper: null,
+            subject: row.title ?? row.name ?? row.subject_name ?? null,
+            theme: null,
+            topic: null,
+            video_name: null,
+            video_url: null,
+            notes_name: null,
+            notes_url: null,
+            mcqtest_name: null,
+            mcqtest_url: null,
+            pyq_name: null,
+            pyq_url: null,
+          }));
+        }
+      }
     }
   } catch (error) {
-    console.error("Failed to load syllabus-wise courses:", error);
+    console.error("Failed to load syllabus-wise data:", error);
   }
 
-  const stages = [
-    {
-      name: "Prelims",
-      papers: [
-        "Paper 1 - GS",
-        "Paper 2 - CSAT",
-      ],
-    },
-    {
-      name: "Mains",
-      papers: [
-        "Paper 1 - English",
-        "Paper 2 - Hindi",
-        "Paper 3 - GS I",
-        "Paper 4 - GS II",
-        "Paper 5 - GS III",
-        "Paper 6 - GS IV",
-      ],
-    },
-    {
-      name: "Personality Test",
-      papers: [
-        "Interview / Personality Test",
-      ],
-    },
-  ];
+  const stages = Array.from(
+    new Set(syllabusRows.filter((row) => row.stage).map((row) => String(row.stage)))
+  )
+    .map((stageName) => ({
+      name: stageName,
+      papers: Array.from(
+        new Set(
+          syllabusRows
+            .filter((row) => String(row.stage) === stageName)
+            .map((row) => String(row.paper || "Untitled paper"))
+        )
+      ).sort(),
+    }))
+    .filter((stage) => stage.papers.length > 0);
+
+  if (stages.length === 0 && syllabusRows.length > 0) {
+    const fallbackStage = "General";
+    const papers = Array.from(
+      new Set(syllabusRows.map((row) => String(row.paper || "Untitled paper")))
+    ).sort();
+
+    if (papers.length > 0) {
+      stages.push({ name: fallbackStage, papers });
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
@@ -100,9 +190,9 @@ export default async function SyllabusWisePage({
           <h1 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">Syllabus-wise</h1>
         </div>
 
-        {courseRows.length === 0 ? (
+        {stages.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-10 text-center text-sm text-slate-600 backdrop-blur-sm">
-            No syllabus-wise courses are available yet.
+            No syllabus-wise subjects are available yet.
           </div>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
@@ -112,7 +202,7 @@ export default async function SyllabusWisePage({
                 className="group relative flex h-auto w-full max-w-[390px] flex-col gap-3 rounded-[26px] border border-white/80 bg-white/15 p-4 shadow-[0_18px_35px_-22px_rgba(15,23,42,0.5)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:drop-shadow-[0_20px_30px_rgba(15,23,42,0.12)]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100 shadow-inner shadow-slate-200/60">
+                  <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl shadow-inner shadow-slate-200/60">
                     <img src="/hcs.png" alt={stage.name} className="h-12 w-auto object-contain" />
                   </div>
 
@@ -128,12 +218,13 @@ export default async function SyllabusWisePage({
 
                 <div className="space-y-2 rounded-2xl bg-slate-50 p-3">
                   {stage.papers.map((paper) => (
-                    <div
+                    <Link
                       key={paper}
-                      className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-[12px] font-medium text-slate-700"
+                      href={`/courses/${examSlug}/syllabus-wise/${slugify(paper)}`}
+                      className="block rounded-xl border border-slate-200 bg-white px-2 py-2 text-[12px] font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
                     >
                       {paper}
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

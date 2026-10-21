@@ -88,5 +88,27 @@ export async function ensureDatabaseReady() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS syllabus_wise (
+      id SERIAL PRIMARY KEY,
+      exam_id INTEGER NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+      course_id INTEGER REFERENCES courses(id) ON DELETE SET NULL,
+      stage VARCHAR(100),
+      paper VARCHAR(100),
+      subject VARCHAR(255) NOT NULL,
+      theme VARCHAR(255),
+      topic VARCHAR(255),
+      video_name VARCHAR(255),
+      video_url TEXT,
+      notes_name VARCHAR(255),
+      notes_url TEXT,
+      mcqtest_name VARCHAR(255),
+      mcqtest_url TEXT,
+      pyq_name VARCHAR(255),
+      pyq_url TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
+
   return true;
 }
