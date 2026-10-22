@@ -67,10 +67,13 @@ function ResourceLink({
 
 export default async function SyllabusPaperPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ exam: string; paper: string }>;
+  searchParams?: Promise<{ subject?: string }>;
 }) {
   const { exam, paper } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const examSlug = exam ?? "";
   const paperSlug = paper ?? "";
 
@@ -78,6 +81,7 @@ export default async function SyllabusPaperPage({
   let syllabusRows: SyllabusRow[] = [];
   let subjectNames: string[] = [];
   let selectedPaper = "";
+  let selectedSubject = "";
 
   try {
     const exams = await sql<ExamRow[]>`
@@ -157,10 +161,32 @@ export default async function SyllabusPaperPage({
       if (subjectNames.length === 0) {
         subjectNames = Array.from(new Set(subjectValues)).sort((a, b) => a.localeCompare(b));
       }
+
+      const requestedSubject = resolvedSearchParams?.subject ?? "";
+      const normalizedRequestedSubject = requestedSubject.trim();
+      const matchedSubject = subjectNames.find((subjectName) => {
+        const current = String(subjectName).trim();
+        return (
+          current.toLowerCase() === normalizedRequestedSubject.toLowerCase() ||
+          slugify(current) === slugify(normalizedRequestedSubject)
+        );
+      });
+
+      selectedSubject = matchedSubject ?? subjectNames[0] ?? "";
     }
   } catch (error) {
     console.error("Failed to load syllabus paper dashboard:", error);
   }
+
+  const subjectContentRows = selectedSubject
+    ? syllabusRows.filter((row) => {
+        const rowSubject = String(row.subject ?? "").trim();
+        return (
+          rowSubject.toLowerCase() === selectedSubject.toLowerCase() ||
+          slugify(rowSubject) === slugify(selectedSubject)
+        );
+      })
+    : syllabusRows;
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
@@ -173,9 +199,8 @@ export default async function SyllabusPaperPage({
 
         <div className="mb-8 text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-            {selectedExam?.name ?? "Exam"}
+            {selectedExam?.name ?? "Exam"} __ {selectedPaper || "Paper"} __{selectedSubject || selectedPaper || "Selected paper"}
           </p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">{selectedPaper || "Paper"}</h1>
         </div>
 
         {subjectNames.length === 0 ? (
@@ -190,49 +215,60 @@ export default async function SyllabusPaperPage({
               </div>
 
               <div className="space-y-2">
-                {subjectNames.map((subjectName) => (
-                  <div
-                    key={subjectName}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
-                  >
-                    {subjectName}
-                  </div>
-                ))}
+                {subjectNames.map((subjectName) => {
+                  const isSelected = subjectName === selectedSubject;
+
+                  return (
+                    <Link
+                      key={subjectName}
+                      href={`/courses/${examSlug}/syllabus-wise/${paperSlug}?subject=${encodeURIComponent(subjectName)}`}
+                      className={[
+                        "block rounded-xl border px-3 py-2 text-sm font-medium transition",
+                        isSelected
+                          ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100",
+                      ].join(" ")}
+                    >
+                      {subjectName}
+                    </Link>
+                  );
+                })}
               </div>
             </aside>
 
-            <section className="rounded-[24px] border border-slate-200 bg-white/80 p-5 shadow-[0_18px_35px_-25px_rgba(15,23,42,0.45)] md:p-7">
-              <div className="mb-6 border-b border-slate-200 pb-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Content</p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900">{selectedPaper || "Selected paper"}</h2>
-              </div>
+            <section className="rounded-[24px] border border-slate-200 ">
+              
 
-              <div className="space-y-5">
-                {syllabusRows.map((row) => (
-                  <div key={row.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <div>
-                        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          {row.subject}
+              {subjectContentRows.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-600">
+                  No syllabus content is available for this subject yet.
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  {subjectContentRows.map((row) => (
+                    <div key={row.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <div>
+                          
+                          {row.theme ? (
+                            <div className="mt-1 text-sm font-medium text-slate-700">{row.theme}</div>
+                          ) : null}
+                          {row.topic ? (
+                            <div className="mt-1 text-sm text-slate-600">{row.topic}</div>
+                          ) : null}
                         </div>
-                        {row.theme ? (
-                          <div className="mt-1 text-sm font-medium text-slate-700">{row.theme}</div>
-                        ) : null}
-                        {row.topic ? (
-                          <div className="mt-1 text-sm text-slate-600">{row.topic}</div>
-                        ) : null}
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <ResourceLink label="Video" url={row.video_url} name={row.video_name} />
+                        <ResourceLink label="Notes" url={row.notes_url} name={row.notes_name} />
+                        <ResourceLink label="MCQ Test" url={row.mcqtest_url} name={row.mcqtest_name} />
+                        <ResourceLink label="PYQ" url={row.pyq_url} name={row.pyq_name} />
                       </div>
                     </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <ResourceLink label="Video" url={row.video_url} name={row.video_name} />
-                      <ResourceLink label="Notes" url={row.notes_url} name={row.notes_name} />
-                      <ResourceLink label="MCQ Test" url={row.mcqtest_url} name={row.mcqtest_name} />
-                      <ResourceLink label="PYQ" url={row.pyq_url} name={row.pyq_name} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </section>
           </div>
         )}
