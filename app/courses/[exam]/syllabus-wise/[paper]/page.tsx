@@ -330,7 +330,7 @@ export default async function SyllabusPaperPage({
                           <h3 className="text-lg font-bold text-slate-900">{themeName}</h3>
                         </div>
 
-                        <div className="flex flex-col gap-0 overflow-hidden rounded-xl border border-slate-200  xl:flex-row xl:divide-x xl:divide-slate-200">
+                        <div className="flex flex-col gap-0 overflow-hidden rounded-xl   xl:flex-row xl:divide-x xl:divide-slate-500">
                           <div className="flex-1 p-3">
                             <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
                               Videos
