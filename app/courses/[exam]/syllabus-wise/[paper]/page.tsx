@@ -51,14 +51,22 @@ function ResourceLink({
   url: string | null;
   name: string | null;
 }) {
-  if (!url) return null;
+  if (!name) return null;
+
+  const isAvailable = Boolean(url);
 
   return (
     <a
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+      href={isAvailable ? url ?? undefined : undefined}
+      target={isAvailable ? "_blank" : undefined}
+      rel={isAvailable ? "noreferrer" : undefined}
+      aria-disabled={!isAvailable}
+      className={[
+        "inline-flex items-center rounded-lg border px-3 py-2 text-sm font-medium transition",
+        isAvailable
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100"
+          : "border-red-200 bg-red-50 text-red-600",
+      ].join(" ")}
     >
       {name || label}
     </a>
@@ -188,19 +196,59 @@ export default async function SyllabusPaperPage({
       })
     : syllabusRows;
 
+  const themeGroups = Array.from(
+    subjectContentRows.reduce((map, row) => {
+      const themeName = String(row.theme ?? "General").trim() || "General";
+      const existing = map.get(themeName) ?? [];
+      existing.push(row);
+      map.set(themeName, existing);
+      return map;
+    }, new Map<string, SyllabusRow[]>()).entries()
+  ).sort(([a], [b]) => a.localeCompare(b));
+
+  const totalThemes = themeGroups.length;
+  const totalVideos = subjectContentRows.filter((row) => row.video_url).length;
+  const totalNotes = subjectContentRows.filter((row) => row.notes_url).length;
+  const totalTests = subjectContentRows.filter((row) => row.mcqtest_url || row.pyq_url).length;
+
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
       <div className="w-full px-4 py-6 md:px-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <Link href={`/courses/${examSlug}/syllabus-wise`} className="text-sm font-medium text-slate-700 hover:text-slate-900">
-            ← Back to syllabus
-          </Link>
-        </div>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <span>{selectedExam?.name ?? "Exam"}</span>
+            <span>/</span>
+            <span>{selectedPaper || "Paper"}</span>
+            {selectedSubject ? (
+              <>
+                <span>/</span>
+                <span>{selectedSubject}</span>
+              </>
+            ) : null}
+          </div>
 
-        <div className="mb-8 text-left">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-            {selectedExam?.name ?? "Exam"} __ {selectedPaper || "Paper"} __{selectedSubject || selectedPaper || "Selected paper"}
-          </p>
+          <div className="flex flex-col items-end gap-4">
+            {subjectNames.length > 0 ? (
+              <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:min-w-[430px] md:grid-cols-4">
+              <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Themes</div>
+                <div className="mt-2 text-2xl font-bold text-slate-900">{totalThemes}</div>
+              </div>
+              <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Videos</div>
+                <div className="mt-2 text-2xl font-bold text-slate-900">{totalVideos}</div>
+              </div>
+              <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Notes</div>
+                <div className="mt-2 text-2xl font-bold text-slate-900">{totalNotes}</div>
+              </div>
+                <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Tests</div>
+                  <div className="mt-2 text-2xl font-bold text-slate-900">{totalTests}</div>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         {subjectNames.length === 0 ? (
@@ -237,36 +285,115 @@ export default async function SyllabusPaperPage({
             </aside>
 
             <section className="rounded-[24px] border border-slate-200 ">
-              
-
               {subjectContentRows.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-600">
                   No syllabus content is available for this subject yet.
                 </div>
               ) : (
-                <div className="space-y-5">
-                  {subjectContentRows.map((row) => (
-                    <div key={row.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <div>
-                          
-                          {row.theme ? (
-                            <div className="mt-1 text-sm font-medium text-slate-700">{row.theme}</div>
-                          ) : null}
-                          {row.topic ? (
-                            <div className="mt-1 text-sm text-slate-600">{row.topic}</div>
-                          ) : null}
+                <div className="space-y-6">
+                  {themeGroups.map(([themeName, rows]) => {
+                    const videoLinks = rows
+                      .map((row) => ({
+                        id: row.id,
+                        url: row.video_url,
+                        name: row.video_name,
+                      }))
+                      .filter((item) => item.name);
+
+                    const noteLinks = rows
+                      .map((row) => ({
+                        id: row.id,
+                        url: row.notes_url,
+                        name: row.notes_name,
+                      }))
+                      .filter((item) => item.name);
+
+                    const mcqLinks = rows
+                      .map((row) => ({
+                        id: row.id,
+                        url: row.mcqtest_url,
+                        name: row.mcqtest_name,
+                      }))
+                      .filter((item) => item.name);
+
+                    const pyqLinks = rows
+                      .map((row) => ({
+                        id: row.id,
+                        url: row.pyq_url,
+                        name: row.pyq_name,
+                      }))
+                      .filter((item) => item.name);
+
+                    return (
+                      <div key={themeName} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div className="mb-4">
+                          <h3 className="text-lg font-bold text-slate-900">{themeName}</h3>
+                        </div>
+
+                        <div className="flex flex-col gap-0 overflow-hidden rounded-xl border border-slate-200  xl:flex-row xl:divide-x xl:divide-slate-200">
+                          <div className="flex-1 p-3">
+                            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
+                              Videos
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {videoLinks.length === 0 ? (
+                                <span className="text-sm text-slate-400">No videos</span>
+                              ) : (
+                                videoLinks.map((link) => (
+                                  <ResourceLink key={link.id} label="Video" url={link.url} name={link.name} />
+                                ))
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex-1 p-3">
+                            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
+                              Notes
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {noteLinks.length === 0 ? (
+                                <span className="text-sm text-slate-400">No notes</span>
+                              ) : (
+                                noteLinks.map((link) => (
+                                  <ResourceLink key={link.id} label="Notes" url={link.url} name={link.name} />
+                                ))
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex-1 p-3">
+                            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
+                              MCQ Test
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {mcqLinks.length === 0 ? (
+                                <span className="text-sm text-slate-400">No MCQ test</span>
+                              ) : (
+                                mcqLinks.map((link) => (
+                                  <ResourceLink key={link.id} label="MCQ Test" url={link.url} name={link.name} />
+                                ))
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex-1 p-3">
+                            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
+                              PYQ Test
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {pyqLinks.length === 0 ? (
+                                <span className="text-sm text-slate-400">No PYQ</span>
+                              ) : (
+                                pyqLinks.map((link) => (
+                                  <ResourceLink key={link.id} label="PYQ" url={link.url} name={link.name} />
+                                ))
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        <ResourceLink label="Video" url={row.video_url} name={row.video_name} />
-                        <ResourceLink label="Notes" url={row.notes_url} name={row.notes_name} />
-                        <ResourceLink label="MCQ Test" url={row.mcqtest_url} name={row.mcqtest_name} />
-                        <ResourceLink label="PYQ" url={row.pyq_url} name={row.pyq_name} />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </section>
