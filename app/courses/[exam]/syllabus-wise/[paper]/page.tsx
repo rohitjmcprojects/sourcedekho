@@ -257,7 +257,7 @@ export default async function SyllabusPaperPage({
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <aside className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4 shadow-inner shadow-slate-200/60">
+            <aside className="rounded-[24px] border border-slate-400  p-4 shadow-inner shadow-slate-200/60">
               <div className="mb-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Subjects</p>
               </div>
@@ -325,7 +325,7 @@ export default async function SyllabusPaperPage({
                       .filter((item) => item.name);
 
                     return (
-                      <div key={themeName} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div key={themeName} className="rounded-2xl border border-slate-400  p-4">
                         <div className="mb-4">
                           <h3 className="text-lg font-bold text-slate-900">{themeName}</h3>
                         </div>
