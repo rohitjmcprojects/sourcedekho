@@ -186,6 +186,20 @@ export default async function SyllabusPaperPage({
     console.error("Failed to load syllabus paper dashboard:", error);
   }
 
+  const subjectDataMap = new Map<string, boolean>();
+  subjectNames.forEach((subjectName) => {
+    const hasData = syllabusRows.some((row) => {
+      const rowSubject = String(row.subject ?? "").trim();
+      return (
+        rowSubject &&
+        (rowSubject.toLowerCase() === subjectName.toLowerCase() ||
+          slugify(rowSubject) === slugify(subjectName))
+      );
+    });
+
+    subjectDataMap.set(subjectName, hasData);
+  });
+
   const subjectContentRows = selectedSubject
     ? syllabusRows.filter((row) => {
         const rowSubject = String(row.subject ?? "").trim();
@@ -265,19 +279,41 @@ export default async function SyllabusPaperPage({
               <div className="space-y-2">
                 {subjectNames.map((subjectName) => {
                   const isSelected = subjectName === selectedSubject;
+                  const hasData = subjectDataMap.get(subjectName) ?? false;
 
                   return (
                     <Link
                       key={subjectName}
                       href={`/courses/${examSlug}/syllabus-wise/${paperSlug}?subject=${encodeURIComponent(subjectName)}`}
                       className={[
-                        "block rounded-xl border px-3 py-2 text-sm font-medium transition",
+                        "flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-sm font-medium text-slate-900 transition",
                         isSelected
                           ? "border-slate-900 bg-slate-900 text-white shadow-sm"
-                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100",
+                          : hasData
+                            ? "border-emerald-200 bg-emerald-50 text-slate-900 hover:border-emerald-300 hover:bg-emerald-100"
+                            : "border-red-200 bg-red-50 text-slate-900 hover:border-red-300 hover:bg-red-100",
                       ].join(" ")}
                     >
-                      {subjectName}
+                      <span>{subjectName}</span>
+                      {hasData ? (
+                        <span
+                          className={[
+                            "inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 shadow-sm",
+                            isSelected ? "border-white bg-emerald-400 shadow-emerald-200/80" : "border-emerald-100 bg-emerald-500 shadow-emerald-200/80",
+                          ].join(" ")}
+                          title="Data available"
+                          aria-label="Data available"
+                        />
+                      ) : (
+                        <span
+                          className={[
+                            "inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 shadow-sm",
+                            isSelected ? "border-white bg-red-400 shadow-red-200/80" : "border-red-100 bg-red-500 shadow-red-200/80",
+                          ].join(" ")}
+                          title="No data available"
+                          aria-label="No data available"
+                        />
+                      )}
                     </Link>
                   );
                 })}

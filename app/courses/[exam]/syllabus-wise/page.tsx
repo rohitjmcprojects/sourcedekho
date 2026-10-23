@@ -216,16 +216,32 @@ export default async function SyllabusWisePage({
                   </div>
                 </div>
 
-                <div className="space-y-2 rounded-2xl bg-slate-50 p-3">
-                  {stage.papers.map((paper) => (
-                    <Link
-                      key={paper}
-                      href={`/courses/${examSlug}/syllabus-wise/${slugify(paper)}`}
-                      className="block rounded-xl border border-slate-200 bg-white px-2 py-2 text-[12px] font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-                    >
-                      {paper}
-                    </Link>
-                  ))}
+                <div className="space-y-2 rounded-2xl p-3">
+                  {stage.papers.map((paper) => {
+                    const subjectCount = new Set(
+                      syllabusRows
+                        .filter(
+                          (row) =>
+                            String(row.stage ?? "") === stage.name &&
+                            String(row.paper || "Untitled paper") === paper &&
+                            String(row.subject ?? "").trim() !== ""
+                        )
+                        .map((row) => String(row.subject).trim())
+                    ).size;
+
+                    return (
+                      <Link
+                        key={paper}
+                        href={`/courses/${examSlug}/syllabus-wise/${slugify(paper)}`}
+                        className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-2 py-2 text-[12px] font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                      >
+                        <span>{paper}</span>
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+                          {subjectCount} subjects
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             ))}
