@@ -62,10 +62,10 @@ function ResourceLink({
       rel={isAvailable ? "noreferrer" : undefined}
       aria-disabled={!isAvailable}
       className={[
-        "inline-flex items-center rounded-lg border px-3 py-2 text-sm font-medium transition",
+        "inline-flex items-center text-sm font-medium underline-offset-2 transition",
         isAvailable
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100"
-          : "border-red-200 bg-red-50 text-red-600",
+          ? "text-emerald-700 hover:text-emerald-800 hover:underline"
+          : "text-red-600 hover:text-red-700 hover:underline",
       ].join(" ")}
     >
       {name || label}
@@ -328,104 +328,132 @@ export default async function SyllabusPaperPage({
               ) : (
                 <div className="space-y-6">
                   {themeGroups.map(([themeName, rows]) => {
-                    const videoLinks = rows
-                      .map((row) => ({
-                        id: row.id,
-                        url: row.video_url,
-                        name: row.video_name,
-                      }))
-                      .filter((item) => item.name);
-
-                    const noteLinks = rows
-                      .map((row) => ({
-                        id: row.id,
-                        url: row.notes_url,
-                        name: row.notes_name,
-                      }))
-                      .filter((item) => item.name);
-
-                    const mcqLinks = rows
-                      .map((row) => ({
-                        id: row.id,
-                        url: row.mcqtest_url,
-                        name: row.mcqtest_name,
-                      }))
-                      .filter((item) => item.name);
-
-                    const pyqLinks = rows
-                      .map((row) => ({
-                        id: row.id,
-                        url: row.pyq_url,
-                        name: row.pyq_name,
-                      }))
-                      .filter((item) => item.name);
+                    const topicGroups = Array.from(
+                      rows.reduce((map, row) => {
+                        const topicName = String(row.topic ?? "General").trim() || "General";
+                        const existing = map.get(topicName) ?? [];
+                        existing.push(row);
+                        map.set(topicName, existing);
+                        return map;
+                      }, new Map<string, SyllabusRow[]>()).entries()
+                    ).sort(([a], [b]) => a.localeCompare(b));
 
                     return (
-                      <div key={themeName} className="rounded-2xl border border-slate-400  p-4">
+                      <div key={themeName} className="rounded-2xl border border-slate-400 p-4">
                         <div className="mb-4">
                           <h3 className="text-lg font-bold text-slate-900">{themeName}</h3>
                         </div>
 
-                        <div className="flex flex-col gap-0 overflow-hidden rounded-xl   xl:flex-row xl:divide-x xl:divide-slate-500">
-                          <div className="flex-1 p-3">
-                            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
-                              Videos
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {videoLinks.length === 0 ? (
-                                <span className="text-sm text-slate-400">No videos</span>
-                              ) : (
-                                videoLinks.map((link) => (
-                                  <ResourceLink key={link.id} label="Video" url={link.url} name={link.name} />
-                                ))
-                              )}
-                            </div>
-                          </div>
+                        <div className="space-y-5">
+                          {topicGroups.map(([topicName, topicRows]) => {
+                            const videoLinks = topicRows
+                              .map((row) => ({
+                                id: row.id,
+                                url: row.video_url,
+                                name: row.video_name,
+                              }))
+                              .filter((item) => item.name);
 
-                          <div className="flex-1 p-3">
-                            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
-                              Notes
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {noteLinks.length === 0 ? (
-                                <span className="text-sm text-slate-400">No notes</span>
-                              ) : (
-                                noteLinks.map((link) => (
-                                  <ResourceLink key={link.id} label="Notes" url={link.url} name={link.name} />
-                                ))
-                              )}
-                            </div>
-                          </div>
+                            const noteLinks = topicRows
+                              .map((row) => ({
+                                id: row.id,
+                                url: row.notes_url,
+                                name: row.notes_name,
+                              }))
+                              .filter((item) => item.name);
 
-                          <div className="flex-1 p-3">
-                            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
-                              MCQ Test
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {mcqLinks.length === 0 ? (
-                                <span className="text-sm text-slate-400">No MCQ test</span>
-                              ) : (
-                                mcqLinks.map((link) => (
-                                  <ResourceLink key={link.id} label="MCQ Test" url={link.url} name={link.name} />
-                                ))
-                              )}
-                            </div>
-                          </div>
+                            const mcqLinks = topicRows
+                              .map((row) => ({
+                                id: row.id,
+                                url: row.mcqtest_url,
+                                name: row.mcqtest_name,
+                              }))
+                              .filter((item) => item.name);
 
-                          <div className="flex-1 p-3">
-                            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
-                              PYQ Test
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {pyqLinks.length === 0 ? (
-                                <span className="text-sm text-slate-400">No PYQ</span>
-                              ) : (
-                                pyqLinks.map((link) => (
-                                  <ResourceLink key={link.id} label="PYQ" url={link.url} name={link.name} />
-                                ))
-                              )}
-                            </div>
-                          </div>
+                            const pyqLinks = topicRows
+                              .map((row) => ({
+                                id: row.id,
+                                url: row.pyq_url,
+                                name: row.pyq_name,
+                              }))
+                              .filter((item) => item.name);
+
+                            return (
+                              <div key={`${themeName}-${topicName}`} className="rounded-xl border border-slate-200  p-3">
+                                <div className="mb-3 text-sm font-semibold text-slate-700">{topicName}</div>
+
+                                <div className="flex flex-col gap-0 overflow-hidden rounded-xl xl:flex-row xl:divide-x xl:divide-slate-500">
+                                  <div className="flex-1 p-3">
+                                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
+                                      Videos
+                                    </div>
+                                    <ul className="space-y-1 pl-4 text-sm text-slate-700">
+                                      {videoLinks.length === 0 ? (
+                                        <li className="text-slate-400">No videos</li>
+                                      ) : (
+                                        videoLinks.map((link) => (
+                                          <li key={link.id} className="list-disc marker:text-slate-500">
+                                            <ResourceLink label="Video" url={link.url} name={link.name} />
+                                          </li>
+                                        ))
+                                      )}
+                                    </ul>
+                                  </div>
+
+                                  <div className="flex-1 p-3">
+                                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
+                                      Notes
+                                    </div>
+                                    <ul className="space-y-1 pl-4 text-sm text-slate-700">
+                                      {noteLinks.length === 0 ? (
+                                        <li className="text-slate-400">No notes</li>
+                                      ) : (
+                                        noteLinks.map((link) => (
+                                          <li key={link.id} className="list-disc marker:text-slate-500">
+                                            <ResourceLink label="Notes" url={link.url} name={link.name} />
+                                          </li>
+                                        ))
+                                      )}
+                                    </ul>
+                                  </div>
+
+                                  <div className="flex-1 p-3">
+                                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
+                                      MCQ Test
+                                    </div>
+                                    <ul className="space-y-1 pl-4 text-sm text-slate-700">
+                                      {mcqLinks.length === 0 ? (
+                                        <li className="text-slate-400">No MCQ test</li>
+                                      ) : (
+                                        mcqLinks.map((link) => (
+                                          <li key={link.id} className="list-disc marker:text-slate-500">
+                                            <ResourceLink label="MCQ Test" url={link.url} name={link.name} />
+                                          </li>
+                                        ))
+                                      )}
+                                    </ul>
+                                  </div>
+
+                                  <div className="flex-1 p-3">
+                                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
+                                      PYQ Test
+                                    </div>
+                                    <ul className="space-y-1 pl-4 text-sm text-slate-700">
+                                      {pyqLinks.length === 0 ? (
+                                        <li className="text-slate-400">No PYQ</li>
+                                      ) : (
+                                        pyqLinks.map((link) => (
+                                          <li key={link.id} className="list-disc marker:text-slate-500">
+                                            <ResourceLink label="PYQ" url={link.url} name={link.name} />
+                                          </li>
+                                        ))
+                                      )}
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     );
