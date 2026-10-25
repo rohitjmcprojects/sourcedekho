@@ -28,10 +28,9 @@ type SyllabusRow = {
 
 type SubjectTableRow = {
   id: number;
-  course_id: number | null;
-  title?: string | null;
-  name?: string | null;
-  subject_name?: string | null;
+  stage: string | null;
+  paper: string | null;
+  subject: string | null;
 };
 
 function slugify(value: string) {
@@ -101,74 +100,64 @@ export default async function SyllabusPaperPage({
     selectedExam = exams.find((item) => slugify(item.name) === examSlug) ?? null;
 
     if (selectedExam) {
-      const rows = await sql<SyllabusRow[]>`
-        SELECT *
-        FROM syllabus_wise
-        WHERE exam_id = ${selectedExam.id}
-        ORDER BY subject ASC, topic ASC, paper ASC
+      const subjectRows = await sql<SubjectTableRow[]>`
+        SELECT
+          s.id,
+          COALESCE(TO_JSONB(s) ->> 'stage', TO_JSONB(s) ->> 'subject_stage') AS stage,
+          COALESCE(TO_JSONB(s) ->> 'paper', TO_JSONB(s) ->> 'paper_name') AS paper,
+          COALESCE(
+            TO_JSONB(s) ->> 'title',
+            TO_JSONB(s) ->> 'subject_name',
+            TO_JSONB(s) ->> 'name'
+          ) AS subject
+        FROM subjects AS s
+        LEFT JOIN courses AS c ON c.id = s.course_id
+        WHERE COALESCE(NULLIF(TO_JSONB(s) ->> 'exam_id', ''), c.exam_id::text) = ${String(selectedExam.id)}
+        ORDER BY stage ASC, paper ASC, subject ASC
       `;
 
-      const matchedPaper = rows.find((row) => slugify(String(row.paper ?? "")) === paperSlug);
+      const rows = await sql<SyllabusRow[]>`
+        SELECT
+          sw.id,
+          COALESCE(NULLIF(TO_JSONB(s) ->> 'exam_id', ''), c.exam_id::text)::integer AS exam_id,
+          s.course_id,
+          COALESCE(TO_JSONB(s) ->> 'stage', TO_JSONB(s) ->> 'subject_stage') AS stage,
+          COALESCE(TO_JSONB(s) ->> 'paper', TO_JSONB(s) ->> 'paper_name') AS paper,
+          COALESCE(
+            TO_JSONB(s) ->> 'title',
+            TO_JSONB(s) ->> 'subject_name',
+            TO_JSONB(s) ->> 'name'
+          ) AS subject,
+          sw.theme,
+          sw.topic,
+          sw.video_name,
+          sw.video_url,
+          sw.notes_name,
+          sw.notes_url,
+          sw.mcqtest_name,
+          sw.mcqtest_url,
+          sw.pyq_name,
+          sw.pyq_url
+        FROM syllabus_wise AS sw
+        INNER JOIN subjects AS s ON s.id = sw.subject_id
+        LEFT JOIN courses AS c ON c.id = s.course_id
+        WHERE COALESCE(NULLIF(TO_JSONB(s) ->> 'exam_id', ''), c.exam_id::text) = ${String(selectedExam.id)}
+        ORDER BY subject ASC, sw.topic ASC, paper ASC
+      `;
+
+      const matchedPaper = subjectRows.find((row) => slugify(String(row.paper ?? "")) === paperSlug);
       selectedPaper = matchedPaper?.paper ?? "";
 
       syllabusRows = rows.filter((row) => row.paper === selectedPaper);
 
-      const subjectRows = await sql<any[]>`
-        SELECT s.*
-        FROM subjects s
-        INNER JOIN courses c ON c.id = s.course_id
-        WHERE c.exam_id = ${selectedExam.id}
-      `;
-
-      const normalizeSubjectName = (row: any) =>
-        String(row?.title ?? row?.name ?? row?.subject_name ?? row?.subject ?? "").trim();
-
-      const exactPaperSubjectRows = subjectRows.filter((row) => {
-        const rowPaper = row?.paper ?? row?.paper_name ?? row?.subject_paper ?? "";
-        const rowStage = row?.stage ?? row?.subject_stage ?? "";
-
-        const isMatchingPaper =
-          !rowPaper ||
-          String(rowPaper).trim() === selectedPaper.trim() ||
-          slugify(String(rowPaper)) === paperSlug;
-
-        const isMatchingStage =
-          !rowStage ||
-          !syllabusRows[0]?.stage ||
-          String(rowStage).trim() === String(syllabusRows[0]?.stage).trim();
-
-        return isMatchingPaper && isMatchingStage;
-      });
-
-      const exactPaperSubjectValues = exactPaperSubjectRows
-        .map((row) => normalizeSubjectName(row))
-        .filter(Boolean);
-
-      const subjectValues = subjectRows
-        .map((row) => normalizeSubjectName(row))
-        .filter(Boolean);
-
-      const paperSubjectValues = Array.from(
+      subjectNames = Array.from(
         new Set(
-          syllabusRows
+          subjectRows
+            .filter((row) => row.paper === selectedPaper)
             .map((row) => String(row.subject ?? "").trim())
             .filter(Boolean)
         )
-      );
-
-      const allowedSubjectNames =
-        exactPaperSubjectValues.length > 0
-          ? new Set(exactPaperSubjectValues)
-          : paperSubjectValues.length > 0
-            ? new Set(paperSubjectValues)
-            : new Set(subjectValues);
-
-      subjectNames = Array.from(new Set(subjectValues.filter((value) => allowedSubjectNames.has(value))))
-        .sort((a, b) => a.localeCompare(b));
-
-      if (subjectNames.length === 0) {
-        subjectNames = Array.from(new Set(subjectValues)).sort((a, b) => a.localeCompare(b));
-      }
+      ).sort((a, b) => a.localeCompare(b));
 
       const requestedSubject = resolvedSearchParams?.subject ?? "";
       const normalizedRequestedSubject = requestedSubject.trim();

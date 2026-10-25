@@ -49,13 +49,11 @@ http://localhost:3000/api/init-db
 
 This route creates the required tables, including:
 
-- `communities`
 - `exams`
 - `courses`
-- `course_categories`
-- `enrollments`
 - `subjects`
-- `lectures`
+- `day_wise`
+- `syllabus_wise`
 
 ## Local development
 

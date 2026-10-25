@@ -26,14 +26,6 @@ type SyllabusRow = {
   pyq_url: string | null;
 };
 
-type SubjectFallbackRow = {
-  id: number;
-  course_id: number | null;
-  title?: string | null;
-  name?: string | null;
-  subject_name?: string | null;
-};
-
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -63,86 +55,33 @@ export default async function SyllabusWisePage({
     selectedExam = exams.find((item) => slugify(item.name) === examSlug) ?? null;
 
     if (selectedExam) {
-      const subjectColumns = await sql<{ column_name: string }[]>`
-        SELECT column_name
-        FROM information_schema.columns
-        WHERE table_schema = 'public' AND table_name = 'subjects'
+      syllabusRows = await sql<SyllabusRow[]>`
+        SELECT
+          s.id,
+          COALESCE(NULLIF(TO_JSONB(s) ->> 'exam_id', ''), c.exam_id::text)::integer AS exam_id,
+          s.course_id,
+          COALESCE(TO_JSONB(s) ->> 'stage', TO_JSONB(s) ->> 'subject_stage') AS stage,
+          COALESCE(TO_JSONB(s) ->> 'paper', TO_JSONB(s) ->> 'paper_name') AS paper,
+          COALESCE(
+            TO_JSONB(s) ->> 'title',
+            TO_JSONB(s) ->> 'subject_name',
+            TO_JSONB(s) ->> 'name'
+          ) AS subject,
+          NULL::text AS theme,
+          NULL::text AS topic,
+          NULL::text AS video_name,
+          NULL::text AS video_url,
+          NULL::text AS notes_name,
+          NULL::text AS notes_url,
+          NULL::text AS mcqtest_name,
+          NULL::text AS mcqtest_url,
+          NULL::text AS pyq_name,
+          NULL::text AS pyq_url
+        FROM subjects AS s
+        LEFT JOIN courses AS c ON c.id = s.course_id
+        WHERE COALESCE(NULLIF(TO_JSONB(s) ->> 'exam_id', ''), c.exam_id::text) = ${String(selectedExam.id)}
+        ORDER BY stage ASC, paper ASC, subject ASC
       `;
-
-      const subjectColumnNames = new Set(subjectColumns.map((column) => column.column_name));
-      const hasStageColumn = subjectColumnNames.has("stage");
-      const hasPaperColumn = subjectColumnNames.has("paper");
-
-      if (hasStageColumn || hasPaperColumn) {
-        const rows = await sql<any[]>`
-          SELECT s.*
-          FROM subjects s
-          INNER JOIN courses c ON c.id = s.course_id
-          WHERE c.exam_id = ${selectedExam.id}
-        `;
-
-        syllabusRows = rows.map((row) => ({
-          id: Number(row.id),
-          exam_id: selectedExam?.id ?? null,
-          course_id: row.course_id ?? null,
-          stage: row.stage ?? row.subject_stage ?? null,
-          paper: row.paper ?? row.paper_name ?? null,
-          subject: row.subject ?? row.subject_name ?? row.title ?? row.name ?? null,
-          theme: null,
-          topic: null,
-          video_name: null,
-          video_url: null,
-          notes_name: null,
-          notes_url: null,
-          mcqtest_name: null,
-          mcqtest_url: null,
-          pyq_name: null,
-          pyq_url: null,
-        }));
-      } else {
-        const hasSyllabusTable = await sql<{ exists: boolean }[]>`
-          SELECT EXISTS (
-            SELECT 1
-            FROM information_schema.tables
-            WHERE table_schema = 'public' AND table_name = 'syllabus_wise'
-          ) AS exists
-        `;
-
-        if (hasSyllabusTable[0]?.exists) {
-          syllabusRows = await sql<SyllabusRow[]>`
-            SELECT *
-            FROM syllabus_wise
-            WHERE exam_id = ${selectedExam.id}
-            ORDER BY stage ASC, paper ASC, subject ASC
-          `;
-        } else {
-          const fallbackRows = await sql<SubjectFallbackRow[]>`
-            SELECT s.*
-            FROM subjects s
-            INNER JOIN courses c ON c.id = s.course_id
-            WHERE c.exam_id = ${selectedExam.id}
-          `;
-
-          syllabusRows = fallbackRows.map((row) => ({
-            id: row.id,
-            exam_id: selectedExam?.id ?? null,
-            course_id: row.course_id,
-            stage: null,
-            paper: null,
-            subject: row.title ?? row.name ?? row.subject_name ?? null,
-            theme: null,
-            topic: null,
-            video_name: null,
-            video_url: null,
-            notes_name: null,
-            notes_url: null,
-            mcqtest_name: null,
-            mcqtest_url: null,
-            pyq_name: null,
-            pyq_url: null,
-          }));
-        }
-      }
     }
   } catch (error) {
     console.error("Failed to load syllabus-wise data:", error);

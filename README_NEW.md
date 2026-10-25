@@ -69,13 +69,11 @@ The app uses PostgreSQL via `lib/db.ts` and initializes the schema in `app/api/i
 
 Core tables:
 
-- `communities`
 - `exams`
 - `courses`
-- `course_categories`
-- `enrollments`
 - `subjects`
-- `lectures`
+- `day_wise`
+- `syllabus_wise`
 
 ### Key rule
 

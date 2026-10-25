@@ -2,15 +2,6 @@ import { sql } from "./db";
 
 export async function ensureDatabaseReady() {
   await sql`
-    CREATE TABLE IF NOT EXISTS communities (
-      id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL,
-      description TEXT,
-      created_at TIMESTAMP DEFAULT NOW()
-    )
-  `;
-
-  await sql`
     CREATE TABLE IF NOT EXISTS exams (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
@@ -52,21 +43,10 @@ export async function ensureDatabaseReady() {
     CREATE TABLE IF NOT EXISTS courses (
       id SERIAL PRIMARY KEY,
       exam_id INTEGER REFERENCES exams(id) ON DELETE CASCADE,
-      community_id INTEGER REFERENCES communities(id) ON DELETE CASCADE,
       category TEXT NOT NULL,
       title TEXT NOT NULL,
       description TEXT,
       price INTEGER DEFAULT 0,
-      created_at TIMESTAMP DEFAULT NOW()
-    )
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS enrollments (
-      id SERIAL PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
-      approved BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMP DEFAULT NOW()
     )
   `;
@@ -80,22 +60,9 @@ export async function ensureDatabaseReady() {
   `;
 
   await sql`
-    CREATE TABLE IF NOT EXISTS lectures (
-      id SERIAL PRIMARY KEY,
-      subject_id INTEGER REFERENCES subjects(id) ON DELETE CASCADE,
-      title TEXT NOT NULL,
-      video_url TEXT
-    )
-  `;
-
-  await sql`
     CREATE TABLE IF NOT EXISTS syllabus_wise (
       id SERIAL PRIMARY KEY,
-      exam_id INTEGER NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
-      course_id INTEGER REFERENCES courses(id) ON DELETE SET NULL,
-      stage VARCHAR(100),
-      paper VARCHAR(100),
-      subject VARCHAR(255) NOT NULL,
+      subject_id INTEGER NOT NULL REFERENCES subjects(id),
       theme VARCHAR(255),
       topic VARCHAR(255),
       video_name VARCHAR(255),
@@ -108,6 +75,99 @@ export async function ensureDatabaseReady() {
       pyq_url TEXT,
       created_at TIMESTAMP DEFAULT NOW()
     )
+  `;
+
+  await sql`
+    ALTER TABLE syllabus_wise
+    ADD COLUMN IF NOT EXISTS subject_id INTEGER REFERENCES subjects(id)
+  `;
+
+  await sql`
+    UPDATE syllabus_wise AS sw
+    SET subject_id = (
+      SELECT MIN(s.id)
+      FROM subjects AS s
+      INNER JOIN courses AS c ON c.id = s.course_id
+      WHERE COALESCE(TO_JSONB(s) ->> 'exam_id', c.exam_id::text) = TO_JSONB(sw) ->> 'exam_id'
+        AND (
+          TO_JSONB(sw) ->> 'course_id' IS NULL
+          OR s.course_id::text = TO_JSONB(sw) ->> 'course_id'
+        )
+        AND LOWER(REGEXP_REPLACE(TRIM(COALESCE(
+          TO_JSONB(s) ->> 'stage',
+          TO_JSONB(s) ->> 'subject_stage'
+        )), '[^a-z0-9]+', '', 'g')) = LOWER(REGEXP_REPLACE(TRIM(TO_JSONB(sw) ->> 'stage'), '[^a-z0-9]+', '', 'g'))
+        AND LOWER(REGEXP_REPLACE(TRIM(COALESCE(
+          TO_JSONB(s) ->> 'paper',
+          TO_JSONB(s) ->> 'paper_name'
+        )), '[^a-z0-9]+', '', 'g')) = LOWER(REGEXP_REPLACE(TRIM(TO_JSONB(sw) ->> 'paper'), '[^a-z0-9]+', '', 'g'))
+        AND LOWER(TRIM(COALESCE(
+          TO_JSONB(s) ->> 'title',
+          TO_JSONB(s) ->> 'subject_name',
+          TO_JSONB(s) ->> 'name'
+        ))) = LOWER(TRIM(TO_JSONB(sw) ->> 'subject'))
+    )
+    WHERE sw.subject_id IS NULL
+      AND (
+        SELECT COUNT(*)
+        FROM subjects AS s
+        INNER JOIN courses AS c ON c.id = s.course_id
+        WHERE COALESCE(TO_JSONB(s) ->> 'exam_id', c.exam_id::text) = TO_JSONB(sw) ->> 'exam_id'
+          AND (
+            TO_JSONB(sw) ->> 'course_id' IS NULL
+            OR s.course_id::text = TO_JSONB(sw) ->> 'course_id'
+          )
+          AND LOWER(REGEXP_REPLACE(TRIM(COALESCE(
+            TO_JSONB(s) ->> 'stage',
+            TO_JSONB(s) ->> 'subject_stage'
+          )), '[^a-z0-9]+', '', 'g')) = LOWER(REGEXP_REPLACE(TRIM(TO_JSONB(sw) ->> 'stage'), '[^a-z0-9]+', '', 'g'))
+          AND LOWER(REGEXP_REPLACE(TRIM(COALESCE(
+            TO_JSONB(s) ->> 'paper',
+            TO_JSONB(s) ->> 'paper_name'
+          )), '[^a-z0-9]+', '', 'g')) = LOWER(REGEXP_REPLACE(TRIM(TO_JSONB(sw) ->> 'paper'), '[^a-z0-9]+', '', 'g'))
+          AND LOWER(TRIM(COALESCE(
+            TO_JSONB(s) ->> 'title',
+            TO_JSONB(s) ->> 'subject_name',
+            TO_JSONB(s) ->> 'name'
+          ))) = LOWER(TRIM(TO_JSONB(sw) ->> 'subject'))
+      ) = 1
+  `;
+
+  const unlinkedSyllabusRows = await sql<{ count: number }[]>`
+    SELECT COUNT(*)::integer AS count
+    FROM syllabus_wise
+    WHERE subject_id IS NULL
+  `;
+
+  if (unlinkedSyllabusRows[0]?.count > 0) {
+    throw new Error(
+      `Cannot normalize syllabus_wise: ${unlinkedSyllabusRows[0].count} rows do not map uniquely to subjects.id.`
+    );
+  }
+
+  await sql`
+    ALTER TABLE syllabus_wise
+    ALTER COLUMN subject_id SET NOT NULL
+  `;
+
+  await sql`
+    ALTER TABLE syllabus_wise
+    DROP CONSTRAINT IF EXISTS syllabus_wise_subject_id_fkey
+  `;
+
+  await sql`
+    ALTER TABLE syllabus_wise
+    ADD CONSTRAINT syllabus_wise_subject_id_fkey
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE RESTRICT
+  `;
+
+  await sql`
+    ALTER TABLE syllabus_wise
+      DROP COLUMN IF EXISTS exam_id,
+      DROP COLUMN IF EXISTS course_id,
+      DROP COLUMN IF EXISTS stage,
+      DROP COLUMN IF EXISTS paper,
+      DROP COLUMN IF EXISTS subject
   `;
 
   return true;
