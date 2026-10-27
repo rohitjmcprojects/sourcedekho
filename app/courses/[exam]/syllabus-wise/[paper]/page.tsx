@@ -328,12 +328,10 @@ export default async function SyllabusPaperPage({
                     ).sort(([a], [b]) => a.localeCompare(b));
 
                     return (
-                      <div key={themeName} className="rounded-2xl border border-slate-400 p-4">
-                        <div className="mb-4">
-                          <h3 className="text-lg font-bold text-slate-900">{themeName}</h3>
-                        </div>
-
-                        <div className="space-y-5">
+                      <div key={themeName} className="rounded-2xl border border-slate-400 p-2">
+                        <h3 className="text-lg font-bold text-slate-900">{themeName}</h3>
+    
+                        <div className="space-y-1">
                           {topicGroups.map(([topicName, topicRows]) => {
                             const videoLinks = topicRows
                               .map((row) => ({
