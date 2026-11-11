@@ -47,6 +47,7 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+
 function ResourceLink({
   label,
   url,
@@ -60,23 +61,36 @@ function ResourceLink({
 
   const isAvailable = Boolean(url);
 
+  const availableColor =
+    label === "Video"
+      ? "text-emerald-700 hover:text-emerald-800"
+      : label === "Notes"
+        ? "text-blue-700 hover:text-blue-800"
+        : label === "MCQ Test"
+          ? "text-amber-700 hover:text-amber-800"
+          : label === "PYQ"
+            ? "text-purple-700 hover:text-purple-800"
+            : "text-slate-700 hover:text-slate-800";
+
   return (
     <a
-      href={isAvailable ? url ?? undefined : undefined}
-      target={isAvailable ? "_blank" : undefined}
-      rel={isAvailable ? "noreferrer" : undefined}
-      aria-disabled={!isAvailable}
-      className={[
-        "inline-flex items-center text-sm font-medium underline-offset-2 transition",
-        isAvailable
-          ? "text-emerald-700 hover:text-emerald-800 hover:underline"
-          : "text-red-600 hover:text-red-700 hover:underline",
-      ].join(" ")}
-    >
-      {name || label}
-    </a>
+  href={isAvailable ? url ?? undefined : undefined}
+  target={isAvailable ? "_blank" : undefined}
+  rel={isAvailable ? "noreferrer" : undefined}
+  aria-disabled={!isAvailable}
+  title={!isAvailable ? "Shall be updated soon" : undefined}
+  className={[
+    "inline-flex items-center text-sm font-medium underline-offset-2 transition",
+    isAvailable
+      ? `${availableColor} hover:underline`
+      : "text-slate-400 cursor-not-allowed no-underline",
+  ].join(" ")}
+>
+  {name}
+</a>
   );
 }
+
 
 export default async function SyllabusPaperPage({
   params,
@@ -216,9 +230,19 @@ export default async function SyllabusPaperPage({
   ).sort(([a], [b]) => a.localeCompare(b));
 
   const totalThemes = themeGroups.length;
-  const totalVideos = subjectContentRows.filter((row) => row.video_url).length;
-  const totalNotes = subjectContentRows.filter((row) => row.notes_url).length;
+  const totalTopics = themeGroups.reduce((total, [, rows]) => {
+  const uniqueTopics = new Set(
+    rows.map((row) => String(row.topic ?? "General").trim() || "General")
+  );
+
+  return total + uniqueTopics.size;
+}, 0);
+  
   const totalTests = subjectContentRows.filter((row) => row.mcqtest_url || row.pyq_url).length;
+  const totalVideos = subjectContentRows.filter((row) => row.video_url).length;
+const totalNotes = subjectContentRows.filter((row) => row.notes_url).length;
+const totalMcqTests = subjectContentRows.filter((row) => row.mcqtest_url).length;
+const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
 
  
   return (
@@ -237,28 +261,68 @@ export default async function SyllabusPaperPage({
             ) : null}
           </div>
 
-          <div className="flex flex-col items-end gap-4">
-            {subjectNames.length > 0 ? (
-              <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:min-w-[430px] md:grid-cols-4">
-              <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Themes</div>
-                <div className="mt-2 text-2xl font-bold text-slate-900">{totalThemes}</div>
-              </div>
-              <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Videos</div>
-                <div className="mt-2 text-2xl font-bold text-slate-900">{totalVideos}</div>
-              </div>
-              <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Notes</div>
-                <div className="mt-2 text-2xl font-bold text-slate-900">{totalNotes}</div>
-              </div>
-                <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Tests</div>
-                  <div className="mt-2 text-2xl font-bold text-slate-900">{totalTests}</div>
+                          {/* TOP DASHBOARD - FULL WIDTH */}
+              {subjectNames.length > 0 && (
+                <div className="mb-6 grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3 xl:grid-cols-6">
+
+                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Themes
+                    </div>
+                    <div className="mt-2 text-2xl font-bold text-slate-900">
+                      {totalThemes}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Topics
+                    </div>
+                    <div className="mt-2 text-2xl font-bold text-slate-900">
+                      {totalTopics}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-600">
+                      Videos
+                    </div>
+                    <div className="mt-2 text-2xl font-bold text-slate-900">
+                      {totalVideos}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-600">
+                      Notes
+                    </div>
+                    <div className="mt-2 text-2xl font-bold text-slate-900">
+                      {totalNotes}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-600">
+                      MCQ Tests
+                    </div>
+                    <div className="mt-2 text-2xl font-bold text-slate-900">
+                      {totalMcqTests}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-purple-600">
+                      PYQ Tests
+                    </div>
+                    <div className="mt-2 text-2xl font-bold text-slate-900">
+                      {totalPyqTests}
+                    </div>
+                  </div>
+
                 </div>
-              </div>
-            ) : null}
-          </div>
+              )}
+
+          
         </div>
 
         {subjectNames.length === 0 ? (
