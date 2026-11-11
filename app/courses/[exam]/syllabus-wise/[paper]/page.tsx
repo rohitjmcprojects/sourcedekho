@@ -1,5 +1,11 @@
 import Link from "next/link";
 import { sql } from "@/lib/db";
+import {
+  PlayCircle,
+  FileText,
+  ClipboardCheck,
+  BookOpen,
+} from "lucide-react";
 
 type ExamRow = {
   id: number;
@@ -214,6 +220,7 @@ export default async function SyllabusPaperPage({
   const totalNotes = subjectContentRows.filter((row) => row.notes_url).length;
   const totalTests = subjectContentRows.filter((row) => row.mcqtest_url || row.pyq_url).length;
 
+ 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
       <div className="w-full px-4 py-6 md:px-8">
@@ -309,145 +316,246 @@ export default async function SyllabusPaperPage({
               </div>
             </aside>
 
-            <section className="rounded-[24px] border border-slate-200 ">
-              {subjectContentRows.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-600">
-                  No syllabus content is available for this subject yet.
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {themeGroups.map(([themeName, rows]) => {
-                    const topicGroups = Array.from(
-                      rows.reduce((map, row) => {
-                        const topicName = String(row.topic ?? "General").trim() || "General";
-                        const existing = map.get(topicName) ?? [];
-                        existing.push(row);
-                        map.set(topicName, existing);
-                        return map;
-                      }, new Map<string, SyllabusRow[]>()).entries()
-                    ).sort(([a], [b]) => a.localeCompare(b));
+           
+<section className="rounded-[24px] border border-slate-200 ">
 
-                    return (
-                      <div key={themeName} className="rounded-2xl border border-slate-400 p-2">
-                        <h3 className="text-lg font-bold text-slate-900">{themeName}</h3>
-    
-                        <div className="space-y-1">
-                          {topicGroups.map(([topicName, topicRows]) => {
-                            const videoLinks = topicRows
-                              .map((row) => ({
-                                id: row.id,
-                                url: row.video_url,
-                                name: row.video_name,
-                              }))
-                              .filter((item) => item.name);
+  {subjectContentRows.length === 0 ? (
+    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-600">
+      No syllabus content is available for this subject yet.
+    </div>
+  ) : (
+    <div className="space-y-6">
 
-                            const noteLinks = topicRows
-                              .map((row) => ({
-                                id: row.id,
-                                url: row.notes_url,
-                                name: row.notes_name,
-                              }))
-                              .filter((item) => item.name);
+      {themeGroups.map(([themeName, rows]) => {
+        const topicGroups = Array.from(
+          rows.reduce((map, row) => {
+            const topicName = String(row.topic ?? "General").trim() || "General";
+            const existing = map.get(topicName) ?? [];
+            existing.push(row);
+            map.set(topicName, existing);
+            return map;
+          }, new Map<string, SyllabusRow[]>()).entries()
+        ).sort(([a], [b]) => a.localeCompare(b));
 
-                            const mcqLinks = topicRows
-                              .map((row) => ({
-                                id: row.id,
-                                url: row.mcqtest_url,
-                                name: row.mcqtest_name,
-                              }))
-                              .filter((item) => item.name);
 
-                            const pyqLinks = topicRows
-                              .map((row) => ({
-                                id: row.id,
-                                url: row.pyq_url,
-                                name: row.pyq_name,
-                              }))
-                              .filter((item) => item.name);
+        const themeTopicCount = topicGroups.length;
 
-                            return (
-                              <div key={`${themeName}-${topicName}`} className="rounded-xl border border-slate-200  p-3">
-                                <div className="mb-3 text-sm font-semibold text-slate-700">{topicName}</div>
 
-                                <div className="flex flex-col gap-0 overflow-hidden rounded-xl xl:flex-row xl:divide-x xl:divide-slate-500">
-                                  <div className="flex-1 p-3">
-                                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
-                                      Videos
-                                    </div>
-                                    <ul className="space-y-1 pl-4 text-sm text-slate-700">
-                                      {videoLinks.length === 0 ? (
-                                        <li className="text-slate-400">No videos</li>
-                                      ) : (
-                                        videoLinks.map((link) => (
-                                          <li key={link.id} className="list-disc marker:text-slate-500">
-                                            <ResourceLink label="Video" url={link.url} name={link.name} />
-                                          </li>
-                                        ))
-                                      )}
-                                    </ul>
-                                  </div>
+        return (
+          <details
+            key={themeName}
+            className="group/theme rounded-3xl border border-slate-400 p-2"
+          >
 
-                                  <div className="flex-1 p-3">
-                                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
-                                      Notes
-                                    </div>
-                                    <ul className="space-y-1 pl-4 text-sm text-slate-700">
-                                      {noteLinks.length === 0 ? (
-                                        <li className="text-slate-400">No notes</li>
-                                      ) : (
-                                        noteLinks.map((link) => (
-                                          <li key={link.id} className="list-disc marker:text-slate-500">
-                                            <ResourceLink label="Notes" url={link.url} name={link.name} />
-                                          </li>
-                                        ))
-                                      )}
-                                    </ul>
-                                  </div>
+            {/* THEME HEADING */}
 
-                                  <div className="flex-1 p-3">
-                                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
-                                      MCQ Test
-                                    </div>
-                                    <ul className="space-y-1 pl-4 text-sm text-slate-700">
-                                      {mcqLinks.length === 0 ? (
-                                        <li className="text-slate-400">No MCQ test</li>
-                                      ) : (
-                                        mcqLinks.map((link) => (
-                                          <li key={link.id} className="list-disc marker:text-slate-500">
-                                            <ResourceLink label="MCQ Test" url={link.url} name={link.name} />
-                                          </li>
-                                        ))
-                                      )}
-                                    </ul>
-                                  </div>
+            
+<summary className="flex cursor-pointer list-none items-center justify-between gap-3">
 
-                                  <div className="flex-1 p-3">
-                                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-900">
-                                      PYQ Test
-                                    </div>
-                                    <ul className="space-y-1 pl-4 text-sm text-slate-700">
-                                      {pyqLinks.length === 0 ? (
-                                        <li className="text-slate-400">No PYQ</li>
-                                      ) : (
-                                        pyqLinks.map((link) => (
-                                          <li key={link.id} className="list-disc marker:text-slate-500">
-                                            <ResourceLink label="PYQ" url={link.url} name={link.name} />
-                                          </li>
-                                        ))
-                                      )}
-                                    </ul>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+  <h3 className="text-lg font-bold text-slate-900">
+    {themeName}
+  </h3>
+
+  <div className="flex flex-wrap items-center justify-end gap-2">
+
+    <span className="rounded-full bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">
+      Topics: {themeTopicCount}
+    </span>
+  
+
+    <span className="mr-2 text-slate-500 transition-transform duration-200 group-open/theme:rotate-180">
+      ▼
+    </span>
+
+  </div>
+
+</summary>
+
+
+            {/* TOPICS */}
+
+            <div className="space-y-1 pt-2">
+
+              {topicGroups.map(([topicName, topicRows]) => {
+
+                const videoLinks = topicRows
+                  .map((row) => ({
+                    id: row.id,
+                    url: row.video_url,
+                    name: row.video_name,
+                  }))
+                  .filter((item) => item.name);
+
+                const noteLinks = topicRows
+                  .map((row) => ({
+                    id: row.id,
+                    url: row.notes_url,
+                    name: row.notes_name,
+                  }))
+                  .filter((item) => item.name);
+
+                const mcqLinks = topicRows
+                  .map((row) => ({
+                    id: row.id,
+                    url: row.mcqtest_url,
+                    name: row.mcqtest_name,
+                  }))
+                  .filter((item) => item.name);
+
+                const pyqLinks = topicRows
+                  .map((row) => ({
+                    id: row.id,
+                    url: row.pyq_url,
+                    name: row.pyq_name,
+                  }))
+                  .filter((item) => item.name);
+
+                  const topicVideoCount = topicRows.filter((row) => row.video_url).length;
+                  const topicNotesCount = topicRows.filter((row) => row.notes_url).length;
+                  const topicMcqCount = topicRows.filter((row) => row.mcqtest_url).length;
+                  const topicPyqCount = topicRows.filter((row) => row.pyq_url).length;
+
+                return (
+                  <details
+                    key={`${themeName}-${topicName}`}
+                    className="group/topic rounded-xl border border-slate-200 p-3"
+                  >
+
+                    {/* TOPIC HEADING */}
+
+                    <summary className="mb-3 flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-700">
+  <span>{topicName}</span>
+
+  <div className="flex flex-wrap items-center justify-end gap-2">
+    <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
+      Videos: {topicVideoCount}
+    </span>
+
+    <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
+      Notes: {topicNotesCount}
+    </span>
+
+    <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
+      MCQ_Test: {topicMcqCount}
+    </span>
+
+    <span className="rounded-full bg-purple-100 px-2 py-1 text-xs font-semibold text-purple-700">
+      PYQ_Test: {topicPyqCount}
+    </span>
+
+    <span className="text-slate-500 transition-transform duration-200 group-open/topic:rotate-180">
+      ▼
+    </span>
+  </div>
+</summary>
+
+                    {/* EXISTING RESOURCE LAYOUT */}
+
+                    <div className="flex flex-col gap-0 overflow-hidden rounded-xl xl:flex-row xl:divide-x xl:divide-slate-500">
+
+                      {/* VIDEOS */}
+
+                      <div className="flex-1 p-3">
+                      
+                        <ul className="space-y-1 pl-4 text-sm text-slate-700">
+                          {videoLinks.length === 0 ? (
+                            <li className="text-slate-400">No videos</li>
+                          ) : (
+                            videoLinks.map((link) => (
+                              <li key={link.id} className="flex items-start gap-2 list-none">
+                                <PlayCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                                <ResourceLink
+                                  label="Video"
+                                  url={link.url}
+                                  name={link.name}
+                                />
+                              </li>
+                            ))
+                          )}
+                        </ul>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
+
+                      {/* NOTES */}
+
+                      <div className="flex-1 p-3">
+                      
+                        <ul className="space-y-1 pl-4 text-sm text-slate-700">
+                          {noteLinks.length === 0 ? (
+                            <li className="text-slate-400">No notes</li>
+                          ) : (
+                            noteLinks.map((link) => (
+                              <li key={link.id} className="flex items-start gap-2 list-none">
+                                <FileText className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+                                <ResourceLink
+                                  label="Notes"
+                                  url={link.url}
+                                  name={link.name}
+                                />
+                              </li>
+                            ))
+                          )}
+                        </ul>
+                      </div>
+
+                      {/* MCQ TEST */}
+
+                      <div className="flex-1 p-3">
+                     
+                        <ul className="space-y-1 pl-4 text-sm text-slate-700">
+                          {mcqLinks.length === 0 ? (
+                            <li className="text-slate-400">No MCQ test</li>
+                          ) : (
+                            mcqLinks.map((link) => (
+                              <li key={link.id} className="flex items-start gap-2 list-none">
+                                <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                                <ResourceLink
+                                  label="MCQ Test"
+                                  url={link.url}
+                                  name={link.name}
+                                />
+                              </li>
+                            ))
+                          )}
+                        </ul>
+                      </div>
+
+                      {/* PYQ TEST */}
+
+                      <div className="flex-1 p-3">
+                        
+                        <ul className="space-y-1 pl-4 text-sm text-slate-700">
+                          {pyqLinks.length === 0 ? (
+                            <li className="text-slate-400">No PYQ</li>
+                          ) : (
+                            pyqLinks.map((link) => (
+                              <li key={link.id} className="flex items-start gap-2 list-none">
+                                <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" />
+                                <ResourceLink
+                                  label="PYQ"
+                                  url={link.url}
+                                  name={link.name}
+                                />
+                              </li>
+                            ))
+                          )}
+                        </ul>
+                      </div>
+
+                    </div>
+                  </details>
+                );
+              })}
+
+            </div>
+          </details>
+        );
+      })}
+
+    </div>
+  )}
+
+</section>
+
           </div>
         )}
       </div>
