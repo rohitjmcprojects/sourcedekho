@@ -526,8 +526,13 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
                             <li className="text-slate-400">No videos</li>
                           ) : (
                             videoLinks.map((link) => (
-                              <li key={link.id} className="flex items-start gap-2 list-none">
-                                <PlayCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                              <li key={link.id} className="flex items-start gap-2 list-none" title={!link.url ? "Shall be updated soon" : undefined}>
+                                 <PlayCircle
+                                      className={`mt-0.5 h-4 w-4 shrink-0 ${
+                                        link.url ? "text-emerald-600" : "text-slate-400"
+                                      }`}
+                                      
+                                    />
                                 <ResourceLink
                                   label="Video"
                                   url={link.url}
@@ -548,8 +553,12 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
                             <li className="text-slate-400">No notes</li>
                           ) : (
                             noteLinks.map((link) => (
-                              <li key={link.id} className="flex items-start gap-2 list-none">
-                                <FileText className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+                              <li key={link.id} className="flex items-start gap-2 list-none" title={!link.url ? "Shall be updated soon" : undefined}>
+                                <FileText
+                                  className={`mt-0.5 h-4 w-4 shrink-0 ${
+                                    link.url ? "text-blue-600" : "text-slate-400"
+                                  }`}
+                                />
                                 <ResourceLink
                                   label="Notes"
                                   url={link.url}
@@ -571,7 +580,11 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
                           ) : (
                             mcqLinks.map((link) => (
                               <li key={link.id} className="flex items-start gap-2 list-none">
-                                <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                                <ClipboardCheck
+                                      className={`mt-0.5 h-4 w-4 shrink-0 ${
+                                        link.url ? "text-amber-600" : "text-slate-400"
+                                      }`}
+                                    />
                                 <ResourceLink
                                   label="MCQ Test"
                                   url={link.url}
@@ -592,8 +605,12 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
                             <li className="text-slate-400">No PYQ</li>
                           ) : (
                             pyqLinks.map((link) => (
-                              <li key={link.id} className="flex items-start gap-2 list-none">
-                                <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" />
+                              <li key={link.id} className="flex items-start gap-2 list-none" title={!link.url ? "Shall be updated soon" : undefined}>
+                                <BookOpen
+                                      className={`mt-0.5 h-4 w-4 shrink-0 ${
+                                        link.url ? "text-purple-600" : "text-slate-400"
+                                      }`}
+                                    />
                                 <ResourceLink
                                   label="PYQ"
                                   url={link.url}
