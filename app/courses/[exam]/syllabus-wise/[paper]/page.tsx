@@ -338,7 +338,7 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
                         isSelected
                           ? "border-slate-900 bg-slate-900 text-white shadow-sm"
                           : hasData
-                            ? "border-emerald-200 bg-emerald-50 text-slate-900 hover:border-emerald-300 hover:bg-emerald-100"
+                            ? "border-emerald-200  text-slate-900 hover:border-emerald-300 hover:bg-emerald-100"
                             : "border-red-200 bg-red-50 text-slate-900 hover:border-red-300 hover:bg-red-100",
                       ].join(" ")}
                     >
