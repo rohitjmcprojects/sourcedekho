@@ -97,12 +97,13 @@ export default async function SyllabusPaperPage({
   searchParams,
 }: {
   params: Promise<{ exam: string; paper: string }>;
-  searchParams?: Promise<{ subject?: string }>;
+  searchParams?: Promise<{ subject?: string; medium?: string }>;
 }) {
   const { exam, paper } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const examSlug = exam ?? "";
   const paperSlug = paper ?? "";
+  const selectedMedium = resolvedSearchParams.medium === "Hindi" ? "Hindi" : "English";
 
   let selectedExam: ExamRow | null = null;
   let syllabusRows: SyllabusRow[] = [];
@@ -162,6 +163,7 @@ export default async function SyllabusPaperPage({
         INNER JOIN subjects AS s ON s.id = sw.subject_id
         LEFT JOIN courses AS c ON c.id = s.course_id
         WHERE COALESCE(NULLIF(TO_JSONB(s) ->> 'exam_id', ''), c.exam_id::text) = ${String(selectedExam.id)}
+          AND sw.medium = ${selectedMedium}
         ORDER BY subject ASC, sw.topic ASC, paper ASC
       `;
 
@@ -248,7 +250,7 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
       <div className="w-full px-4 py-6 md:px-8">
-        <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
             <span>{selectedExam?.name ?? "Exam"}</span>
             <span>/</span>
@@ -261,69 +263,55 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
             ) : null}
           </div>
 
-                          {/* TOP DASHBOARD - FULL WIDTH */}
-              {subjectNames.length > 0 && (
-                <div className="mb-6 grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3 xl:grid-cols-6">
-
-                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      Themes
-                    </div>
-                    <div className="mt-2 text-2xl font-bold text-slate-900">
-                      {totalThemes}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      Topics
-                    </div>
-                    <div className="mt-2 text-2xl font-bold text-slate-900">
-                      {totalTopics}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-600">
-                      Videos
-                    </div>
-                    <div className="mt-2 text-2xl font-bold text-slate-900">
-                      {totalVideos}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-600">
-                      Notes
-                    </div>
-                    <div className="mt-2 text-2xl font-bold text-slate-900">
-                      {totalNotes}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-600">
-                      MCQ Tests
-                    </div>
-                    <div className="mt-2 text-2xl font-bold text-slate-900">
-                      {totalMcqTests}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-purple-600">
-                      PYQ Tests
-                    </div>
-                    <div className="mt-2 text-2xl font-bold text-slate-900">
-                      {totalPyqTests}
-                    </div>
-                  </div>
-
-                </div>
-              )}
-
-          
+          {/* MEDIUM TOGGLE - TOP RIGHT */}
+          <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+            <span className={`pl-3 text-xs font-semibold ${selectedMedium === "Hindi" ? "text-teal-700" : "text-slate-400"}`}>
+              हिंदी मीडियम
+            </span>
+            <Link
+              href={`/courses/${examSlug}/syllabus-wise/${paperSlug}?subject=${encodeURIComponent(selectedSubject)}&medium=${selectedMedium === "Hindi" ? "English" : "Hindi"}`}
+              role="switch"
+              aria-checked={selectedMedium === "Hindi"}
+              aria-label="Switch between Hindi and English medium"
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${selectedMedium === "Hindi" ? "bg-teal-600" : "bg-slate-300"}`}
+            >
+              <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${selectedMedium === "Hindi" ? "translate-x-1" : "translate-x-6"}`} />
+            </Link>
+            <span className={`pr-3 text-xs font-semibold ${selectedMedium === "English" ? "text-teal-700" : "text-slate-400"}`}>
+              English Medium
+            </span>
+          </div>
         </div>
+
+        {/* TOP DASHBOARD - FULL WIDTH, OUTSIDE BOTH PANES */}
+        {subjectNames.length > 0 && (
+          <div className="mb-6 grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 p-4 sm:grid-cols-3 xl:grid-cols-6">
+            <div className="rounded-xl p-3 text-center shadow-sm">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Themes</div>
+              <div className="mt-2 text-2xl font-bold text-slate-900">{totalThemes}</div>
+            </div>
+            <div className="rounded-xl p-3 text-center shadow-sm">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Topics</div>
+              <div className="mt-2 text-2xl font-bold text-slate-900">{totalTopics}</div>
+            </div>
+            <div className="rounded-xl p-3 text-center shadow-sm">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-600">Videos</div>
+              <div className="mt-2 text-2xl font-bold text-slate-900">{totalVideos}</div>
+            </div>
+            <div className="rounded-xl p-3 text-center shadow-sm">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-600">Notes</div>
+              <div className="mt-2 text-2xl font-bold text-slate-900">{totalNotes}</div>
+            </div>
+            <div className="rounded-xl p-3 text-center shadow-sm">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-600">MCQ Tests</div>
+              <div className="mt-2 text-2xl font-bold text-slate-900">{totalMcqTests}</div>
+            </div>
+            <div className="rounded-xl p-3 text-center shadow-sm">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-purple-600">PYQ Tests</div>
+              <div className="mt-2 text-2xl font-bold text-slate-900">{totalPyqTests}</div>
+            </div>
+          </div>
+        )}
 
         {subjectNames.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-10 text-center text-sm text-slate-600 backdrop-blur-sm">
@@ -344,7 +332,7 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
                   return (
                     <Link
                       key={subjectName}
-                      href={`/courses/${examSlug}/syllabus-wise/${paperSlug}?subject=${encodeURIComponent(subjectName)}`}
+                      href={`/courses/${examSlug}/syllabus-wise/${paperSlug}?subject=${encodeURIComponent(subjectName)}&medium=${selectedMedium}`}
                       className={[
                         "flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-sm font-medium text-slate-900 transition",
                         isSelected
