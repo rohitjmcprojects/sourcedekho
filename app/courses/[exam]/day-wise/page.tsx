@@ -46,21 +46,21 @@ function categoryLabel(category: DayWiseContentRow["category"]) {
 const categoryConfig = {
   fresh: {
     title: "New Learning",
-    panel: "border-emerald-200 bg-emerald-50/60",
+    panel: "border-emerald-400 ",
     heading: "text-emerald-800",
     link: "text-emerald-800 hover:text-emerald-950 hover:bg-emerald-100",
     dot: "bg-emerald-500",
   },
   revision: {
     title: "Revision",
-    panel: "border-amber-200 bg-amber-50/60",
+    panel: "border-amber-400 ",
     heading: "text-amber-800",
     link: "text-amber-800 hover:text-amber-950 hover:bg-amber-100",
     dot: "bg-amber-500",
   },
   test: {
     title: "Test",
-    panel: "border-violet-200 bg-violet-50/60",
+    panel: "border-violet-400 ",
     heading: "text-violet-800",
     link: "text-violet-800 hover:text-violet-950 hover:bg-violet-100",
     dot: "bg-violet-500",
@@ -159,7 +159,7 @@ function renderCategorySection(
           })}
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-white/90 bg-white/60 px-4 py-5 text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-white/90  px-4 py-5 text-sm text-slate-500">
           No {categoryLabel(category).toLowerCase()} available for this day.
         </div>
       )}
