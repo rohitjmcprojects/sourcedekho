@@ -10,6 +10,8 @@ type ExamRow = {
 type DayWiseContentRow = {
   id: number;
   syllabus_wise_id: number;
+  medium: "Hindi" | "English";
+  subject_name: string | null;
   theme: string | null;
   topic: string | null;
   day_number: number;
@@ -44,7 +46,7 @@ function categoryLabel(category: DayWiseContentRow["category"]) {
 const categoryConfig = {
   fresh: {
     title: "New Learning",
-    panel: "border-emerald-200",
+    panel: "border-emerald-200 bg-emerald-50/60",
     heading: "text-emerald-800",
     link: "text-emerald-800 hover:text-emerald-950 hover:bg-emerald-100",
     dot: "bg-emerald-500",
@@ -107,10 +109,15 @@ function renderCategorySection(
 
       {groupedRows.length > 0 ? (
         <div className="space-y-2">
-          {groupedRows.map(([syllabusId, rows], index) => {
+          {groupedRows.map(([syllabusId, rows]) => {
             const firstRow = rows[0];
-            const displayName =
-              firstRow.display_name || firstRow.content_name || "Untitled topic";
+            const displayName = [
+              firstRow.subject_name,
+              firstRow.theme,
+              firstRow.topic,
+            ]
+              .filter((part) => part && part.trim())
+              .join(" - ") || firstRow.content_name || "Untitled topic";
             const availableLinks = rows.filter(
               (row) => row.content_type && row.content_url
             );
@@ -120,9 +127,12 @@ function renderCategorySection(
                 key={syllabusId}
                 className="flex flex-col gap-2 rounded-xl border border-white/80 px-4 py-3 shadow-sm sm:flex-row sm:flex-wrap sm:items-center"
               >
-                <span className="text-sm font-semibold text-slate-800">
-                  {index + 1}. {displayName}
-                </span>
+                <div className="flex min-w-0 items-start gap-2">
+                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-slate-500" aria-hidden="true" />
+                  <span className="text-sm font-semibold text-slate-800">
+                    {displayName}
+                  </span>
+                </div>
 
                 {availableLinks.length > 0 ? (
                   <div className="flex flex-wrap items-center gap-2">
@@ -162,11 +172,13 @@ export default async function DayWisePage({
   searchParams,
 }: {
   params: Promise<{ exam: string }>;
-  searchParams?: Promise<{ day?: string }>;
+  searchParams?: Promise<{ day?: string; medium?: string }>;
 }) {
   const { exam } = await params;
   const examSlug = exam ?? "";
-  const { day } = (await searchParams) ?? {};
+  const { day, medium } = (await searchParams) ?? {};
+  const selectedMedium: "Hindi" | "English" =
+    medium?.toLowerCase() === "hindi" ? "Hindi" : "English";
 
   let selectedExam: ExamRow | null = null;
   let dayRows: DayWiseContentRow[] = [];
@@ -186,6 +198,8 @@ export default async function DayWisePage({
         SELECT
           dw.id,
           dw.syllabus_wise_id,
+          dw.medium,
+          s.subject_name,
           sw.theme,
           sw.topic,
           COALESCE(NULLIF(sw.topic, ''), NULLIF(sw.theme, '')) AS display_name,
@@ -212,6 +226,7 @@ export default async function DayWisePage({
         INNER JOIN subjects AS s
           ON s.id = sw.subject_id
         WHERE s.exam_id = ${selectedExam.id}
+          AND dw.medium = ${selectedMedium}
         ORDER BY
           dw.day_number ASC,
           CASE dw.category
@@ -266,13 +281,47 @@ export default async function DayWisePage({
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
       <div className="w-full px-4 py-6 md:px-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <Link
             href={`/courses/${examSlug}`}
             className="text-sm font-medium text-slate-700 hover:text-slate-900"
           >
             ← Back to Courses
           </Link>
+
+          <div className="inline-flex h-10 items-center gap-3 rounded-full border border-slate-200 bg-white px-3 shadow-sm">
+            <span
+              className={`whitespace-nowrap text-[13px] font-semibold ${
+                selectedMedium === "Hindi" ? "text-teal-600" : "text-slate-400"
+              }`}
+            >
+              हिंदी मीडियम
+            </span>
+
+            <Link
+              href={`/courses/${examSlug}/day-wise?day=day-${selectedDayNumber}&medium=${selectedMedium === "Hindi" ? "english" : "hindi"}`}
+              role="switch"
+              aria-checked={selectedMedium === "Hindi"}
+              aria-label="Switch between Hindi and English medium"
+              className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 ${
+                selectedMedium === "Hindi" ? "bg-teal-600" : "bg-slate-300"
+              }`}
+            >
+              <span
+                className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                  selectedMedium === "Hindi" ? "translate-x-1" : "translate-x-6"
+                }`}
+              />
+            </Link>
+
+            <span
+              className={`whitespace-nowrap text-[13px] font-semibold ${
+                selectedMedium === "English" ? "text-teal-600" : "text-slate-400"
+              }`}
+            >
+              English Medium
+            </span>
+          </div>
 
           <a
             href="https://forms.gle/NVYP9q8KmGmG22CG9"
@@ -325,7 +374,7 @@ export default async function DayWisePage({
                   return (
                     <Link
                       key={option.key}
-                      href={`/courses/${examSlug}/day-wise?day=${option.key}`}
+                      href={`/courses/${examSlug}/day-wise?day=${option.key}&medium=${selectedMedium.toLowerCase()}`}
                       className={`flex h-11 items-center justify-center rounded-xl border text-sm font-semibold transition-all ${
                         option.hasNullCategory
                           ? isActive
@@ -346,7 +395,7 @@ export default async function DayWisePage({
             </div>
           </aside>
 
-          <section className="min-w-0 rounded-[24px] border border-slate-200 bg-white/80 p-5 shadow-[0_18px_35px_-25px_rgba(15,23,42,0.45)] md:p-7">
+          <section className="min-w-0 rounded-[24px] border border-slate-200  p-5 shadow-[0_18px_35px_-25px_rgba(15,23,42,0.45)] md:p-7">
             <div className="mb-6 flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -362,17 +411,10 @@ export default async function DayWisePage({
             </div>
 
             {selectedDayRows.length > 0 ? (
-              <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-                {/* Fresh Content stays in the left column */}
-                <div className="min-w-0">
-                  {renderCategorySection("fresh", selectedDayRows)}
-                </div>
-
-                {/* Revision and Test are stacked in the right column */}
-                <div className="min-w-0 space-y-5">
-                  {renderCategorySection("revision", selectedDayRows)}
-                  {renderCategorySection("test", selectedDayRows)}
-                </div>
+              <div className="flex flex-col gap-5">
+                {renderCategorySection("fresh", selectedDayRows)}
+                {renderCategorySection("revision", selectedDayRows)}
+                {renderCategorySection("test", selectedDayRows)}
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
