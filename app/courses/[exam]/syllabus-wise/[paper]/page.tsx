@@ -5,6 +5,7 @@ import {
   FileText,
   ClipboardCheck,
   BookOpen,
+  MessageCircleQuestion
 } from "lucide-react";
 
 type ExamRow = {
@@ -246,6 +247,34 @@ const totalNotes = subjectContentRows.filter((row) => row.notes_url).length;
 const totalMcqTests = subjectContentRows.filter((row) => row.mcqtest_url).length;
 const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
 
+
+
+const queryFormUrl = new URL(
+  "https://forms.gle/sDUN5mVf21nvoeHFA"
+);
+
+queryFormUrl.searchParams.set("usp", "pp_url");
+
+queryFormUrl.searchParams.set(
+  "entry.179034276",
+  selectedExam?.name ?? ""
+);
+
+queryFormUrl.searchParams.set(
+  "entry.1620531068",
+  selectedPaper
+);
+
+queryFormUrl.searchParams.set(
+  "entry.1497946113",
+  selectedSubject
+);
+
+queryFormUrl.searchParams.set(
+  "entry.2012252946",
+  selectedMedium
+);
+
  
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
@@ -280,7 +309,18 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
             <span className={`pr-3 text-xs font-semibold ${selectedMedium === "English" ? "text-teal-700" : "text-slate-400"}`}>
               English Medium
             </span>
+
           </div>
+
+                      <a
+                        href={queryFormUrl.toString()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
+                      >
+                        <MessageCircleQuestion className="h-3.5 w-3.5" />
+                        Raise a Query
+                      </a>
         </div>
 
         {/* TOP DASHBOARD - FULL WIDTH, OUTSIDE BOTH PANES */}
@@ -338,7 +378,7 @@ const totalPyqTests = subjectContentRows.filter((row) => row.pyq_url).length;
                         isSelected
                           ? "border-slate-900 bg-slate-900 text-white shadow-sm"
                           : hasData
-                            ? "border-emerald-200  text-slate-900 hover:border-emerald-300 hover:bg-emerald-100"
+                            ? "border-emerald-200 text-slate-900 hover:border-emerald-300 hover:bg-emerald-100"
                             : "border-red-200 bg-red-50 text-slate-900 hover:border-red-300 hover:bg-red-100",
                       ].join(" ")}
                     >
