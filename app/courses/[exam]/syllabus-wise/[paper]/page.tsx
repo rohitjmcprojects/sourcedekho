@@ -5,7 +5,8 @@ import {
   FileText,
   ClipboardCheck,
   BookOpen,
-  MessageCircleQuestion
+  MessageCircleQuestion,
+  FilePlus2
 } from "lucide-react";
 
 type ExamRow = {
@@ -253,6 +254,8 @@ const queryFormUrl = new URL(
   "https://forms.gle/sDUN5mVf21nvoeHFA"
 );
 
+const contributionFormUrl = "PASTE_CONTRIBUTION_GOOGLE_FORM_URL_HERE";
+
 queryFormUrl.searchParams.set("usp", "pp_url");
 
 queryFormUrl.searchParams.set(
@@ -280,47 +283,100 @@ queryFormUrl.searchParams.set(
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
       <div className="w-full px-4 py-6 md:px-8">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-            <span>{selectedExam?.name ?? "Exam"}</span>
-            <span>/</span>
-            <span>{selectedPaper || "Paper"}</span>
-            {selectedSubject ? (
-              <>
-                <span>/</span>
-                <span>{selectedSubject}</span>
-              </>
-            ) : null}
-          </div>
+          <nav aria-label="Breadcrumb" className="min-w-0">
+            <ol className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em]">
+              <li>
+                <Link
+                  href="/courses"
+                  className="text-slate-500 underline-offset-4 transition hover:text-teal-700 hover:underline"
+                >
+                  Courses
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-400">/</li>
+              <li>
+                <Link
+                  href={`/courses/${examSlug}`}
+                  className="text-slate-600 underline-offset-4 transition hover:text-teal-700 hover:underline"
+                >
+                  {selectedExam?.name ?? "Exam"}
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-400">/</li>
+              <li>
+                <Link
+                  href={`/courses/${examSlug}/syllabus-wise/${paperSlug}?medium=${selectedMedium}`}
+                  className="text-slate-600 underline-offset-4 transition hover:text-teal-700 hover:underline"
+                >
+                  {selectedPaper || "Paper"}
+                </Link>
+              </li>
+              {selectedSubject ? (
+                <>
+                  <li aria-hidden="true" className="text-slate-400">/</li>
+                  <li aria-current="page" className="text-slate-500">
+                    {selectedSubject}
+                  </li>
+                </>
+              ) : null}
+            </ol>
+          </nav>
 
-          {/* MEDIUM TOGGLE - TOP RIGHT */}
-          <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-            <span className={`pl-3 text-xs font-semibold ${selectedMedium === "Hindi" ? "text-teal-700" : "text-slate-400"}`}>
-              हिंदी मीडियम
-            </span>
-            <Link
-              href={`/courses/${examSlug}/syllabus-wise/${paperSlug}?subject=${encodeURIComponent(selectedSubject)}&medium=${selectedMedium === "Hindi" ? "English" : "Hindi"}`}
-              role="switch"
-              aria-checked={selectedMedium === "Hindi"}
-              aria-label="Switch between Hindi and English medium"
-              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${selectedMedium === "Hindi" ? "bg-teal-600" : "bg-slate-300"}`}
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <div className="inline-flex h-10 items-center gap-3 rounded-full border border-slate-200 bg-white px-3 shadow-sm">
+              <span
+                className={`whitespace-nowrap text-[11px] font-semibold ${
+                  selectedMedium === "Hindi" ? "text-teal-600" : "text-slate-400"
+                }`}
+              >
+                हिंदी मीडियम
+              </span>
+
+              <Link
+                href={`/courses/${examSlug}/syllabus-wise/${paperSlug}?subject=${encodeURIComponent(selectedSubject)}&medium=${selectedMedium === "Hindi" ? "English" : "Hindi"}`}
+                role="switch"
+                aria-checked={selectedMedium === "Hindi"}
+                aria-label="Switch between Hindi and English medium"
+                className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 ${
+                  selectedMedium === "Hindi" ? "bg-teal-600" : "bg-slate-300"
+                }`}
+              >
+                <span
+                  className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    selectedMedium === "Hindi" ? "translate-x-1" : "translate-x-6"
+                  }`}
+                />
+              </Link>
+
+              <span
+                className={`whitespace-nowrap text-[11px] font-semibold ${
+                  selectedMedium === "English" ? "text-teal-600" : "text-slate-400"
+                }`}
+              >
+                English Medium
+              </span>
+            </div>
+
+            <a
+              href={queryFormUrl.toString()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
             >
-              <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${selectedMedium === "Hindi" ? "translate-x-1" : "translate-x-6"}`} />
-            </Link>
-            <span className={`pr-3 text-xs font-semibold ${selectedMedium === "English" ? "text-teal-700" : "text-slate-400"}`}>
-              English Medium
-            </span>
+              <MessageCircleQuestion className="h-4 w-4" />
+              Raise a Query
+            </a>
 
+            <a
+              href={contributionFormUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+            >
+              <FilePlus2 className="h-4 w-4" />
+              Want to contribute content?
+            </a>
           </div>
-
-                      <a
-                        href={queryFormUrl.toString()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
-                      >
-                        <MessageCircleQuestion className="h-3.5 w-3.5" />
-                        Raise a Query
-                      </a>
         </div>
 
         {/* TOP DASHBOARD - FULL WIDTH, OUTSIDE BOTH PANES */}

@@ -46,21 +46,21 @@ function categoryLabel(category: DayWiseContentRow["category"]) {
 const categoryConfig = {
   fresh: {
     title: "New Learning",
-    panel: "border-emerald-400 ",
+    panel: "border-emerald-200 bg-emerald-50/60",
     heading: "text-emerald-800",
     link: "text-emerald-800 hover:text-emerald-950 hover:bg-emerald-100",
     dot: "bg-emerald-500",
   },
   revision: {
     title: "Revision",
-    panel: "border-amber-400 ",
+    panel: "border-amber-200 bg-amber-50/60",
     heading: "text-amber-800",
     link: "text-amber-800 hover:text-amber-950 hover:bg-amber-100",
     dot: "bg-amber-500",
   },
   test: {
     title: "Test",
-    panel: "border-violet-400 ",
+    panel: "border-violet-200 bg-violet-50/60",
     heading: "text-violet-800",
     link: "text-violet-800 hover:text-violet-950 hover:bg-violet-100",
     dot: "bg-violet-500",
@@ -159,7 +159,7 @@ function renderCategorySection(
           })}
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-white/90  px-4 py-5 text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-white/90 bg-white/60 px-4 py-5 text-sm text-slate-500">
           No {categoryLabel(category).toLowerCase()} available for this day.
         </div>
       )}
@@ -281,14 +281,33 @@ export default async function DayWisePage({
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8f6f2_0%,_#f2efe9_32%,_#eef0f3_100%)] px-0 py-0 text-slate-900">
       <div className="w-full px-4 py-6 md:px-8">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <Link
-            href={`/courses/${examSlug}`}
-            className="text-sm font-medium text-slate-700 hover:text-slate-900"
-          >
-            ← Back to Courses
-          </Link>
-
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <nav aria-label="Breadcrumb" className="min-w-0 text-left">
+            <ol className="flex flex-wrap items-center gap-2 text-sm">
+              <li>
+                <Link
+                  href="/courses"
+                  className="font-medium text-slate-500 underline-offset-4 transition hover:text-teal-700 hover:underline"
+                >
+                  Courses
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-400">/</li>
+              <li>
+                <Link
+                  href={`/courses/${examSlug}`}
+                  className="font-semibold text-slate-700 underline-offset-4 transition hover:text-teal-700 hover:underline"
+                >
+                  {selectedExam?.name ?? "Exam"}
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-400">/</li>
+              <li aria-current="page" className="font-medium text-slate-500">
+                Day-wise
+              </li>
+            </ol>
+          </nav>
+          <div className="flex flex-wrap items-center justify-end gap-3">
           <div className="inline-flex h-10 items-center gap-3 rounded-full border border-slate-200 bg-white px-3 shadow-sm">
             <span
               className={`whitespace-nowrap text-[13px] font-semibold ${
@@ -322,7 +341,6 @@ export default async function DayWisePage({
               English Medium
             </span>
           </div>
-
           <a
             href="https://forms.gle/NVYP9q8KmGmG22CG9"
             target="_blank"
@@ -346,12 +364,7 @@ export default async function DayWisePage({
             </svg>
             Raise a Query
           </a>
-        </div>
-
-        <div className="mb-8 text-left">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-            {selectedExam?.name ?? "Exam"}
-          </p>
+          </div>
         </div>
 
         <div className="grid gap-6 rounded-[30px] border border-white/70 lg:grid-cols-[300px_minmax(0,1fr)] lg:p-6">
@@ -395,7 +408,7 @@ export default async function DayWisePage({
             </div>
           </aside>
 
-          <section className="min-w-0 rounded-[24px] border border-slate-200  p-5 shadow-[0_18px_35px_-25px_rgba(15,23,42,0.45)] md:p-7">
+          <section className="min-w-0 rounded-[24px] border border-slate-200 bg-white/80 p-5 shadow-[0_18px_35px_-25px_rgba(15,23,42,0.45)] md:p-7">
             <div className="mb-6 flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
