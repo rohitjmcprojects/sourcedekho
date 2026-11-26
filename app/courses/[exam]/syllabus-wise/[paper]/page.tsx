@@ -20,6 +20,7 @@ type ExamRow = {
 
 type SyllabusRow = {
   id: number;
+  subject_id: number;
   exam_id: number | null;
   course_id: number | null;
   stage: string | null;
@@ -35,6 +36,7 @@ type SyllabusRow = {
   mcqtest_url: string | null;
   pyq_name: string | null;
   pyq_url: string | null;
+  created_at: string | null;
 };
 
 type SubjectTableRow = {
@@ -42,6 +44,14 @@ type SubjectTableRow = {
   stage: string | null;
   paper: string | null;
   subject: string | null;
+};
+
+type SubjectStrategyRow = {
+  strategy_title: string | null;
+  strategy_content: string;
+  support_url: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 function slugify(value: string) {
@@ -61,6 +71,24 @@ function getResourceCount(
   const total = rows.filter((row) => Boolean(row[nameKey]?.trim())).length;
   const available = rows.filter((row) => Boolean(row[urlKey]?.trim())).length;
   return { total, available };
+}
+
+function formatRelativeTime(dateValue: string) {
+  const timestamp = new Date(dateValue).getTime();
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+
+  if (elapsedSeconds < 60) return "Just now";
+  if (elapsedSeconds < 3600) {
+    const minutes = Math.floor(elapsedSeconds / 60);
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  }
+  if (elapsedSeconds < 86400) {
+    const hours = Math.floor(elapsedSeconds / 3600);
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  }
+
+  const days = Math.floor(elapsedSeconds / 86400);
+  return `${days} ${days === 1 ? "day" : "days"} ago`;
 }
 
 function ResourceLink({
@@ -110,19 +138,22 @@ export default async function SyllabusPaperPage({
   searchParams,
 }: {
   params: Promise<{ exam: string; paper: string }>;
-  searchParams?: Promise<{ subject?: string; medium?: string }>;
+  searchParams?: Promise<{ subject?: string; medium?: string; uploadsPage?: string }>;
 }) {
   const { exam, paper } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const examSlug = exam ?? "";
   const paperSlug = paper ?? "";
   const selectedMedium = resolvedSearchParams.medium === "Hindi" ? "Hindi" : "English";
+  const uploadsPageSize = 5;
+  const requestedUploadsPage = Math.max(1, Number.parseInt(resolvedSearchParams.uploadsPage ?? "1", 10) || 1);
 
   let selectedExam: ExamRow | null = null;
   let syllabusRows: SyllabusRow[] = [];
   let subjectNames: string[] = [];
   let selectedPaper = "";
   let selectedSubject = "";
+  let selectedStrategy: SubjectStrategyRow | null = null;
 
   try {
     const exams = await sql<ExamRow[]>`
@@ -153,6 +184,7 @@ export default async function SyllabusPaperPage({
       const rows = await sql<SyllabusRow[]>`
         SELECT
           sw.id,
+          sw.subject_id,
           COALESCE(NULLIF(TO_JSONB(s) ->> 'exam_id', ''), c.exam_id::text)::integer AS exam_id,
           s.course_id,
           COALESCE(TO_JSONB(s) ->> 'stage', TO_JSONB(s) ->> 'subject_stage') AS stage,
@@ -171,7 +203,8 @@ export default async function SyllabusPaperPage({
           sw.mcqtest_name,
           sw.mcqtest_url,
           sw.pyq_name,
-          sw.pyq_url
+          sw.pyq_url,
+          TO_JSONB(sw) ->> 'created_at' AS created_at
         FROM syllabus_wise AS sw
         INNER JOIN subjects AS s ON s.id = sw.subject_id
         LEFT JOIN courses AS c ON c.id = s.course_id
@@ -204,6 +237,30 @@ export default async function SyllabusPaperPage({
         );
       });
       selectedSubject = matchedSubject ?? subjectNames[0] ?? "";
+
+      // Resolve the selected subject_id from syllabus_wise, then load its single strategy.
+      const selectedSubjectRow = syllabusRows.find((row) => {
+        const rowSubject = String(row.subject ?? "").trim();
+        return (
+          rowSubject.toLowerCase() === selectedSubject.toLowerCase() ||
+          slugify(rowSubject) === slugify(selectedSubject)
+        );
+      });
+
+      if (selectedSubjectRow?.subject_id) {
+        const strategyRows = await sql<SubjectStrategyRow[]>`
+          SELECT
+            strategy_title,
+            strategy_content,
+            support_url,
+            TO_JSONB(ss) ->> 'created_at' AS created_at,
+            TO_JSONB(ss) ->> 'updated_at' AS updated_at
+          FROM subject_strategies AS ss
+          WHERE ss.subject_id = ${selectedSubjectRow.subject_id}
+          LIMIT 1
+        `;
+        selectedStrategy = strategyRows[0] ?? null;
+      }
     }
   } catch (error) {
     console.error("Failed to load syllabus paper dashboard:", error);
@@ -254,6 +311,22 @@ export default async function SyllabusPaperPage({
   const notesCount = getResourceCount(subjectContentRows, "notes_name", "notes_url");
   const mcqCount = getResourceCount(subjectContentRows, "mcqtest_name", "mcqtest_url");
   const pyqCount = getResourceCount(subjectContentRows, "pyq_name", "pyq_url");
+
+  const latestUploadEntries = syllabusRows
+    .filter((row) => row.created_at && !Number.isNaN(new Date(row.created_at).getTime()))
+    .sort(
+      (a, b) =>
+        new Date(b.created_at as string).getTime() -
+        new Date(a.created_at as string).getTime()
+    );
+  const uploadsTotalPages = Math.max(1, Math.ceil(latestUploadEntries.length / uploadsPageSize));
+  const currentUploadsPage = Math.min(requestedUploadsPage, uploadsTotalPages);
+  const paginatedUploadEntries = latestUploadEntries.slice(
+    (currentUploadsPage - 1) * uploadsPageSize,
+    currentUploadsPage * uploadsPageSize
+  );
+  const uploadsPageHref = (pageNumber: number) =>
+    `/courses/${examSlug}/syllabus-wise/${paperSlug}?subject=${encodeURIComponent(selectedSubject)}&medium=${selectedMedium}&uploadsPage=${pageNumber}`;
 
   const queryFormUrl = new URL("https://forms.gle/sDUN5mVf21nvoeHFA");
   const contributionFormUrl = "PASTE_CONTRIBUTION_GOOGLE_FORM_URL_HERE";
@@ -362,59 +435,88 @@ export default async function SyllabusPaperPage({
         ) : (
           <>
         {/* COLLAPSIBLE PANELS - OUTSIDE THE TWO-COLUMN LAYOUT */}
-        <div className="mb-5 flex flex-wrap items-start gap-3">
+        <div className="mb-5 flex flex-nowrap items-start gap-3">
           {/* STATISTICS */}
-          <details className="w-full max-w-[280px] overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
+          <details className="min-w-0 flex-[2] overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 bg-slate-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-700">
-              <span>Content Statistics</span>
+              <span>Content Progress</span>
               <span className="text-slate-500">Show / hide</span>
             </summary>
-            <div className="border-t border-slate-200">
-              <table className="w-full text-xs">
-                <tbody className="divide-y divide-slate-100">
-                  <tr>
-                    <td className="px-3 py-2 font-medium text-slate-600">Themes</td>
-                    <td className="px-3 py-2 text-right font-bold text-slate-900">{totalThemes}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-2 font-medium text-slate-600">Topics</td>
-                    <td className="px-3 py-2 text-right font-bold text-slate-900">{totalTopics}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-2 font-medium text-emerald-700">Videos</td>
-                    <td className="px-3 py-2 text-right font-bold text-emerald-700">{videoCount.available}/{videoCount.total}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-2 font-medium text-blue-700">Notes</td>
-                    <td className="px-3 py-2 text-right font-bold text-blue-700">{notesCount.available}/{notesCount.total}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-2 font-medium text-amber-700">MCQ Tests</td>
-                    <td className="px-3 py-2 text-right font-bold text-amber-700">{mcqCount.available}/{mcqCount.total}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-2 font-medium text-purple-700">PYQ Tests</td>
-                    <td className="px-3 py-2 text-right font-bold text-purple-700">{pyqCount.available}/{pyqCount.total}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-200 px-4 py-3 text-sm">
+              <span className="font-semibold text-slate-800">{totalThemes} Themes</span>
+              <span className="font-semibold text-slate-800">{totalTopics} Topics</span>
+              <span className="font-semibold text-emerald-700">• Videos ({videoCount.total > 0 ? Math.round((videoCount.available / videoCount.total) * 100) : 0}%)</span>
+              <span className="font-semibold text-blue-700">• Notes ({notesCount.total > 0 ? Math.round((notesCount.available / notesCount.total) * 100) : 0}%)</span>
+              <span className="font-semibold text-amber-700">• MCQ Tests ({mcqCount.total > 0 ? Math.round((mcqCount.available / mcqCount.total) * 100) : 0}%)</span>
+              <span className="font-semibold text-purple-700">• PYQ Tests ({pyqCount.total > 0 ? Math.round((pyqCount.available / pyqCount.total) * 100) : 0}%)</span>
+              <div className="basis-full border-t border-slate-200 pt-2 text-xs text-slate-600">
+                <p className="mb-2 font-semibold text-slate-800">Latest Uploads</p>
+                {latestUploadEntries.length > 0 ? (
+                  <>
+                  <ol className="space-y-1.5">
+                    {paginatedUploadEntries.map((row) => (
+                      <li key={row.id} className="flex flex-wrap items-baseline gap-x-2">
+                        <span className="shrink-0 font-semibold text-slate-700">
+                          {formatRelativeTime(row.created_at as string)}
+                        </span>
+                        <span className="text-slate-500">
+                          {[row.subject, row.theme, row.topic].filter(Boolean).join(" · ") || "Content entry"}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                  <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-200 pt-2">
+                    <span className="text-[11px] text-slate-500">Page {currentUploadsPage} of {uploadsTotalPages} · {latestUploadEntries.length} uploads</span>
+                    <div className="flex items-center gap-2">
+                      {currentUploadsPage > 1 ? (
+                        <Link href={uploadsPageHref(currentUploadsPage - 1)} className="rounded-md border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100">Previous</Link>
+                      ) : (
+                        <span className="rounded-md border border-slate-200 px-2.5 py-1 text-[11px] text-slate-300">Previous</span>
+                      )}
+                      {currentUploadsPage < uploadsTotalPages ? (
+                        <Link href={uploadsPageHref(currentUploadsPage + 1)} className="rounded-md border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100">Next</Link>
+                      ) : (
+                        <span className="rounded-md border border-slate-200 px-2.5 py-1 text-[11px] text-slate-300">Next</span>
+                      )}
+                    </div>
+                  </div>
+                  </>
+                ) : (
+                  <p className="text-slate-500">No upload information available for this paper.</p>
+                )}
+              </div>
             </div>
           </details>
 
           {/* STUDY STRATEGY */}
-          <details className="w-full max-w-xl overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
+          <details className="min-w-0 flex-[3] overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 bg-slate-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-700">
               <span>Strategy</span>
               <span className="text-slate-500">Show / hide</span>
             </summary>
             <div className="border-t border-slate-200 px-4 py-3 text-sm text-slate-700">
-              <ol className="list-decimal space-y-2 pl-5">
-                <li><span className="font-semibold">Understand the topic:</span> Read the topic and identify its key concepts before moving to resources.</li>
-                <li><span className="font-semibold">Learn:</span> Use the available video and notes to build and consolidate understanding.</li>
-                <li><span className="font-semibold">Practice:</span> Attempt the MCQ test and review the questions you get wrong.</li>
-                <li><span className="font-semibold">Revise:</span> Solve previous-year questions (PYQs) and revisit weak areas.</li>
-                <li><span className="font-semibold">Track gaps:</span> Check the resource counts and return to topics where materials or practice are still pending.</li>
-              </ol>
+              {selectedStrategy ? (
+                <div className="space-y-3">
+                  {selectedStrategy.strategy_title ? (
+                    <h3 className="font-semibold text-slate-900">{selectedStrategy.strategy_title}</h3>
+                  ) : null}
+                  <div className="whitespace-pre-wrap leading-6">{selectedStrategy.strategy_content}</div>
+                  {selectedStrategy.support_url ? (
+                    <a
+                      href={selectedStrategy.support_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-800 transition hover:bg-teal-100"
+                    >
+                      View supporting charts / material ↗
+                    </a>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="text-slate-500">
+                  No strategy has been added for {selectedSubject || "this subject"} yet.
+                </p>
+              )}
             </div>
           </details>
         </div>
